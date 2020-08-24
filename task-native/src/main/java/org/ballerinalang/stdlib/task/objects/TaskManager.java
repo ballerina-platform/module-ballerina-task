@@ -16,19 +16,15 @@
  * under the License.
  */
 
-package org.ballerinalang.task.objects;
+package org.ballerinalang.stdlib.task.objects;
 
-import org.ballerinalang.task.exceptions.SchedulingException;
+import org.ballerinalang.stdlib.task.utils.TaskConstants;
+import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 
 import java.util.Properties;
-
-import static org.ballerinalang.task.utils.TaskConstants.QUARTZ_MISFIRE_THRESHOLD;
-import static org.ballerinalang.task.utils.TaskConstants.QUARTZ_MISFIRE_THRESHOLD_VALUE;
-import static org.ballerinalang.task.utils.TaskConstants.QUARTZ_THREAD_COUNT;
-import static org.ballerinalang.task.utils.TaskConstants.QUARTZ_THREAD_COUNT_VALUE;
 
 
 /**
@@ -63,8 +59,8 @@ public class TaskManager {
 
     private Properties createSchedulerProperties() {
         Properties properties = new Properties();
-        properties.setProperty(QUARTZ_MISFIRE_THRESHOLD, QUARTZ_MISFIRE_THRESHOLD_VALUE);
-        properties.setProperty(QUARTZ_THREAD_COUNT, QUARTZ_THREAD_COUNT_VALUE);
+        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, TaskConstants.QUARTZ_MISFIRE_THRESHOLD_VALUE);
+        properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, TaskConstants.QUARTZ_THREAD_COUNT_VALUE);
         return properties;
     }
 }

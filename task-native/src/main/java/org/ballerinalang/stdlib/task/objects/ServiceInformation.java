@@ -16,13 +16,12 @@
  *  under the License.
 */
 
-package org.ballerinalang.task.objects;
+package org.ballerinalang.stdlib.task.objects;
 
 import org.ballerinalang.jvm.BRuntime;
 import org.ballerinalang.jvm.types.AttachedFunction;
 import org.ballerinalang.jvm.values.ObjectValue;
-
-import static org.ballerinalang.task.utils.TaskConstants.RESOURCE_ON_TRIGGER;
+import org.ballerinalang.stdlib.task.utils.TaskConstants;
 
 /**
  * Custom object to store service with the parameters to use inside the service.
@@ -50,7 +49,7 @@ public class ServiceInformation {
 
     public AttachedFunction getOnTriggerFunction() {
         for (AttachedFunction resource : service.getType().getAttachedFunctions()) {
-            if (RESOURCE_ON_TRIGGER.equals(resource.getName())) {
+            if (TaskConstants.RESOURCE_ON_TRIGGER.equals(resource.getName())) {
                 return resource;
             }
         }

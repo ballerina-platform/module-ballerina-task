@@ -15,26 +15,24 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.ballerinalang.task.actions;
+package org.ballerinalang.stdlib.task.actions;
 
 import org.ballerinalang.jvm.BRuntime;
 import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.jvm.values.api.BString;
-import org.ballerinalang.task.api.TaskServerConnector;
-import org.ballerinalang.task.exceptions.SchedulingException;
-import org.ballerinalang.task.impl.TaskServerConnectorImpl;
-import org.ballerinalang.task.objects.ServiceInformation;
-import org.ballerinalang.task.objects.Task;
+import org.ballerinalang.stdlib.task.utils.TaskConstants;
+import org.ballerinalang.stdlib.task.api.TaskServerConnector;
+import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
+import org.ballerinalang.stdlib.task.impl.TaskServerConnectorImpl;
+import org.ballerinalang.stdlib.task.objects.ServiceInformation;
+import org.ballerinalang.stdlib.task.objects.Task;
 
-import static org.ballerinalang.task.utils.TaskConstants.MEMBER_LISTENER_CONFIGURATION;
-import static org.ballerinalang.task.utils.TaskConstants.NATIVE_DATA_TASK_OBJECT;
-import static org.ballerinalang.task.utils.TaskConstants.RECORD_TIMER_CONFIGURATION;
-import static org.ballerinalang.task.utils.TaskConstants.SCHEDULER_ERROR;
-import static org.ballerinalang.task.utils.Utils.createTaskError;
-import static org.ballerinalang.task.utils.Utils.processAppointment;
-import static org.ballerinalang.task.utils.Utils.processTimer;
-import static org.ballerinalang.task.utils.Utils.validateService;
+import static org.ballerinalang.stdlib.task.utils.TaskConstants.NATIVE_DATA_TASK_OBJECT;
+import static org.ballerinalang.stdlib.task.utils.Utils.createTaskError;
+import static org.ballerinalang.stdlib.task.utils.Utils.processAppointment;
+import static org.ballerinalang.stdlib.task.utils.Utils.processTimer;
+import static org.ballerinalang.stdlib.task.utils.Utils.validateService;
 
 /**
  * Class to handle ballerina external functions in Task library.
@@ -48,7 +46,7 @@ public class TaskActions {
         try {
             task.pause();
         } catch (SchedulingException e) {
-            return createTaskError(SCHEDULER_ERROR, e.getMessage());
+            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
         }
         return null;
     }
@@ -58,7 +56,7 @@ public class TaskActions {
         try {
             task.resume();
         } catch (SchedulingException e) {
-            return createTaskError(SCHEDULER_ERROR, e.getMessage());
+            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
         }
         return null;
     }
@@ -69,7 +67,7 @@ public class TaskActions {
             String serviceName = service.getType().getName();
             task.removeService(serviceName);
         } catch (Exception e) {
-            return createTaskError(SCHEDULER_ERROR, e.getMessage());
+            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
         }
         return null;
     }
@@ -142,11 +140,11 @@ public class TaskActions {
 
     @SuppressWarnings("unchecked")
     public static Object init(ObjectValue taskListener) {
-        MapValue<BString, Object> configurations = taskListener.getMapValue(MEMBER_LISTENER_CONFIGURATION);
+        MapValue<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
         String configurationTypeName = configurations.getType().getName();
         Task task;
         try {
-            if (RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
+            if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
                 task = processTimer(configurations);
             } else { // Record type validates at the compile time; Hence we do not need exhaustive validation.
                 task = processAppointment(configurations);

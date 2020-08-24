@@ -16,10 +16,11 @@
  *  under the License.
  */
 
-package org.ballerinalang.task.objects;
+package org.ballerinalang.stdlib.task.objects;
 
-import org.ballerinalang.task.exceptions.SchedulingException;
-import org.ballerinalang.task.utils.TaskIdGenerator;
+import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
+import org.ballerinalang.stdlib.task.utils.TaskConstants;
+import org.ballerinalang.stdlib.task.utils.TaskIdGenerator;
 import org.quartz.JobDataMap;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
@@ -27,8 +28,6 @@ import org.quartz.TriggerKey;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.ballerinalang.task.utils.TaskConstants.TASK_OBJECT;
 
 /**
  * Abstract class which represents a ballerina task.
@@ -112,7 +111,7 @@ public abstract class AbstractTask implements Task {
      */
     JobDataMap getJobDataMapFromTask() {
         JobDataMap jobData = new JobDataMap();
-        jobData.put(TASK_OBJECT, this);
+        jobData.put(TaskConstants.TASK_OBJECT, this);
         return jobData;
     }
 

@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
 */
-package org.ballerinalang.task.exceptions;
+package org.ballerinalang.stdlib.task.exceptions;
 
 /**
  * This exception is thrown when scheduling fails.

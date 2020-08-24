@@ -15,9 +15,9 @@
  *  specific language governing permissions and limitations
  *  under the License.
 */
-package org.ballerinalang.task.api;
+package org.ballerinalang.stdlib.task.api;
 
-import org.ballerinalang.task.exceptions.SchedulingException;
+import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 
 /**
  * Task listener server connector.

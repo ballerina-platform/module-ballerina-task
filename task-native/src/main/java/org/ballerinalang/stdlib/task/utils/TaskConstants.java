@@ -16,7 +16,7 @@
  *  under the License.
 */
 
-package org.ballerinalang.task.utils;
+package org.ballerinalang.stdlib.task.utils;
 
 import org.ballerinalang.jvm.StringUtils;
 import org.ballerinalang.jvm.types.BPackage;

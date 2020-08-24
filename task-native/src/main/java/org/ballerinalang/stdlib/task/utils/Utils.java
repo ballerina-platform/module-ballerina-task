@@ -15,7 +15,7 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.ballerinalang.task.utils;
+package org.ballerinalang.stdlib.task.utils;
 
 import org.ballerinalang.jvm.BallerinaErrors;
 import org.ballerinalang.jvm.TypeChecker;
@@ -24,28 +24,13 @@ import org.ballerinalang.jvm.types.BType;
 import org.ballerinalang.jvm.values.ErrorValue;
 import org.ballerinalang.jvm.values.MapValue;
 import org.ballerinalang.jvm.values.api.BString;
-import org.ballerinalang.task.exceptions.SchedulingException;
-import org.ballerinalang.task.objects.Appointment;
-import org.ballerinalang.task.objects.ServiceInformation;
-import org.ballerinalang.task.objects.Timer;
+import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
+import org.ballerinalang.stdlib.task.objects.Appointment;
+import org.ballerinalang.stdlib.task.objects.ServiceInformation;
+import org.ballerinalang.stdlib.task.objects.Timer;
 
 import java.util.Objects;
 
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_DAYS_OF_MONTH;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_DAYS_OF_WEEK;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_DELAY;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_HOURS;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_INTERVAL;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_MINUTES;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_MONTHS;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_NO_OF_RUNS;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_SECONDS;
-import static org.ballerinalang.task.utils.TaskConstants.FIELD_YEAR;
-import static org.ballerinalang.task.utils.TaskConstants.LISTENER_ERROR;
-import static org.ballerinalang.task.utils.TaskConstants.MEMBER_APPOINTMENT_DETAILS;
-import static org.ballerinalang.task.utils.TaskConstants.RECORD_APPOINTMENT_DATA;
-import static org.ballerinalang.task.utils.TaskConstants.RESOURCE_ON_TRIGGER;
-import static org.ballerinalang.task.utils.TaskConstants.TASK_PACKAGE_ID;
 import static org.quartz.CronExpression.isValidExpression;
 
 /**
@@ -60,17 +45,17 @@ public class Utils {
     private static final int VALID_RESOURCE_COUNT = 1;
 
     public static ErrorValue createTaskError(String message) {
-        return createTaskError(LISTENER_ERROR, message);
+        return createTaskError(TaskConstants.LISTENER_ERROR, message);
     }
 
     public static ErrorValue createTaskError(String reason, String message) {
-        return BallerinaErrors.createDistinctError(reason, TASK_PACKAGE_ID, message);
+        return BallerinaErrors.createDistinctError(reason, TaskConstants.TASK_PACKAGE_ID, message);
     }
 
     @SuppressWarnings("unchecked")
     public static String getCronExpressionFromAppointmentRecord(Object record) throws SchedulingException {
         String cronExpression;
-        if (RECORD_APPOINTMENT_DATA.equals(TypeChecker.getType(record).getName())) {
+        if (TaskConstants.RECORD_APPOINTMENT_DATA.equals(TypeChecker.getType(record).getName())) {
             cronExpression = buildCronExpression((MapValue<BString, Object>) record);
             if (!isValidExpression(cronExpression)) {
                 throw new SchedulingException("AppointmentData \"" + record.toString() + "\" is invalid.");
@@ -86,18 +71,18 @@ public class Utils {
 
     // Following code is reported as duplicates since all the lines doing same function call.
     private static String buildCronExpression(MapValue<BString, Object> record) {
-        String cronExpression = getStringFieldValue(record, FIELD_SECONDS) + " " +
-                getStringFieldValue(record, FIELD_MINUTES) + " " +
-                getStringFieldValue(record, FIELD_HOURS) + " " +
-                getStringFieldValue(record, FIELD_DAYS_OF_MONTH) + " " +
-                getStringFieldValue(record, FIELD_MONTHS) + " " +
-                getStringFieldValue(record, FIELD_DAYS_OF_WEEK) + " " +
-                getStringFieldValue(record, FIELD_YEAR);
+        String cronExpression = getStringFieldValue(record, TaskConstants.FIELD_SECONDS) + " " +
+                getStringFieldValue(record, TaskConstants.FIELD_MINUTES) + " " +
+                getStringFieldValue(record, TaskConstants.FIELD_HOURS) + " " +
+                getStringFieldValue(record, TaskConstants.FIELD_DAYS_OF_MONTH) + " " +
+                getStringFieldValue(record, TaskConstants.FIELD_MONTHS) + " " +
+                getStringFieldValue(record, TaskConstants.FIELD_DAYS_OF_WEEK) + " " +
+                getStringFieldValue(record, TaskConstants.FIELD_YEAR);
         return cronExpression.trim();
     }
 
     private static String getStringFieldValue(MapValue<BString, Object> record, BString fieldName) {
-        if (FIELD_DAYS_OF_MONTH.equals(fieldName) && Objects.isNull(record.get(FIELD_DAYS_OF_MONTH))) {
+        if (TaskConstants.FIELD_DAYS_OF_MONTH.equals(fieldName) && Objects.isNull(record.get(TaskConstants.FIELD_DAYS_OF_MONTH))) {
             return "?";
         } else if (Objects.nonNull(record.get(fieldName))) {
             return record.get(fieldName).toString();
@@ -120,30 +105,30 @@ public class Utils {
         }
         AttachedFunction resource = resources[0];
 
-        if (RESOURCE_ON_TRIGGER.equals(resource.getName())) {
+        if (TaskConstants.RESOURCE_ON_TRIGGER.equals(resource.getName())) {
             validateOnTriggerResource(resource.getReturnParameterType());
         } else {
             throw new SchedulingException("Invalid resource function found: " + resource.getName()
-                                                  + ". Expected: \'" + RESOURCE_ON_TRIGGER + "\'.");
+                                                  + ". Expected: \'" + TaskConstants.RESOURCE_ON_TRIGGER + "\'.");
         }
     }
 
     private static void validateOnTriggerResource(BType returnParameterType) throws SchedulingException {
         if (returnParameterType != org.ballerinalang.jvm.types.BTypes.typeNull) {
             throw new SchedulingException(
-                    "Invalid resource function signature: \'" + RESOURCE_ON_TRIGGER + "\' should not return a value.");
+                    "Invalid resource function signature: \'" + TaskConstants.RESOURCE_ON_TRIGGER + "\' should not return a value.");
         }
     }
 
     public static Timer processTimer(MapValue<BString, Object> configurations) throws SchedulingException {
         Timer task;
-        long interval = configurations.getIntValue(FIELD_INTERVAL).intValue();
-        long delay = configurations.getIntValue(FIELD_DELAY).intValue();
+        long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
+        long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
 
-        if (configurations.get(FIELD_NO_OF_RUNS) == null) {
+        if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
             task = new Timer(delay, interval);
         } else {
-            long noOfRuns = configurations.getIntValue(FIELD_NO_OF_RUNS);
+            long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
             task = new Timer(delay, interval, noOfRuns);
         }
         return task;
@@ -151,13 +136,13 @@ public class Utils {
 
     public static Appointment processAppointment(MapValue<BString, Object> configurations) throws SchedulingException {
         Appointment appointment;
-        Object appointmentDetails = configurations.get(MEMBER_APPOINTMENT_DETAILS);
+        Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
         String cronExpression = getCronExpressionFromAppointmentRecord(appointmentDetails);
 
-        if (configurations.get(FIELD_NO_OF_RUNS) == null) {
+        if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
             appointment = new Appointment(cronExpression);
         } else {
-            long noOfRuns = configurations.getIntValue(FIELD_NO_OF_RUNS);
+            long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
             appointment = new Appointment(cronExpression, noOfRuns);
         }
         return appointment;

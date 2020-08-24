@@ -15,9 +15,9 @@
  *  specific language governing permissions and limitations
  *  under the License.
 */
-package org.ballerinalang.task.objects;
+package org.ballerinalang.stdlib.task.objects;
 
-import org.ballerinalang.task.exceptions.SchedulingException;
+import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 
 import java.util.HashMap;
 
