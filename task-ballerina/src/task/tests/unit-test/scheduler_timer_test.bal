@@ -21,16 +21,8 @@ boolean firstTimerServiceTriggered = false;
 boolean secondTimerServiceTriggered = false;
 
 string result = "";
-
 int firstTimerServiceTriggeredCount = 0;
 int secondTimerServiceTriggeredCount = 0;
-
-service timerService1 = service {
-    resource function onTrigger(Person person) {
-        person.age = person.age + 1;
-        result = <@untainted string>(person.name + " is " + person.age.toString() + " years old");
-    }
-};
 
 service service1 = service {
     resource function onTrigger() {
@@ -50,27 +42,35 @@ service service2 = service {
     }
 };
 
-//@test:Config {}
-//function testTaskTimerWithAttachment() {
-//    Person person = {
-//        name: "Sam",
-//        age: 0
-//    };
-//
-//    Scheduler taskTimer = new ({intervalInMillis: 1000, initialDelayInMillis: 1000, noOfRecurrences: 5});
-//    var attachResult = taskTimer.attach(timerService1, person);
-//    if (attachResult is SchedulerError) {
-//        panic attachResult;
-//    }
-//    var startResult = taskTimer.start();
-//    if (startResult is SchedulerError) {
-//        panic startResult;
-//    }
-//    // Sleep for 8 seconds to check whether the task is running for more than 5 times.
-//    runtime:sleep(8000);
-//    checkpanic taskTimer.stop();
-//    test:assertEquals(result, "Sam is 5 years old", msg = "Response payload mismatched");
-//}
+service timerService1 = service {
+    resource function onTrigger(Person person) {
+        person.age = person.age + 1;
+        result = <@untainted string>(person.name + " is " + person.age.toString() + " years old");
+    }
+};
+
+@test:Config {}
+function testTaskTimerWithAttachment() {
+    Person person = {
+        name: "Sam",
+        age: 0
+    };
+
+    Scheduler taskTimer = new ({intervalInMillis: 1000, initialDelayInMillis: 1000, noOfRecurrences: 5});
+    var attachResult = taskTimer.attach(timerService1, person);
+
+    if (attachResult is SchedulerError) {
+        panic attachResult;
+    }
+    var startResult = taskTimer.start();
+    if (startResult is SchedulerError) {
+        panic startResult;
+    }
+    // Sleep for 8 seconds to check whether the task is running for more than 5 times.
+    runtime:sleep(8000);
+    checkpanic taskTimer.stop();
+    test:assertEquals(result, "Sam is 5 years old", msg = "Response payload mismatched");
+}
 
 @test:Config {}
 function testTaskTimerWithMultipleServices() {

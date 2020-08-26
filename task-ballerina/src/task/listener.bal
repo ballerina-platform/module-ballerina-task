@@ -154,7 +154,7 @@ function detachExternal(Listener task, service attachedService) returns Listener
     class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-function attachExternal(Listener task, service s) returns ListenerError? = @java:Method {
+function attachExternal(Listener task, service s, any... attachments) returns ListenerError? = @java:Method {
     name: "attach",
     class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;

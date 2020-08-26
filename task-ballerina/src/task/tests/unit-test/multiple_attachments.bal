@@ -14,9 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
-//import ballerina/runtime;
-//import ballerina/test;
+import ballerina/runtime;
+import ballerina/test;
 
 string name = "John";
 int age = 0;
@@ -36,7 +35,6 @@ public type Person record {
 
 service multipleAttachService = service {
     resource function onTrigger(Person p, Account a) {
-         io:println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
         name = <@untainted>p.name;
         age = <@untainted>p.age;
         acNumber = <@untainted>a.number;
@@ -46,17 +44,16 @@ service multipleAttachService = service {
     }
 };
 
-//@test:Config {}
-//function multipleAttachmentTest() {
-//    Person sam = {name: "Sam", age: 29};
-//    Account acc = {number: 150590, balance: 11.35};
-//     io:println("############");
-//    TimerConfiguration timerConfiguration = {intervalInMillis: 1000};
-//    Scheduler multipleAttachmentTimer = new (timerConfiguration);
-//    var attachResult = multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
-//    var startResult = multipleAttachmentTimer.start();
-//    runtime:sleep(4000);
-//    checkpanic multipleAttachmentTimer.stop();
-//    test:assertEquals(output, "Name: Sam Age: 29 A/C: 150590 Balance: 11.35",
-//            msg = "Response payload mismatched");
-//}
+@test:Config {}
+function multipleAttachmentTest() {
+    Person sam = {name: "Sam", age: 29};
+    Account acc = {number: 150590, balance: 11.35};
+    TimerConfiguration timerConfiguration = {intervalInMillis: 1000};
+    Scheduler multipleAttachmentTimer = new (timerConfiguration);
+    var attachResult = multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
+    var startResult = multipleAttachmentTimer.start();
+    runtime:sleep(4000);
+    checkpanic multipleAttachmentTimer.stop();
+    test:assertEquals(output, "Name: Sam Age: 29 A/C: 150590 Balance: 11.35",
+            msg = "Response payload mismatched");
+}

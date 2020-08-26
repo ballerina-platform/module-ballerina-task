@@ -33,7 +33,7 @@ public type Scheduler object {
     # + attachments - Set of optional parameters, which need to be passed inside the resources
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
     public function attach(service serviceToAttach, any... attachments) returns SchedulerError? {
-        var result = attachExternal(self.taskListener, serviceToAttach);
+        var result = attachExternal(self.taskListener, serviceToAttach, ...attachments);
         if (result is ListenerError) {
             string message = "Failed to attach the service to the scheduler";
             return SchedulerError(message, result);

@@ -45,7 +45,7 @@ function testTaskPauseAndResume() {
     checkpanic timer2.attach(pauseResumeTimerService2);
     checkpanic timer1.start();
     checkpanic timer2.start();
-    runtime:sleep(3000);
+    runtime:sleep(3500);
     var result = timer1.pause();
     if (result is error) {
         test:assertFail("An error occurred when pausing the scheduler");

@@ -116,28 +116,6 @@ public class TaskActions {
         return null;
     }
 
-    public static Object attach(ObjectValue taskListener, ObjectValue service) {
-        ServiceInformation serviceInformation;
-        //if (attachments == null) {
-            serviceInformation = new ServiceInformation(BRuntime.getCurrentRuntime(), service);
-//        } else {
-//            serviceInformation = new ServiceInformation(BRuntime.getCurrentRuntime(), service, attachments);
-//        }
-
-        /*
-         * TODO: After #14148 fixed, use compiler plugin to validate the service
-         */
-        try {
-            validateService(serviceInformation);
-        } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
-        }
-
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-        task.addService(serviceInformation);
-        return null;
-    }
-
     @SuppressWarnings("unchecked")
     public static Object init(ObjectValue taskListener) {
         MapValue<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
