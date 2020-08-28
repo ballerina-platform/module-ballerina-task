@@ -77,17 +77,26 @@ task ballerinaBuild {
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         ballerinaConfigFile.text = newConfig
-
+        def additionalBuildParams = ""
         def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
+
+        if (project.hasProperty("skipBallerinaTests")) {
+            additionalBuildParams += "--skip-tests"
+        }
+
+        if (project.hasProperty("debugBallerina")) {
+            def port = project.getProperty("debugBallerina").toString();
+            additionalBuildParams += "--debug ${port}"
+        }
 
         // Build and populate caches
         exec {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build -c ${moduleName}"
+                commandLine 'cmd', '/c', "$distributionBinPath/ballerina.bat build ${additionalBuildParams} --code-coverage -c ${moduleName}"
             } else {
-                commandLine 'sh', '-c', "$distributionBinPath/ballerina build -c ${moduleName}"
+                commandLine 'sh', '-c', "$distributionBinPath/ballerina build ${additionalBuildParams} --code-coverage -c ${moduleName}"
             }
         }
         copy {
