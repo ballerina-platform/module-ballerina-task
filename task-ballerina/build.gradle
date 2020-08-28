@@ -188,7 +188,3 @@ unpackJballerinaTools.dependsOn copyToLib
 ballerinaBuild.dependsOn unpackJballerinaTools
 ballerinaBuild.dependsOn ":task-native:build"
 build.dependsOn ballerinaBuild
-
-//ballerinaBuild.dependsOn ":task-native:build"
-//ballerinaBuild.dependsOn unpackJballerinaTools
-//build.dependsOn ballerinaBuild
