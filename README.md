@@ -6,13 +6,15 @@ Ballerina Task Library
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-task.svg)](https://github.com/ballerina-platform/module-ballerina-task/commits/master)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-This Task library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
+This `task` library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
 
-For more information on all the operations supported by the `task:Listener` and `task:Scheduler`, see [API Docs](https://ballerina.io/swan-lake/learn/api-docs/ballerina/task/index.html).
+For more information on all the operations supported by the `task:Listener` and `task:Scheduler`, go to [The Task Module](https://ballerina.io/swan-lake/learn/api-docs/ballerina/task/).
 
 For a quick sample on demonstrating the usage see [Ballerina By Example](https://ballerina.io/swan-lake/learn/by-example/).
 
 ## Building from the Source
+
+Execute the commands below to build from source.
 
 1. To build the library,
         
