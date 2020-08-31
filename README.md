@@ -1,7 +1,7 @@
 Ballerina Task Library
 ===================
 
-  [![Build](https://github.com/ballerina-platform/module-ballerina-task/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions?query=workflow%3A%22PR+build%22)
+  [![Build](https://github.com/ballerina-platform/module-ballerina-task/workflows/PR%20build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions?query=workflow%3ABuild) 
   [![Daily build](https://github.com/ballerina-platform/module-ballerina-task/workflows/Daily%20build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions?query=workflow%3A%22Daily+build%22)
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-task.svg)](https://github.com/ballerina-platform/module-ballerina-task/commits/master)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
