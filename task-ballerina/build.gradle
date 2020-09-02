@@ -21,7 +21,7 @@ description = 'Ballerina - Task Ballerina Generator'
 
 configurations {
     jbalTools
-    externalJars
+    packingJars
 }
 
 dependencies {
@@ -30,7 +30,7 @@ dependencies {
         transitive = false
     }
     compile project(':task-native')
-    externalJars (group: 'org.quartz-scheduler', name:"quartz", version: "${quartzVersion}") {
+    packingJars (group: 'org.quartz-scheduler', name:"quartz", version: "${quartzVersion}") {
         transitive = false
     }
 }
@@ -47,9 +47,9 @@ jar {
     }
 }
 
-task copyToLib(type: Copy) {
+task copyPackingJarsToLib(type: Copy) {
     into "$project.projectDir/lib"
-    from configurations.externalJars
+    from configurations.packingJars
 }
 
 task unpackJballerinaTools(type: Copy) {
@@ -134,6 +134,11 @@ task ballerinaBuild {
             into file("$artifactLibParent/libs")
         }
 
+        copy {
+            from configurations.packingJars
+            into file("$artifactLibParent/libs")
+        }
+
         // Publish to central
         if (!project.version.endsWith('-SNAPSHOT') && ballerinaCentralAccessToken != null && project.hasProperty("publishToCentral")) {
             println("Publishing to the ballerina central..")
@@ -193,7 +198,7 @@ publishing {
     }
 }
 
-unpackJballerinaTools.dependsOn copyToLib
+unpackJballerinaTools.dependsOn copyPackingJarsToLib
 ballerinaBuild.dependsOn unpackJballerinaTools
 ballerinaBuild.dependsOn ":task-native:build"
 build.dependsOn ballerinaBuild
