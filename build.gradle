@@ -27,6 +27,7 @@ ext.puppycrawlCheckstyleVersion = "8.18"
 ext.slf4jVersion = "1.7.30"
 ext.axiomVersion = "1.2.22"
 ext.quartzVersion = "2.3.1"
+ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
 
 allprojects {
     group = 'org.ballerinalang'
@@ -59,12 +60,32 @@ allprojects {
 
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/module-ballerina-task'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
+        }
+
+        maven {
+            url "https://maven.pkg.github.com/ballerina-platform/module-ballerina-runtime"
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
         }
     }
 }
 
 subprojects {
     apply plugin: 'java'
+
+    configurations {
+        ballerinaStdLibs
+    }
+    dependencies {
+        /* Standard libraries */
+        ballerinaStdLibs "org.ballerinalang:runtime-ballerina:${stdlibRuntimeVersion}"
+    }
 
     release {
         // Disable check snapshots temporarily
