@@ -45,4 +45,3 @@ All contributors are encouraged to read [Ballerina Code of Conduct](https://ball
 * The ballerina-dev@googlegroups.com mailing list is for discussing code changes to the Ballerina project.
 * Chat live with us on our [Slack channel](https://ballerina.io/community/slack/).
 * Technical questions should be posted on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
-* Ballerina performance test results are available [here](performance/benchmarks/summary.md).
