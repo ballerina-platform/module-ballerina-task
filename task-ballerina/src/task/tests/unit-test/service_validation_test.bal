@@ -25,7 +25,8 @@ Person person = {name: "Sam", age: 29};
 public function testForNoResourceService() {
     var attachResult = timerForNoResourceService.attach(noResourceService, person);
     test:assertTrue(attachResult is error);
-    test:assertEquals(attachResult.toString(), "error Failed to attach the service to the scheduler");
+    test:assertEquals(attachResult.toString(), "error SchedulerError (\"Failed to attach the service to the " +
+        "scheduler\")");
 }
 
 service moreThanOneResourceService = service {
@@ -39,5 +40,6 @@ service moreThanOneResourceService = service {
 public function testForMoreThanOneResource() {
     var attachResult = timerForNoResourceService.attach(moreThanOneResourceService, person);
     test:assertTrue(attachResult is error);
-    test:assertEquals(attachResult.toString(), "error Failed to attach the service to the scheduler");
+    test:assertEquals(attachResult.toString(), "error SchedulerError (\"Failed to attach the service to " +
+        "the scheduler\")");
 }

@@ -27,7 +27,7 @@ public function testZeroInterval() {
         intervalInMillis: 0
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error Timer scheduling interval should be a positive integer.");
+    test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
 }
 
 @test:Config {
@@ -38,7 +38,7 @@ public function testNegativeDelay() {
         initialDelayInMillis: -1000
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error Timer scheduling delay should be a non-negative value.");
+    test:assertEquals(timer.toString(), "error(\"Timer scheduling delay should be a non-negative value.\")");
 }
 
 @test:Config {
@@ -49,7 +49,7 @@ public function testNegativeInteval() {
         initialDelayInMillis: 1000
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error Timer scheduling interval should be a positive integer.");
+    test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
 }
 
 @test:Config {
@@ -71,8 +71,9 @@ public function testInvalidAppointmentData() {
 
     Scheduler|error timer = trap new (configuration);
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error AppointmentData \"seconds=invalid minutes=  hours=Appointment " +
-    "daysOfMonth=  months=Data daysOfWeek=* year=*\" is invalid.");
+    test:assertEquals(timer.toString(), "error(\"AppointmentData \"{\"seconds\":\"invalid\",\"minutes\":\" \"," +
+        "\"hours\":\"Appointment\",\"daysOfMonth\":\" \",\"months\":\"Data\",\"daysOfWeek\":\"*\",\"year\":\"*\"}\" " +
+        "is invalid.\")");
 }
 
 type DuplicateAppointmentData record {
@@ -109,5 +110,5 @@ public function testInvalidCronExpression() {
     };
     Scheduler|error timer = trap new (configuration);
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error Cron Expression \"invalid cron expression\" is invalid.");
+    test:assertEquals(timer.toString(), "error(\"Cron Expression \"invalid cron expression\" is invalid.\")");
 }
