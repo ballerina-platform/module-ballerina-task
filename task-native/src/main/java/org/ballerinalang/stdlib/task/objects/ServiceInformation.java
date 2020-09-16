@@ -18,9 +18,9 @@
 
 package org.ballerinalang.stdlib.task.objects;
 
-import org.ballerinalang.jvm.BRuntime;
+import org.ballerinalang.jvm.api.BRuntime;
+import org.ballerinalang.jvm.api.values.BObject;
 import org.ballerinalang.jvm.types.AttachedFunction;
-import org.ballerinalang.jvm.values.ObjectValue;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 
 /**
@@ -30,16 +30,16 @@ import org.ballerinalang.stdlib.task.utils.TaskConstants;
  */
 public class ServiceInformation {
     private BRuntime runtime;
-    private ObjectValue service;
+    private BObject service;
     private final Object[] attachments;
 
-    public ServiceInformation(BRuntime runtime, ObjectValue service, Object... attachments) {
+    public ServiceInformation(BRuntime runtime, BObject service, Object... attachments) {
         this.runtime = runtime;
         this.service = service;
         this.attachments = attachments;
     }
 
-    public ObjectValue getService() {
+    public BObject getService() {
         return service;
     }
 
