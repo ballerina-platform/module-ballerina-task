@@ -17,13 +17,14 @@
  */
 package org.ballerinalang.stdlib.task.utils;
 
-import org.ballerinalang.jvm.BallerinaErrors;
 import org.ballerinalang.jvm.TypeChecker;
+import org.ballerinalang.jvm.api.BErrorCreator;
+import org.ballerinalang.jvm.api.BStringUtils;
+import org.ballerinalang.jvm.api.values.BError;
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.jvm.types.AttachedFunction;
 import org.ballerinalang.jvm.types.BType;
-import org.ballerinalang.jvm.values.ErrorValue;
-import org.ballerinalang.jvm.values.MapValue;
-import org.ballerinalang.jvm.values.api.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.objects.Appointment;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
@@ -44,19 +45,19 @@ public class Utils {
     // an attached function.
     private static final int VALID_RESOURCE_COUNT = 1;
 
-    public static ErrorValue createTaskError(String message) {
+    public static BError createTaskError(String message) {
         return createTaskError(TaskConstants.LISTENER_ERROR, message);
     }
 
-    public static ErrorValue createTaskError(String reason, String message) {
-        return BallerinaErrors.createDistinctError(reason, TaskConstants.TASK_PACKAGE_ID, message);
+    public static BError createTaskError(String reason, String message) {
+        return BErrorCreator.createDistinctError(reason, TaskConstants.TASK_PACKAGE_ID, BStringUtils.fromString(message));
     }
 
     @SuppressWarnings("unchecked")
     public static String getCronExpressionFromAppointmentRecord(Object record) throws SchedulingException {
         String cronExpression;
         if (TaskConstants.RECORD_APPOINTMENT_DATA.equals(TypeChecker.getType(record).getName())) {
-            cronExpression = buildCronExpression((MapValue<BString, Object>) record);
+            cronExpression = buildCronExpression((BMap<BString, Object>) record);
             if (!isValidExpression(cronExpression)) {
                 throw new SchedulingException("AppointmentData \"" + record.toString() + "\" is invalid.");
             }
@@ -70,7 +71,7 @@ public class Utils {
     }
 
     // Following code is reported as duplicates since all the lines doing same function call.
-    private static String buildCronExpression(MapValue<BString, Object> record) {
+    private static String buildCronExpression(BMap<BString, Object> record) {
         String cronExpression = getStringFieldValue(record, TaskConstants.FIELD_SECONDS) + " " +
                 getStringFieldValue(record, TaskConstants.FIELD_MINUTES) + " " +
                 getStringFieldValue(record, TaskConstants.FIELD_HOURS) + " " +
@@ -81,7 +82,7 @@ public class Utils {
         return cronExpression.trim();
     }
 
-    private static String getStringFieldValue(MapValue<BString, Object> record, BString fieldName) {
+    private static String getStringFieldValue(BMap<BString, Object> record, BString fieldName) {
         if (TaskConstants.FIELD_DAYS_OF_MONTH.equals(fieldName) && Objects.isNull(record.get(TaskConstants.FIELD_DAYS_OF_MONTH))) {
             return "?";
         } else if (Objects.nonNull(record.get(fieldName))) {
@@ -120,7 +121,7 @@ public class Utils {
         }
     }
 
-    public static Timer processTimer(MapValue<BString, Object> configurations) throws SchedulingException {
+    public static Timer processTimer(BMap<BString, Object> configurations) throws SchedulingException {
         Timer task;
         long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
         long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
@@ -134,7 +135,7 @@ public class Utils {
         return task;
     }
 
-    public static Appointment processAppointment(MapValue<BString, Object> configurations) throws SchedulingException {
+    public static Appointment processAppointment(BMap<BString, Object> configurations) throws SchedulingException {
         Appointment appointment;
         Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
         String cronExpression = getCronExpressionFromAppointmentRecord(appointmentDetails);
