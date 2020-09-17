@@ -55,7 +55,7 @@ public class Scheduler {
     # Starts running the task. Task Scheduler will not run until this has been called.
     #
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
-    public function 'start() returns SchedulerError? {
+    public isolated function 'start() returns SchedulerError? {
         var result = startExternal(self.taskListener);
         if (result is ListenerError) {
             string message = "Scheduler failed to start";
@@ -66,7 +66,7 @@ public class Scheduler {
     # Stops the task. This will stop after running the existing jobs.
     #
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
-    public function stop() returns SchedulerError? {
+    public isolated function stop() returns SchedulerError? {
         var result = stopExternal(self.taskListener);
         if (result is ListenerError) {
             string message = "Scheduler failed to stop";
@@ -77,7 +77,7 @@ public class Scheduler {
     # Pauses the task.
     #
     # + return - A `task:SchedulerError` if an error is occurred while pausing or else ()
-    public function pause() returns SchedulerError? {
+    public isolated function pause() returns SchedulerError? {
         var result = pauseExternal(self.taskListener);
         if (result is ListenerError) {
             string message = "Scheduler failed to pause";
@@ -88,7 +88,7 @@ public class Scheduler {
     # Resumes a paused task.
     #
     # + return - A `task:SchedulerError` when an error occurred while resuming or else ()
-    public function resume() returns SchedulerError? {
+    public isolated function resume() returns SchedulerError? {
         var result = resumeExternal(self.taskListener);
         if (result is ListenerError) {
             string message = "Scheduler failed to resume";
@@ -100,7 +100,7 @@ public class Scheduler {
     #
     # + return - `true` if the `Scheduler` is already started or else `false` if the `Scheduler` is
     #            not started yet or stopped calling the `Scheduler.stop()` function
-    public function isStarted() returns boolean {
+    public isolated function isStarted() returns boolean {
         return self.taskListener.isStarted();
     }
 }

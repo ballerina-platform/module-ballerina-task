@@ -67,7 +67,7 @@ public class Listener {
     # any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to start the listener
-    public function __start() returns error? {
+    public isolated function __start() returns error? {
         var result = startExternal(self);
         if (result is error) {
             panic result;
@@ -81,7 +81,7 @@ public class Listener {
     # completed. This may panic if the stopping causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to stop the listener
-    public function __gracefulStop() returns error? {
+    public isolated function __gracefulStop() returns error? {
         var result = stopExternal(self);
         if (result is error) {
             panic result;
@@ -95,7 +95,7 @@ public class Listener {
     # panic if the stopping causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to stop the listener
-    public function __immediateStop() returns error? {
+    public isolated function __immediateStop() returns error? {
         var result = stopExternal(self);
         if (result is error) {
             panic result;
@@ -105,41 +105,41 @@ public class Listener {
         }
     }
 
-    function isStarted() returns boolean {
+    isolated function isStarted() returns boolean {
         return self.started;
     }
 
     # Pauses the `task:Listener` and the attached services.
     #
     # + return - A `task:ListenerError` if an error occurred while pausing or else ()
-    public function pause() returns ListenerError? {
+    public isolated function pause() returns ListenerError? {
         return pauseExternal(self);
     }
 
     # Resumes a paused `task:Listener`. Calling this on an already-running `task:Listener` will not cause any error.
     #
     # + return -  A `task:ListenerError` if an error occurred while resuming or else ()
-    public function resume() returns ListenerError? {
+    public isolated function resume() returns ListenerError? {
         return resumeExternal(self);
     }
 }
 
-function pauseExternal(Listener task) returns ListenerError? = @java:Method {
+isolated function pauseExternal(Listener task) returns ListenerError? = @java:Method {
     name: "pause",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-function resumeExternal(Listener task) returns ListenerError? = @java:Method {
+isolated function resumeExternal(Listener task) returns ListenerError? = @java:Method {
     name: "resume",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-function stopExternal(Listener task) returns ListenerError? = @java:Method {
+isolated function stopExternal(Listener task) returns ListenerError? = @java:Method {
     name: "stop",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-function startExternal(Listener task) returns ListenerError? = @java:Method {
+isolated function startExternal(Listener task) returns ListenerError? = @java:Method {
     name: "start",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
