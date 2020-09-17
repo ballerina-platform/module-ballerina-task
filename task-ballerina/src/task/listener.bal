@@ -29,7 +29,7 @@ public class Listener {
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #   `task:Listener` behavior
-    public function init(TimerConfiguration|AppointmentConfiguration configuration) {
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
         if (configuration is TimerConfiguration) {
             if (configuration["initialDelayInMillis"] == ()) {
                 configuration.initialDelayInMillis = configuration.intervalInMillis;
@@ -47,7 +47,7 @@ public class Listener {
     # + s - Service to attach to the listener
     # + name - Name of the service
     # + return - () or else a `task:ListenerError` upon failure to attach the service
-    public function __attach(service s, string? name = ()) returns error? {
+    public isolated function __attach(service s, string? name = ()) returns error? {
         // ignore param 'name'
         var result = attachExternal(self, s);
         if (result is error) {
@@ -59,7 +59,7 @@ public class Listener {
     #
     # + s - Service to be detached from the listener
     # + return - () or else a `task:ListenerError` upon failure to detach the service
-    public function __detach(service s) returns error? {
+    public isolated function __detach(service s) returns error? {
         return detachExternal(self, s);
     }
 
@@ -144,17 +144,17 @@ isolated function startExternal(Listener task) returns ListenerError? = @java:Me
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-function initExternal(Listener task) returns ListenerError? = @java:Method {
+isolated function initExternal(Listener task) returns ListenerError? = @java:Method {
     name: "init",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-function detachExternal(Listener task, service attachedService) returns ListenerError? = @java:Method {
+isolated function detachExternal(Listener task, service attachedService) returns ListenerError? = @java:Method {
     name: "detach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-function attachExternal(Listener task, service s, any... attachments) returns ListenerError? = @java:Method {
+isolated function attachExternal(Listener task, service s, any... attachments) returns ListenerError? = @java:Method {
     name: "attach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
