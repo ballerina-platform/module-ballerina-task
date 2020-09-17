@@ -23,7 +23,7 @@ public class Scheduler {
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #                   `task:Sceduler` behavior
-    public function init(TimerConfiguration|AppointmentConfiguration configuration) {
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
         self.taskListener = new(configuration);
     }
 
@@ -32,7 +32,7 @@ public class Scheduler {
     # + serviceToAttach - Ballerina `service` object, which needs to be attached to the task
     # + attachments - Set of optional parameters, which need to be passed inside the resources
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
-    public function attach(service serviceToAttach, any... attachments) returns SchedulerError? {
+    public isolated function attach(service serviceToAttach, any... attachments) returns SchedulerError? {
         var result = attachExternal(self.taskListener, serviceToAttach, ...attachments);
         if (result is ListenerError) {
             string message = "Failed to attach the service to the scheduler";
@@ -44,7 +44,7 @@ public class Scheduler {
     #
     # + attachedService - Ballerina `service` object, which needs to be detached from the task
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
-    public function detach(service attachedService) returns SchedulerError? {
+    public isolated function detach(service attachedService) returns SchedulerError? {
         var result = detachExternal(self.taskListener, attachedService);
         if (result is ListenerError) {
             string message = "Scheduler failed to detach the service";
