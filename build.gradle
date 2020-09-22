@@ -107,7 +107,7 @@ release {
 }
 
 task build {
-    dependsOn('ldap-ballerina:build')
+    dependsOn('task-ballerina:build')
 }
 
 task codeCoverageReport(type: JacocoReport) {
