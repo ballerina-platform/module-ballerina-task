@@ -20,8 +20,7 @@ Scheduler timerForNoResourceService = new ({
     intervalInMillis: 1
 });
 
-@test:Config {
-}
+@test:Config {enable : false}
 public function testZeroInterval() {
     Scheduler|error timer = trap new ({
         intervalInMillis: 0
@@ -30,8 +29,7 @@ public function testZeroInterval() {
     test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
 }
 
-@test:Config {
-}
+@test:Config {enable : false}
 public function testNegativeDelay() {
     Scheduler|error timer = trap new ({
         intervalInMillis: 500,
@@ -41,8 +39,7 @@ public function testNegativeDelay() {
     test:assertEquals(timer.toString(), "error(\"Timer scheduling delay should be a non-negative value.\")");
 }
 
-@test:Config {
-}
+@test:Config {enable : false}
 public function testNegativeInteval() {
     Scheduler|error timer = trap new ({
         intervalInMillis: -500,
@@ -52,8 +49,7 @@ public function testNegativeInteval() {
     test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
 }
 
-@test:Config {
-}
+@test:Config {enable : false}
 public function testInvalidAppointmentData() {
     AppointmentData appointmentData = {
         seconds: "invalid",
@@ -102,8 +98,7 @@ public function testInvalidAppointmentDataRecord() {
     test:assertFalse(appointmentData is AppointmentData);
 }
 
-@test:Config {
-}
+@test:Config {enable : false}
 public function testInvalidCronExpression() {
     AppointmentConfiguration configuration = {
         appointmentDetails: "invalid cron expression"
