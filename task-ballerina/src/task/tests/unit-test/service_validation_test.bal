@@ -20,7 +20,7 @@ service noResourceService = service {};
 
 Person person = {name: "Sam", age: 29};
 
-//@test:Config {enable : false}
+@test:Config {}
 public function testForNoResourceService() {
     var attachResult = timerForNoResourceService.attach(noResourceService, person);
     test:assertTrue(attachResult is error);
@@ -34,7 +34,7 @@ service moreThanOneResourceService = service {
     resource function onError(error e) {}
 };
 
-//@test:Config {enable : false}
+@test:Config {}
 public function testForMoreThanOneResource() {
     var attachResult = timerForNoResourceService.attach(moreThanOneResourceService, person);
     test:assertTrue(attachResult is error);
