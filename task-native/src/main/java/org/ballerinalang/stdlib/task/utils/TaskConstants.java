@@ -31,7 +31,7 @@ public class TaskConstants {
 
     // Package related constants
     public static final String PACKAGE_NAME = "task";
-    public static final String PACKAGE_VERSION = "1.1.2";
+    public static final String PACKAGE_VERSION = "1.1.0";
     public static final BPackage TASK_PACKAGE_ID =
             new BPackage(BALLERINA_BUILTIN_PKG_PREFIX, PACKAGE_NAME, PACKAGE_VERSION);
 
