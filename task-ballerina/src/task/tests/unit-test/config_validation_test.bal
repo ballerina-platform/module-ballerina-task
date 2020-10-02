@@ -17,13 +17,13 @@
 import ballerina/test;
 
 TimerConfiguration config =  {intervalInMillis: 1};
-Scheduler timerForNoResourceService = new ({triggerConfig: config});
+Scheduler timerForNoResourceService = new ({ triggerConfig: config});
 
 @test:Config {}
 public function testZeroInterval() {
-    Scheduler|error timer = trap new ({triggerConfig: {
-        intervalInMillis: 0
-    }});
+    Scheduler|error timer = trap new ({ triggerConfig: {
+                                            intervalInMillis: 0
+                                         }});
     test:assertTrue(timer is error);
     test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
 }
@@ -31,9 +31,9 @@ public function testZeroInterval() {
 @test:Config {}
 public function testNegativeDelay() {
     Scheduler|error timer = trap new ({ triggerConfig: {
-        intervalInMillis: 500,
-        initialDelayInMillis: -1000
-    }});
+                                            intervalInMillis: 500,
+                                            initialDelayInMillis: -1000
+                                         }});
     test:assertTrue(timer is error);
     test:assertEquals(timer.toString(), "error(\"Timer scheduling delay should be a non-negative value.\")");
 }
@@ -41,9 +41,9 @@ public function testNegativeDelay() {
 @test:Config {}
 public function testNegativeInteval() {
     Scheduler|error timer = trap new ({ triggerConfig: {
-        intervalInMillis: -500,
-        initialDelayInMillis: 1000
-    }});
+                                            intervalInMillis: -500,
+                                            initialDelayInMillis: 1000
+                                         }});
     test:assertTrue(timer is error);
     test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
 }
@@ -64,7 +64,7 @@ public function testInvalidAppointmentData() {
         appointmentDetails: appointmentData
     };
 
-    Scheduler|error timer = trap new ({triggerConfig: configuration});
+    Scheduler|error timer = trap new ({ triggerConfig: configuration });
     test:assertTrue(timer is error);
     test:assertEquals(timer.toString(), "error(\"AppointmentData \"{\"seconds\":\"invalid\",\"minutes\":\" \"," +
         "\"hours\":\"Appointment\",\"daysOfMonth\":\" \",\"months\":\"Data\",\"daysOfWeek\":\"*\",\"year\":\"*\"}\" " +
@@ -102,7 +102,7 @@ public function testInvalidCronExpression() {
     AppointmentConfiguration configuration = {
         appointmentDetails: "invalid cron expression"
     };
-    Scheduler|error timer = trap new ({triggerConfig: configuration});
+    Scheduler|error timer = trap new ({ triggerConfig: configuration });
     test:assertTrue(timer is error);
     test:assertEquals(timer.toString(), "error(\"Cron Expression \"invalid cron expression\" is invalid.\")");
 }

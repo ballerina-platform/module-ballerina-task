@@ -28,8 +28,12 @@ service misfireService6 = service {
 @test:Config {}
 function testCronTriggerWithfireAndProceedMisfirePolicy() {
 
-    Scheduler taskTimer = new ({ triggerConfig: {appointmentDetails: "* * * * * ? *", noOfRecurrences: 8},
-                                 misfireConfig: {instruction: "fireAndProceed"}
+    Scheduler taskTimer = new ({ triggerConfig: {
+                                    appointmentDetails: "* * * * * ? *",
+                                    noOfRecurrences: 8},
+                                    misfireConfig: {
+                                        instruction: "fireAndProceed"
+                                    }
                                 });
     var attachResult = taskTimer.attach(misfireService6);
     if (attachResult is SchedulerError) {
@@ -67,8 +71,13 @@ service misfireService7 = service {
 @test:Config {}
 function testCronTriggerWithdoNothingMisfirePolicy() {
 
-    Scheduler taskTimer = new ({ triggerConfig: {appointmentDetails: "* * * * * ? *",
-                                noOfRecurrences: 5}, misfireConfig: {instruction: "doNothing"}});
+    Scheduler taskTimer = new ({ triggerConfig: {
+                                    appointmentDetails: "* * * * * ? *",
+                                    noOfRecurrences: 5
+                                  },
+                                  misfireConfig: {
+                                     instruction: "doNothing"
+                                  }});
     var attachResult = taskTimer.attach(misfireService7);
     if (attachResult is SchedulerError) {
         panic attachResult;

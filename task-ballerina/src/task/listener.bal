@@ -27,8 +27,7 @@ public class Listener {
     # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a configuration
     # error.
     #
-    # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
-    #   `task:Listener` behavior
+    # + configuration - The configurations associated with the `task:Listener`
     public isolated function init(TaskConfiguration configuration) {
         var triggerConfig = configuration["triggerConfig"];
         var misfireConfig = configuration["misfireConfig"];
