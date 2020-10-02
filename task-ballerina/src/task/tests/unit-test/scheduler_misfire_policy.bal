@@ -47,7 +47,6 @@ function testTaskTimerWithFireNowMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(5000);
     test:assertEquals(triggeredCount1, 0, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();
@@ -86,7 +85,6 @@ function testTaskTimerWithIgnoreMisfiresPoilcyMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(5000);
     test:assertEquals(triggeredCount8, 0, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();
@@ -122,7 +120,6 @@ function testTaskTimerWithSmartPolicyMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(5000);
     test:assertEquals(triggeredCount9, 0, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();

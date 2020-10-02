@@ -86,14 +86,12 @@ function testCronTriggerWithdoNothingMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-     // Sleep for 8 seconds.
     runtime:sleep(1500);
     int count = triggeredCount7;
     var pauseResult = taskTimer.pause();
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(1000);
     test:assertEquals(triggeredCount7, count, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();

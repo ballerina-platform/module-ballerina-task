@@ -50,7 +50,6 @@ function testRecurringTriggerWithExistingRepeatCountMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(8000);
     test:assertEquals(triggeredCount2, 2, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();
@@ -59,8 +58,7 @@ function testRecurringTriggerWithExistingRepeatCountMisfirePolicy() {
     }
     runtime:sleep(1000);
     test:assertEquals(triggeredCount2, 3, msg = "Output mismatched");
-    // Sleep for 8 seconds.
-    runtime:sleep(10000);
+    runtime:sleep(8000);
     test:assertEquals(triggeredCount2, 5, msg = "Output mismatched");
     checkpanic taskTimer.stop();
 }
@@ -90,14 +88,12 @@ function testRecurringTriggerWithNowWithRemainingRepeatCountMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-     // Sleep for 8 seconds.
     runtime:sleep(8000);
     test:assertEquals(triggeredCount3, 2, msg = "Output mismatched");
     var pauseResult = taskTimer.pause();
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(8000);
     test:assertEquals(triggeredCount3, 2, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();
@@ -106,7 +102,6 @@ function testRecurringTriggerWithNowWithRemainingRepeatCountMisfirePolicy() {
     }
     runtime:sleep(1000);
     test:assertEquals(triggeredCount3, 3, msg = "Output mismatched");
-    // Sleep for 8 seconds.
     runtime:sleep(8000);
     test:assertEquals(triggeredCount3, 5, msg = "Output mismatched");
     checkpanic taskTimer.stop();
@@ -137,14 +132,12 @@ function testRecurringTriggerWithNextWithExistingCountMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-     // Sleep for 8 seconds.
     runtime:sleep(7000);
     test:assertEquals(triggeredCount4, 2, msg = "Output mismatched");
     var pauseResult = taskTimer.pause();
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(7000);
     test:assertEquals(triggeredCount4, 2, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();
@@ -153,8 +146,7 @@ function testRecurringTriggerWithNextWithExistingCountMisfirePolicy() {
     }
     runtime:sleep(500);
     test:assertEquals(triggeredCount4, 2, msg = "Output mismatched");
-    // Sleep for 8 seconds.
-    runtime:sleep(20000);
+    runtime:sleep(10000);
     test:assertEquals(triggeredCount4, 5, msg = "Output mismatched");
     checkpanic taskTimer.stop();
 }
@@ -183,14 +175,12 @@ function testRecurringTriggerWithNextWithRemainigCountMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-     // Sleep for 8 seconds.
     runtime:sleep(7000);
     test:assertEquals(triggeredCount5, 2, msg = "Output mismatched");
     var pauseResult = taskTimer.pause();
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(7000);
     test:assertEquals(triggeredCount5, 2, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();
@@ -199,8 +189,7 @@ function testRecurringTriggerWithNextWithRemainigCountMisfirePolicy() {
     }
     runtime:sleep(500);
     test:assertEquals(triggeredCount5, 2, msg = "Output mismatched");
-    // Sleep for 8 seconds.
-    runtime:sleep(20000);
+    runtime:sleep(10000);
     test:assertEquals(triggeredCount5, 5, msg = "Output mismatched");
     checkpanic taskTimer.stop();
 }
@@ -225,14 +214,12 @@ function testRecurringTriggerWithSmartPolicyMisfirePolicy() {
     if (startResult is SchedulerError) {
         panic startResult;
     }
-     // Sleep for 8 seconds.
     runtime:sleep(8000);
     test:assertEquals(triggeredCount11, 2, msg = "Output mismatched");
     var pauseResult = taskTimer.pause();
     if (startResult is SchedulerError) {
         panic startResult;
     }
-    // Sleep for 8 seconds.
     runtime:sleep(8000);
     test:assertEquals(triggeredCount11, 2, msg = "Output mismatched");
     var resumeResult = taskTimer.resume();
@@ -241,7 +228,6 @@ function testRecurringTriggerWithSmartPolicyMisfirePolicy() {
     }
     runtime:sleep(1000);
     test:assertEquals(triggeredCount11, 3, msg = "Output mismatched");
-    // Sleep for 8 seconds.
     runtime:sleep(10000);
     test:assertEquals(triggeredCount11, 5, msg = "Output mismatched");
     checkpanic taskTimer.stop();

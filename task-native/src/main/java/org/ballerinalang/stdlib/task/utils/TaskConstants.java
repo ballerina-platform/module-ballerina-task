@@ -43,9 +43,11 @@ public class TaskConstants {
     public static final BString MEMBER_LISTENER_CONFIGURATION = BStringUtils.fromString("listenerConfiguration");
     public static final BString MEMBER_APPOINTMENT_DETAILS = BStringUtils.fromString("appointmentDetails");
 
-    //
+    // Fields used in TaskConfiguration
     public static final BString TRIGGER_CONFIG = BStringUtils.fromString("triggerConfig");
     public static final BString MISFIRE_CONFIG = BStringUtils.fromString("misfireConfig");
+
+    // Fields used in MisfireConfiguration
     public static final BString THRESHOLD_IN_MILLIS = BStringUtils.fromString("thresholdInMillis");
     public static final BString INSTRUCTION = BStringUtils.fromString("instruction");
 
