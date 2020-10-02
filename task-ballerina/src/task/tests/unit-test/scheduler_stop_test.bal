@@ -27,7 +27,7 @@ function testSchedulerStop() {
         intervalInMillis: 500,
         initialDelayInMillis: 2000
     };
-    Scheduler timer = new (configuration);
+    Scheduler timer = new ({triggerConfig: configuration});
     checkpanic timer.attach(stopTimerService);
     checkpanic timer.start();
     var expectedResult =  timer.stop();

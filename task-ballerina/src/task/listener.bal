@@ -22,18 +22,32 @@ public class Listener {
     *'object:Listener;
     boolean started = false;
 
-    private TimerConfiguration|AppointmentConfiguration listenerConfiguration;
+    private TaskConfiguration listenerConfiguration;
 
     # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a configuration
     # error.
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #   `task:Listener` behavior
-    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
-        if (configuration is TimerConfiguration) {
-            if (configuration["initialDelayInMillis"] == ()) {
-                configuration.initialDelayInMillis = configuration.intervalInMillis;
+    public isolated function init(TaskConfiguration configuration) {
+        var triggerConfig = configuration["triggerConfig"];
+        var misfireConfig = configuration["misfireConfig"];
+        var instruction = misfireConfig["instruction"];
+        if (triggerConfig is TimerConfiguration) {
+            var noOfRecurrences = triggerConfig["noOfRecurrences"];
+            if (noOfRecurrences is int && noOfRecurrences == 1 && !(instruction is InstructionForOneOffTrigger ||
+                instruction is DefaultInstruction)) {
+                panic ListenerError("Wrong misfire instruction has given for off-one trigger");
+            } else if (!(noOfRecurrences == 1) && !(instruction is InstructionForRecurringTrigger ||
+                       instruction is DefaultInstruction)) {
+                panic ListenerError("Wrong misfire instruction has given for recurring trigger");
             }
+            if (triggerConfig["initialDelayInMillis"] == ()) {
+                triggerConfig.initialDelayInMillis = triggerConfig["intervalInMillis"];
+            }
+            configuration.triggerConfig = triggerConfig;
+        } else if (instruction is InstructionForRecurringTrigger || instruction is InstructionForOneOffTrigger) {
+            panic ListenerError("Wrong misfire instruction has given for cron trigger");
         }
         self.listenerConfiguration = configuration;
         var result = initExternal(self);

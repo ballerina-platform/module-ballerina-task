@@ -56,7 +56,8 @@ function testTaskTimerWithAttachment() {
         age: 0
     };
 
-    Scheduler taskTimer = new ({intervalInMillis: 1000, initialDelayInMillis: 1000, noOfRecurrences: 5});
+    Scheduler taskTimer = new ({ triggerConfig: {intervalInMillis: 1000, initialDelayInMillis: 1000,
+                                noOfRecurrences: 5}});
     var attachResult = taskTimer.attach(timerService1, person);
 
     if (attachResult is SchedulerError) {
@@ -74,7 +75,7 @@ function testTaskTimerWithAttachment() {
 
 @test:Config {}
 function testTaskTimerWithMultipleServices() {
-    Scheduler timerWithMultipleServices = new ({intervalInMillis: 1000});
+    Scheduler timerWithMultipleServices = new ({triggerConfig: {intervalInMillis: 1000}});
     checkpanic timerWithMultipleServices.attach(service1);
     checkpanic timerWithMultipleServices.attach(service2);
     checkpanic timerWithMultipleServices.start();

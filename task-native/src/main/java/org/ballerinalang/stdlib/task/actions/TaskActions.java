@@ -29,6 +29,7 @@ import org.ballerinalang.stdlib.task.objects.Task;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 
 import static org.ballerinalang.stdlib.task.utils.TaskConstants.NATIVE_DATA_TASK_OBJECT;
+import static org.ballerinalang.stdlib.task.utils.TaskConstants.TRIGGER_CONFIG;
 import static org.ballerinalang.stdlib.task.utils.Utils.createTaskError;
 import static org.ballerinalang.stdlib.task.utils.Utils.processAppointment;
 import static org.ballerinalang.stdlib.task.utils.Utils.processTimer;
@@ -119,7 +120,8 @@ public class TaskActions {
     @SuppressWarnings("unchecked")
     public static Object init(BObject taskListener) {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
-        String configurationTypeName = configurations.getType().getName();
+        BMap<BString, Object> triggerConfig = (BMap<BString, Object>) configurations.getMapValue(TRIGGER_CONFIG);
+        String configurationTypeName = triggerConfig.getType().getName();
         Task task;
         try {
             if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {

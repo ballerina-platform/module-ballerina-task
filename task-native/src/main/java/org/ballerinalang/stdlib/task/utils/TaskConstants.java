@@ -31,7 +31,7 @@ public class TaskConstants {
 
     // Package related constants
     public static final String PACKAGE_NAME = "task";
-    public static final String PACKAGE_VERSION = "1.1.1";
+    public static final String PACKAGE_VERSION = "1.1.0";
     public static final BPackage TASK_PACKAGE_ID =
             new BPackage(BALLERINA_BUILTIN_PKG_PREFIX, PACKAGE_NAME, PACKAGE_VERSION);
 
@@ -42,6 +42,12 @@ public class TaskConstants {
     // Member names used in records
     public static final BString MEMBER_LISTENER_CONFIGURATION = BStringUtils.fromString("listenerConfiguration");
     public static final BString MEMBER_APPOINTMENT_DETAILS = BStringUtils.fromString("appointmentDetails");
+
+    //
+    public static final BString TRIGGER_CONFIG = BStringUtils.fromString("triggerConfig");
+    public static final BString MISFIRE_CONFIG = BStringUtils.fromString("misfireConfig");
+    public static final BString THRESHOLD_IN_MILLIS = BStringUtils.fromString("thresholdInMillis");
+    public static final BString INSTRUCTION = BStringUtils.fromString("instruction");
 
     // Allowed resource function names
     public static final String RESOURCE_ON_TRIGGER = "onTrigger";
@@ -79,6 +85,4 @@ public class TaskConstants {
 
     // Quartz property values
     public static final String QUARTZ_THREAD_COUNT_VALUE = "10";
-    // Defines how late the trigger should be to be considered misfired
-    public static final String QUARTZ_MISFIRE_THRESHOLD_VALUE = "5000";
 }

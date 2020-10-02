@@ -39,8 +39,8 @@ service pauseResumeTimerService2 = service {
 
 @test:Config {}
 function testTaskPauseAndResume() {
-    Scheduler timer1 = new (configuration);
-    Scheduler timer2 = new (configuration);
+    Scheduler timer1 = new ({triggerConfig: configuration});
+    Scheduler timer2 = new ({triggerConfig: configuration});
     checkpanic timer1.attach(pauseResumeTimerService1);
     checkpanic timer2.attach(pauseResumeTimerService2);
     checkpanic timer1.start();

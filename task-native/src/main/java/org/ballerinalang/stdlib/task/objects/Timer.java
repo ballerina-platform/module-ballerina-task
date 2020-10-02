@@ -17,7 +17,10 @@
 */
 package org.ballerinalang.stdlib.task.objects;
 
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
+import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -39,6 +42,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class Timer extends AbstractTask {
 
     private long interval, delay;
+    private static int thresholdInMillis;
+    private static String instruction;
 
     /**
      * Creates a Timer object.
@@ -47,11 +52,13 @@ public class Timer extends AbstractTask {
      * @param interval The interval between two task executions.
      * @throws SchedulingException When provided configuration values are invalid.
      */
-    public Timer(long delay, long interval) throws SchedulingException {
+    public Timer(long delay, long interval, BMap<BString, Object> misfireConfig) throws SchedulingException {
         super();
         validateTimerConfigurations(delay, interval);
         this.interval = interval;
         this.delay = delay;
+        thresholdInMillis = misfireConfig.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
+        instruction = misfireConfig.getStringValue(TaskConstants.INSTRUCTION).toString();
     }
 
     /**
@@ -62,11 +69,14 @@ public class Timer extends AbstractTask {
      * @param maxRuns  Number of times after which the timer will turn off.
      * @throws SchedulingException When provided configuration values are invalid.
      */
-    public Timer(long delay, long interval, long maxRuns) throws SchedulingException {
+    public Timer(long delay, long interval, BMap<BString, Object> misfireConfig, long maxRuns) throws
+            SchedulingException {
         super(maxRuns);
         validateTimerConfigurations(delay, interval);
         this.interval = interval;
         this.delay = delay;
+        thresholdInMillis = misfireConfig.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
+        instruction = misfireConfig.getStringValue(TaskConstants.INSTRUCTION).toString();
     }
 
     /**
@@ -125,6 +135,7 @@ public class Timer extends AbstractTask {
      * @throws SchedulerException if scheduling is failed.
      */
     private void scheduleTimer(JobDataMap jobData) throws SchedulerException, SchedulingException {
+        TaskManager.createSchedulerProperties(thresholdInMillis);
         SimpleScheduleBuilder schedule = createSchedulerBuilder(this.getInterval(), this.getMaxRuns());
         String triggerId = this.getId();
         JobDetail job = newJob(TaskJob.class).usingJobData(jobData).withIdentity(triggerId).build();
@@ -153,15 +164,38 @@ public class Timer extends AbstractTask {
 
     private static SimpleScheduleBuilder createSchedulerBuilder(long interval, long maxRuns) {
         SimpleScheduleBuilder simpleScheduleBuilder = simpleSchedule()
-                .withMisfireHandlingInstructionNextWithRemainingCount()
                 .withIntervalInMilliseconds(interval);
         if (maxRuns > 0) {
             // Quartz uses number of repeats, but we count total number of runs.
             // Hence we subtract 1 from the maxRuns to get the repeat count.
             simpleScheduleBuilder.withRepeatCount((int) (maxRuns - 1));
+            if (maxRuns == 1) {
+                if (instruction.equalsIgnoreCase("fireNow")) {
+                    simpleScheduleBuilder.withMisfireHandlingInstructionFireNow();
+                } else if (instruction.equalsIgnoreCase("ignoreMisfiresPoilcy")) {
+                    simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+                }
+            } else {
+                setMisfirePolicyForRecurringAction(simpleScheduleBuilder);
+            }
         } else {
             simpleScheduleBuilder.repeatForever();
+            setMisfirePolicyForRecurringAction(simpleScheduleBuilder);
         }
         return simpleScheduleBuilder;
+    }
+
+    private static void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder) {
+        if (instruction.equalsIgnoreCase("rescheduleNextWithExistingCount")) {
+            simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
+        } else if (instruction.equalsIgnoreCase("ignoreMisfiresPoilcy")) {
+            simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+        } else if (instruction.equalsIgnoreCase("rescheduleNextWithRemainingCount")) {
+            simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
+        } else if (instruction.equalsIgnoreCase("rescheduleNowWithExistingRepeatCount")) {
+            simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
+        } else if (instruction.equalsIgnoreCase("handlingInstructionNowWithRemainingRepeatCount")) {
+            simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
+        }
     }
 }
