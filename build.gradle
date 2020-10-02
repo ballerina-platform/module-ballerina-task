@@ -51,7 +51,7 @@ allprojects {
         }
 
         maven {
-            url = 'https://maven.wso2.org/nexus/content/repositories/orgballerinalang-1614'
+            url = 'https://repo.maven.apache.org/maven2'
         }
 
         maven {
@@ -60,6 +60,10 @@ allprojects {
 
         maven {
             url = 'https://maven.pkg.github.com/ballerina-platform/ballerina-lang'
+            credentials {
+                username System.getenv("packageUser")
+                password System.getenv("packagePAT")
+            }
         }
 
         maven {
