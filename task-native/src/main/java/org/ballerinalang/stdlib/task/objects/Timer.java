@@ -172,7 +172,7 @@ public class Timer extends AbstractTask {
             if (maxRuns == 1) {
                 if (instruction.equalsIgnoreCase("fireNow")) {
                     simpleScheduleBuilder.withMisfireHandlingInstructionFireNow();
-                } else if (instruction.equalsIgnoreCase("ignoreMisfiresPoilcy")) {
+                } else if (instruction.equalsIgnoreCase("ignoreMisfiresPolicy")) {
                     simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
                 }
             } else {
@@ -188,7 +188,7 @@ public class Timer extends AbstractTask {
     private static void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder) {
         if (instruction.equalsIgnoreCase("rescheduleNextWithExistingCount")) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
-        } else if (instruction.equalsIgnoreCase("ignoreMisfiresPoilcy")) {
+        } else if (instruction.equalsIgnoreCase("ignoreMisfiresPolicy")) {
             simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
         } else if (instruction.equalsIgnoreCase("rescheduleNextWithRemainingCount")) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();

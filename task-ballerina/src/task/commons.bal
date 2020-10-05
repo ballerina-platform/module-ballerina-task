@@ -75,7 +75,7 @@ public type TaskConfiguration record {|
 #                     smartPolicy - This is default which will act as `firenow`
 #                     fireNow - Instructs the Scheduler If the Trigger misfires, the trigger wants to be fired
 #                               now by Scheduler.
-#                     ignoreMisfiresPoilcy - If the Trigger misfires, instructs the Scheduler that the trigger will
+#                     ignoreMisfiresPolicy - If the Trigger misfires, instructs the Scheduler that the trigger will
 #                                            never be evaluated for a misfire situation and that the scheduler will
 #                                            simply try to fire it as soon as it can, and then update the trigger as
 #                                            if it had fired at the proper time.
@@ -100,7 +100,7 @@ public type TaskConfiguration record {|
 #                                                                      the SimpleTrigger wants to be re-scheduled to
 #                                                                      'now' with the repeat count set to what it
 #                                                                       would be, if it had not missed any firings.
-#                     ignoreMisfiresPoilcy - If the Trigger misfires, instructs the Scheduler that the trigger will
+#                     ignoreMisfiresPolicy - If the Trigger misfires, instructs the Scheduler that the trigger will
 #                                            never be evaluated for a misfire situation, and that the scheduler will
 #                                            simply try to fire it as soon as it can, and then update the Trigger
 #                                            as if it had fired at the proper time.
@@ -120,11 +120,11 @@ public type MisfireConfiguration record {|
 |};
 
 # Possible types of parameters that can be passed into the `InstructionForSingleTrigger`.
-public type InstructionForOneOffTrigger "fireNow"|"ignoreMisfiresPoilcy";
+public type InstructionForOneOffTrigger "fireNow"|"ignoreMisfiresPolicy";
 
 # Possible types of parameters that can be passed into the `InstructionForSingleRepeatingTrigger`.
 public type InstructionForRecurringTrigger "rescheduleNextWithExistingCount"|"rescheduleNextWithRemainingCount"|
-"rescheduleNowWithExistingRepeatCount"|"handlingInstructionNowWithRemainingRepeatCount"|"ignoreMisfiresPoilcy";
+"rescheduleNowWithExistingRepeatCount"|"handlingInstructionNowWithRemainingRepeatCount"|"ignoreMisfiresPolicy";
 
 # Possible types of parameters that can be passed into the `InstructionForCronTrigger`.
 public type InstructionForCronTrigger "doNothing"|"ignoreMisfiresPolicy"|"fireAndProceed";
