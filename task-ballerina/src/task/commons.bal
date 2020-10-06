@@ -55,80 +55,83 @@ public type AppointmentData record {|
     string year?;
 |};
 
-# Represents configurations for the `task` objefct.
-#
-# + triggerConfig - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record which is used to define
-#                   the task trigger behavior
-# + misfireConfig - The `task:MisfireConfig` record which is used to configure the misfire situations of the scheduler
-public type TaskConfiguration record {|
-    AppointmentConfiguration|TimerConfiguration triggerConfig;
-    MisfireConfiguration misfireConfig = {};
-|};
-
 # Represents configurations for the misfire situations of the scheduler.
 #
 # + thresholdInMillis - The number of milliseconds the scheduler will tolerate a trigger to pass its
 #                       next-fire-time by, before being considered `misfired`.
-# + instruction - The instruction which is used to inform what it should do when a misfire occurs. Following are the
-#                 instruction can be used:
-#                 For one-off trigger:
-#                     smartPolicy - This is default which will act as `firenow`
-#                     fireNow - Instructs the Scheduler If the Trigger misfires, the trigger wants to be fired
-#                               now by Scheduler.
-#                     ignorePolicy - If the Trigger misfires, instructs the scheduler that the trigger will
-#                                            never be evaluated for a misfire situation and that the scheduler will
-#                                            simply try to fire it as soon as it can, and then update the trigger as
-#                                            if it had fired at the proper time.
-#                 For recurring trigger:
-#                     smartPolicy - This is default. If the repeat count is indefinite, will act as
-#                                   `rescheduleNextWithRemainigCount`, else will act as
-#                                   `rescheduleNowWithExistingRepeatCount`.
-#                      fireNextWithExistingCount - Instructs the scheduler if the trigger misfires,
-#                                                       the trigger wants to be re-scheduled to the next
-#                                                       scheduled time after 'now', and with the repeat count
-#                                                       left unchanged.
-#                      fireNextWithRemainingCount - Instructs the scheduler if the trigger misfires,
-#                                                       the trigger wants to be re-scheduled to the next scheduled time
-#                                                       after 'now', and with the repeat count set to what it would be,
-#                                                       if it had not missed any firings.
-#                      fireNowWithExistingCount - Instructs the scheduler if the trigger misfires,
-#                                                            the trigger wants to be re-scheduled to 'now' with the
-#                                                            repeat count left as-is. If 'now' is after the end-time
-#                                                            the Trigger will not fire again as this does obey
-#                                                            the Trigger end-time.
-#                      fireNowWithRemainingRepeatCount - Instructs the scheduler if the trigger misfires,
-#                                                                      the SimpleTrigger wants to be re-scheduled to
-#                                                                      'now' with the repeat count set to what it
-#                                                                       would be, if it had not missed any firings.
-#                      ignorePolicy - If the trigger misfires, instructs the scheduler that the trigger will
-#                                            never be evaluated for a misfire situation, and that the scheduler will
-#                                            simply try to fire it as soon as it can, and then update the Trigger
-#                                            as if it had fired at the proper time.
-#                 For cron trigger:
-#                     smartPolicy - This is default which will act as `FireAndProceed`
-#                     ignorePolicy - If the Trigger misfires, instructs the scheduler that the trigger will
-#                                            never be evaluated for a misfire situation, and that the scheduler will
-#                                            simply try to fire it as soon as it can, and then update the trigger as
-#                                            if it had fired at the proper time.
-#                     doNothing - Instructs the scheduler If the trigger misfires, the trigger wants to have
-#                                 it's next-fire-time updated to the next time in the schedule after the current time.
-#                     fireAndProceed - Instructs the scheduler If the trigger misfires, the trigger wants to be fired
-#                                      now by Scheduler.
+# + policy - The policy which is used to inform what it should do when a misfire occurs. Following are the
+#            policy can be used:
+#               For timer task:
+#                   One-time task(The task will be run once):
+#                       smartPolicy - This is default which will act as `firenow`
+#                       fireNow - Instructs the Scheduler If the Trigger misfires, the trigger wants to be fired
+#                                 now by Scheduler.
+#                       ignorePolicy - If the Trigger misfires, instructs the scheduler that the trigger will
+#                                      never be evaluated for a misfire situation and that the scheduler will
+#                                      simply try to fire it as soon as it can, and then update the trigger as
+#                                      if it had fired at the proper time.
+#                   Recurrinng task(The task will be run repeatedly):
+#                       smartPolicy - This is default. If the repeat count is indefinite, will act as
+#                                     `rescheduleNextWithRemainigCount`, else will act as
+#                                     `rescheduleNowWithExistingRepeatCount`.
+#                       fireNextWithExistingCount - Instructs the scheduler if the trigger misfires,
+#                                                   the trigger wants to be re-scheduled to the next
+#                                                   scheduled time after 'now', and with the repeat count
+#                                                   left unchanged.
+#                       fireNextWithRemainingCount - Instructs the scheduler if the trigger misfires,
+#                                                    the trigger wants to be re-scheduled to the next scheduled time
+#                                                    after 'now', and with the repeat count set to what it would be,
+#                                                    if it had not missed any firings.
+#                       fireNowWithExistingCount - Instructs the scheduler if the trigger misfires,
+#                                                  the trigger wants to be re-scheduled to 'now' with the
+#                                                  repeat count left as-is. If 'now' is after the end-time
+#                                                  the Trigger will not fire again as this does obey
+#                                                  the Trigger end-time.
+#                       fireNowWithRemainingCount - Instructs the scheduler if the trigger misfires,
+#                                                         the SimpleTrigger wants to be re-scheduled to
+#                                                         'now' with the repeat count set to what it
+#                                                          would be, if it had not missed any firings.
+#                       ignorePolicy - If the trigger misfires, instructs the scheduler that the trigger will
+#                                      never be evaluated for a misfire situation, and that the scheduler will
+#                                      simply try to fire it as soon as it can, and then update the Trigger
+#                                      as if it had fired at the proper time.
+#           For the appointment task:
+#               smartPolicy - This is default which will act as `FireAndProceed`
+#               ignorePolicy - If the Trigger misfires, instructs the scheduler that the trigger will
+#                              never be evaluated for a misfire situation, and that the scheduler will
+#                              simply try to fire it as soon as it can, and then update the trigger as
+#                              if it had fired at the proper time.
+#               doNothing - Instructs the scheduler If the trigger misfires, the trigger wants to have
+#                           it's next-fire-time updated to the next time in the schedule after the current time.
+#               fireAndProceed - Instructs the scheduler If the trigger misfires, the trigger wants to be fired
+#                                now by Scheduler.
 public type MisfireConfiguration record {|
     int thresholdInMillis = 5000;
-    InstructionForOneOffTrigger|InstructionForRecurringTrigger|InstructionForCronTrigger|DefaultInstruction
-    instruction = "smartPolicy";
+    Policy policy = "smartPolicy";
 |};
 
-# Possible types of parameters that can be passed into the `InstructionForOneOffTrigger`.
-public type InstructionForOneOffTrigger "fireNow"|"ignorePolicy";
+# Possible types of parameters that can be passed into the `Policy`.
+public type Policy TimerTaskPolicy|AppointmentTaskPolicy;
 
-# Possible types of parameters that can be passed into the `InstructionForRecurringTrigger`.
-public type InstructionForRecurringTrigger "fireNextWithExistingCount"|"fireNextWithRemainingCount"|
-"fireNowWithExistingCount"|"fireNowWithRemainingRepeatCount"|"ignorePolicy";
+# Possible types of parameters that can be passed into the `TimerTaskPolicy`.
+public type TimerTaskPolicy RecurringTaskPolicy|OneTimeTaskPolicy;
 
-# Possible types of parameters that can be passed into the `InstructionForCronTrigger`.
-public type InstructionForCronTrigger "doNothing"|"ignorePolicy"|"fireAndProceed";
+# Possible types of parameters that can be passed into the `AppointmentTaskPolicy`.
+public type AppointmentTaskPolicy SMART_POLICY|DO_NOTHING|FIRE_AND_PROCEED|IGNORE_POLICY;
 
-# Possible types of parameters that can be passed into the `DefaultInstruction`.
-public type DefaultInstruction "smartPolicy";
+# Possible types of parameters that can be passed into the `RecurringTaskPolicy`.
+public type RecurringTaskPolicy SMART_POLICY|IGNORE_POLICY|FIRE_NEXT_WITH_EXISTING_COUNT|
+FIRE_NEXT_WITH_REMAINING_COUNT|FIRE_NOW_WITH_EXISTING_COUNT|FIRE_NOW_WITH_REMAINING_COUNT;
+
+# Possible types of parameters that can be passed into the `OneTimeTaskPolicy`.
+public type OneTimeTaskPolicy SMART_POLICY|IGNORE_POLICY|FIRE_NOW;
+
+public const string SMART_POLICY = "smartPolicy";
+public const string DO_NOTHING = "doNothing";
+public const string FIRE_AND_PROCEED = "fireAndProceed";
+public const string FIRE_NEXT_WITH_EXISTING_COUNT = "fireNextWithExistingCount";
+public const string FIRE_NEXT_WITH_REMAINING_COUNT = "fireNextWithRemainingCount";
+public const string FIRE_NOW_WITH_EXISTING_COUNT = "fireNowWithExistingCount";
+public const string FIRE_NOW_WITH_REMAINING_COUNT = "fireNowWithRemainingCount";
+public const string FIRE_NOW = "fireNow";
+public const string IGNORE_POLICY = "ignorePolicy";

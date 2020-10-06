@@ -48,8 +48,8 @@ service multipleAttachService = service {
 function multipleAttachmentTest() {
     Person sam = {name: "Sam", age: 29};
     Account acc = {number: 150590, balance: 11.35};
-    TimerConfiguration timerConfiguration = { intervalInMillis: 1000 };
-    Scheduler multipleAttachmentTimer = new ({ triggerConfig: timerConfiguration });
+    TimerConfiguration timerConfiguration = {intervalInMillis: 1000};
+    Scheduler multipleAttachmentTimer = new (timerConfiguration);
     var attachResult = multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
     var startResult = multipleAttachmentTimer.start();
     runtime:sleep(4000);

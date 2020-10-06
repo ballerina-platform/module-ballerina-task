@@ -47,7 +47,7 @@ public class Appointment extends AbstractTask {
 
     private String cronExpression;
     private static int thresholdInMillis;
-    private static String instruction;
+    private static String policy;
 
     /**
      * Creates an Appointment object with provided cron expression.
@@ -59,7 +59,7 @@ public class Appointment extends AbstractTask {
         super();
         this.cronExpression = cronExpression;
         thresholdInMillis = misfireConfig.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        instruction = misfireConfig.getStringValue(TaskConstants.INSTRUCTION).toString();
+        policy = misfireConfig.getStringValue(TaskConstants.POLICY).toString();
     }
 
     /**
@@ -75,7 +75,7 @@ public class Appointment extends AbstractTask {
         super(maxRuns);
         this.cronExpression = cronExpression;
         thresholdInMillis = misfireConfig.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        instruction = misfireConfig.getStringValue(TaskConstants.INSTRUCTION).toString();
+        policy = misfireConfig.getStringValue(TaskConstants.POLICY).toString();
     }
 
     /**
@@ -138,11 +138,11 @@ public class Appointment extends AbstractTask {
 
     private static CronScheduleBuilder buildCronScheduler(String cronExpression) {
         CronScheduleBuilder cronScheduleBuilder = cronSchedule(cronExpression);
-        if (instruction.equalsIgnoreCase(TaskConstants.DO_NOTHING)) {
+        if (policy.equalsIgnoreCase(TaskConstants.DO_NOTHING)) {
             cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
-        } else if (instruction.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
+        } else if (policy.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
             cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-        } else if (instruction.equalsIgnoreCase(TaskConstants.FIRE_AND_PROCEED)) {
+        } else if (policy.equalsIgnoreCase(TaskConstants.FIRE_AND_PROCEED)) {
             cronScheduleBuilder.withMisfireHandlingInstructionFireAndProceed();
         }
         return cronScheduleBuilder;

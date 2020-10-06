@@ -34,7 +34,7 @@ AppointmentConfiguration appointmentConfiguration = {
 
 int count = 0;
 
-listener Listener appointment = new({ triggerConfig: appointmentConfiguration });
+listener Listener appointment = new(appointmentConfiguration);
 
 function getCount() returns int {
     return count;
@@ -54,7 +54,7 @@ TimerConfiguration timerConfig = {
 
 int timerCount = 0;
 
-listener Listener timer = new({ triggerConfig: timerConfig });
+listener Listener timer = new(timerConfig);
 
 function getTimerCount() returns int {
     return timerCount;
@@ -68,7 +68,7 @@ service timerService on timer {
 }
 
 // Service for the timer task with an inline config
-listener Listener inLineTimer = new({ triggerConfig: { intervalInMillis: 2000, initialDelayInMillis: 1000 }});
+listener Listener inLineTimer = new({ intervalInMillis: 2000, initialDelayInMillis: 1000 });
 
 int inLineTimerConfigCount = 0;
 
@@ -90,7 +90,7 @@ TimerConfiguration timerConfigForWithLimitedNumberOfRuns = {
 
 int countForWithLimitedNumberOfRuns = 0;
 
-listener Listener timerForWithLimitedNumberOfRuns = new({ triggerConfig: timerConfigForWithLimitedNumberOfRuns });
+listener Listener timerForWithLimitedNumberOfRuns = new(timerConfigForWithLimitedNumberOfRuns);
 
 function getCountForWithLimitedNumberOfRuns() returns int {
     return countForWithLimitedNumberOfRuns;
@@ -109,7 +109,7 @@ TimerConfiguration configWithOutDelay = {
 
 int countForConfigWithOutDelay = 0;
 
-listener Listener timerForConfigWithOutDelay = new({ triggerConfig: configWithOutDelay });
+listener Listener timerForConfigWithOutDelay = new(configWithOutDelay);
 
 function getCountForConfigWithOutDelay() returns int {
     return countForConfigWithOutDelay;

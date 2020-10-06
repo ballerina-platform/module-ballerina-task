@@ -123,33 +123,32 @@ public class Utils {
         }
     }
 
-    public static Timer processTimer(BMap<BString, Object> configurations) throws SchedulingException {
+    public static Timer processTimer(BMap<BString, Object> configurations, BMap<BString, Object> misfireConfig)
+            throws SchedulingException {
         Timer task;
-        BMap<BString, Object> triggerConfig = (BMap<BString, Object>) configurations.getMapValue(TRIGGER_CONFIG);
-        long interval = triggerConfig.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
-        long delay = triggerConfig.getIntValue(TaskConstants.FIELD_DELAY).intValue();
-        BMap<BString, Object> misfireConfig = (BMap<BString, Object>) configurations.getMapValue(MISFIRE_CONFIG);
+        long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
+        long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
 
-        if (triggerConfig.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
+        if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
             task = new Timer(delay, interval, misfireConfig);
         } else {
-            long noOfRuns = triggerConfig.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
+            long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
             task = new Timer(delay, interval, misfireConfig, noOfRuns);
         }
         return task;
     }
 
-    public static Appointment processAppointment(BMap<BString, Object> configurations) throws SchedulingException {
+    public static Appointment processAppointment(BMap<BString, Object> configurations,
+                                                 BMap<BString, Object> misfireConfig)
+            throws SchedulingException {
         Appointment appointment;
-        BMap<BString, Object> triggerConfig = (BMap<BString, Object>) configurations.getMapValue(TRIGGER_CONFIG);
-        Object appointmentDetails = triggerConfig.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
+        Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
         String cronExpression = getCronExpressionFromAppointmentRecord(appointmentDetails);
-        BMap<BString, Object> misfireConfig = (BMap<BString, Object>) configurations.getMapValue(MISFIRE_CONFIG);
 
-        if (triggerConfig.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
+        if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
             appointment = new Appointment(cronExpression, misfireConfig);
         } else {
-            long noOfRuns = triggerConfig.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
+            long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
             appointment = new Appointment(cronExpression, misfireConfig, noOfRuns);
         }
         return appointment;

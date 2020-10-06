@@ -43,7 +43,7 @@ public class Timer extends AbstractTask {
 
     private long interval, delay;
     private static int thresholdInMillis;
-    private static String instruction;
+    private static String policy;
 
     /**
      * Creates a Timer object.
@@ -58,7 +58,7 @@ public class Timer extends AbstractTask {
         this.interval = interval;
         this.delay = delay;
         thresholdInMillis = misfireConfig.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        instruction = misfireConfig.getStringValue(TaskConstants.INSTRUCTION).toString();
+        policy = misfireConfig.getStringValue(TaskConstants.POLICY).toString();
     }
 
     /**
@@ -76,7 +76,7 @@ public class Timer extends AbstractTask {
         this.interval = interval;
         this.delay = delay;
         thresholdInMillis = misfireConfig.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        instruction = misfireConfig.getStringValue(TaskConstants.INSTRUCTION).toString();
+        policy = misfireConfig.getStringValue(TaskConstants.POLICY).toString();
     }
 
     /**
@@ -170,9 +170,9 @@ public class Timer extends AbstractTask {
             // Hence we subtract 1 from the maxRuns to get the repeat count.
             simpleScheduleBuilder.withRepeatCount((int) (maxRuns - 1));
             if (maxRuns == 1) {
-                if (instruction.equalsIgnoreCase(TaskConstants.FIRE_NOW)) {
+                if (policy.equalsIgnoreCase(TaskConstants.FIRE_NOW)) {
                     simpleScheduleBuilder.withMisfireHandlingInstructionFireNow();
-                } else if (instruction.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
+                } else if (policy.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
                     simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
                 }
             } else {
@@ -186,15 +186,15 @@ public class Timer extends AbstractTask {
     }
 
     private static void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder) {
-        if (instruction.equalsIgnoreCase(TaskConstants.NEXT_WITH_EXISTING_COUNT)) {
+        if (policy.equalsIgnoreCase(TaskConstants.NEXT_WITH_EXISTING_COUNT)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
-        } else if (instruction.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
+        } else if (policy.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-        } else if (instruction.equalsIgnoreCase(TaskConstants.NEXT_WITH_REMAINING_COUNT)) {
+        } else if (policy.equalsIgnoreCase(TaskConstants.NEXT_WITH_REMAINING_COUNT)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
-        } else if (instruction.equalsIgnoreCase(TaskConstants.NOW_WITH_EXISTING_COUNT)) {
+        } else if (policy.equalsIgnoreCase(TaskConstants.NOW_WITH_EXISTING_COUNT)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
-        } else if (instruction.equalsIgnoreCase(TaskConstants.NOW_WITH_REMAINING_COUNT)) {
+        } else if (policy.equalsIgnoreCase(TaskConstants.NOW_WITH_REMAINING_COUNT)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
         }
     }

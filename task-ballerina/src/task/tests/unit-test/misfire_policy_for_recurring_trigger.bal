@@ -28,13 +28,8 @@ service misfireService2 = service {
 @test:Config {}
 function testRecurringTriggerWithExistingRepeatCountMisfirePolicy() {
 
-    Scheduler taskTimer = new ({ triggerConfig: {
-                                        intervalInMillis: 3000,
-                                        noOfRecurrences: 5
-                                  },
-                                  misfireConfig: {
-                                        instruction: "fireNowWithExistingRepeatCount"
-                                  }});
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 5 },
+                               { policy: "fireNowWithExistingCount" });
     var attachResult = taskTimer.attach(misfireService2);
     if (attachResult is SchedulerError) {
         panic attachResult;
@@ -73,13 +68,8 @@ service misfireService3 = service {
 
 @test:Config {}
 function testRecurringTriggerWithNowWithRemainingRepeatCountMisfirePolicy() {
-    Scheduler taskTimer = new ({ triggerConfig: {
-                                    intervalInMillis: 3000,
-                                    noOfRecurrences: 7
-                                  },
-                                  misfireConfig: {
-                                    instruction: "fireNowWithRemainingRepeatCount"
-                                  }});
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7},
+                               { policy: "fireNowWithRemainingCount" });
     var attachResult = taskTimer.attach(misfireService3);
     if (attachResult is SchedulerError) {
         panic attachResult;
@@ -117,13 +107,8 @@ service misfireService4 = service {
 
 @test:Config {}
 function testRecurringTriggerWithNextWithExistingCountMisfirePolicy() {
-    Scheduler taskTimer = new ({ triggerConfig: {
-                                     intervalInMillis: 3000,
-                                     noOfRecurrences: 7
-                                  },
-                                  misfireConfig: {
-                                      instruction: "fireNextWithExistingCount"
-                                  }});
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 },
+                               { policy: "fireNextWithExistingCount" });
     var attachResult = taskTimer.attach(misfireService4);
     if (attachResult is SchedulerError) {
         panic attachResult;
@@ -160,13 +145,8 @@ service misfireService5 = service {
 };
 @test:Config {}
 function testRecurringTriggerWithNextWithRemainigCountMisfirePolicy() {
-    Scheduler taskTimer = new ({ triggerConfig: {
-                                     intervalInMillis: 3000,
-                                     noOfRecurrences: 7
-                                 },
-                                 misfireConfig: {
-                                     instruction: "fireNextWithRemainingCount"
-                                 }});
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 },
+                               { policy: "fireNextWithRemainingCount" });
     var attachResult = taskTimer.attach(misfireService5);
     if (attachResult is SchedulerError) {
         panic attachResult;
@@ -205,7 +185,7 @@ service misfireService11 = service {
 @test:Config {}
 function testRecurringTriggerWithSmartPolicyMisfirePolicy() {
 
-    Scheduler taskTimer = new ({ triggerConfig: {intervalInMillis: 3000, noOfRecurrences: 5 }});
+    Scheduler taskTimer = new ({intervalInMillis: 3000, noOfRecurrences: 5 });
     var attachResult = taskTimer.attach(misfireService11);
     if (attachResult is SchedulerError) {
         panic attachResult;

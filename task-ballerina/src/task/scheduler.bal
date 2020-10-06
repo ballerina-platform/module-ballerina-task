@@ -22,8 +22,9 @@ public class Scheduler {
     # a configuration error.
     #
     # + configuration - The configurations associated with the `task:Scheduler`
-    public isolated function init(TaskConfiguration configuration) {
-        self.taskListener = new(configuration);
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
+                                  MisfireConfiguration misfireConfiguration = {}) {
+        self.taskListener = new(configuration, misfireConfiguration);
     }
 
     # Attaches the provided `service` to the task.

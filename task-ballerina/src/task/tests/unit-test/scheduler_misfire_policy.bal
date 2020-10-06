@@ -28,13 +28,8 @@ service misfireService1 = service {
 @test:Config {}
 function testTaskTimerWithFireNowMisfirePolicy() {
 
-    Scheduler taskTimer = new ({ triggerConfig: {
-                                     intervalInMillis: 3000,
-                                     noOfRecurrences: 1
-                                 },
-                                 misfireConfig: {
-                                     instruction: "fireNow"
-                                 }});
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1},
+                               { policy: "fireNow" });
     var attachResult = taskTimer.attach(misfireService1);
     if (attachResult is SchedulerError) {
         panic attachResult;
@@ -66,13 +61,8 @@ service misfireService8 = service {
 };
 @test:Config {}
 function testTaskTimerWithIgnoreMisfiresPoilcyMisfirePolicy() {
-    Scheduler taskTimer = new ({ triggerConfig: {
-                                     intervalInMillis: 3000,
-                                     noOfRecurrences: 1
-                                  },
-                                  misfireConfig: {
-                                     instruction: "ignorePoilcy"
-                                  }});
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1 },
+                               { policy: "ignorePolicy" });
     var attachResult = taskTimer.attach(misfireService8);
     if (attachResult is SchedulerError) {
         panic attachResult;
@@ -107,7 +97,7 @@ service misfireService9 = service {
 @test:Config {}
 function testTaskTimerWithSmartPolicyMisfirePolicy() {
 
-    Scheduler taskTimer = new ({ triggerConfig: {intervalInMillis: 3000, noOfRecurrences: 1}});
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1});
     var attachResult = taskTimer.attach(misfireService9);
     if (attachResult is SchedulerError) {
         panic attachResult;

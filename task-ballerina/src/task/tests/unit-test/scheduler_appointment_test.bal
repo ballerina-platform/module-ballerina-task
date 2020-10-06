@@ -54,7 +54,7 @@ service appointmentService3 = service {
 @test:Config {}
 function testSchedulerWithMultipleServices() {
     string cronExpression = "* * * * * ? *";
-    Scheduler appointment = new ({ triggerConfig: { appointmentDetails: cronExpression }});
+    Scheduler appointment = new ({appointmentDetails: cronExpression});
     checkpanic appointment.attach(appointmentService1);
     checkpanic appointment.attach(appointmentService2);
     checkpanic appointment.start();
@@ -71,7 +71,7 @@ function testLimitedNumberOfRuns() {
         appointmentDetails: cronExpression,
         noOfRecurrences: 3
     };
-    Scheduler appointmentWithLimitedRuns = new ({ triggerConfig: configuration });
+    Scheduler appointmentWithLimitedRuns = new (configuration);
     var result = appointmentWithLimitedRuns.attach(appointmentService3);
     checkpanic appointmentWithLimitedRuns.start();
     runtime:sleep(5000);

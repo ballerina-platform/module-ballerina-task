@@ -22,33 +22,41 @@ public class Listener {
     *'object:Listener;
     boolean started = false;
 
-    private TaskConfiguration listenerConfiguration;
+    private TimerConfiguration|AppointmentConfiguration listenerConfiguration;
+    private MisfireConfiguration misfireConfiguration;
 
     # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a configuration
     # error.
     #
-    # + configuration - The configurations associated with the `task:Listener`
-    public isolated function init(TaskConfiguration configuration) {
-        var triggerConfig = configuration["triggerConfig"];
-        var misfireConfig = configuration["misfireConfig"];
-        var instruction = misfireConfig["instruction"];
-        if (triggerConfig is TimerConfiguration) {
-            var noOfRecurrences = triggerConfig["noOfRecurrences"];
-            if (noOfRecurrences is int && noOfRecurrences == 1 && !(instruction is InstructionForOneOffTrigger ||
-                instruction is DefaultInstruction)) {
-                panic ListenerError("Wrong misfire instruction has given for off-one trigger");
-            } else if (!(noOfRecurrences == 1) && !(instruction is InstructionForRecurringTrigger ||
-                       instruction is DefaultInstruction)) {
-                panic ListenerError("Wrong misfire instruction has given for recurring trigger");
+    # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
+    #                   `task:Listener` behavior
+    # + misfireConfiguration - The `task:MisfireConfiguration` record which is used to configure the misfire situations
+    #                          of the scheduler
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
+                                  MisfireConfiguration misfireConfiguration = {}) {
+        var noOfRecurrences = configuration["noOfRecurrences"];
+        var policy = misfireConfiguration.policy;
+        if (configuration is TimerConfiguration) {
+            if (noOfRecurrences is int) {
+                if (noOfRecurrences == 1) {
+                    if (!(policy is OneTimeTaskPolicy)) {
+                        panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks");
+                    }
+
+                } else {
+                    if (!(policy is RecurringTaskPolicy)) {
+                        panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks");
+                    }
+                }
             }
-            if (triggerConfig["initialDelayInMillis"] == ()) {
-                triggerConfig.initialDelayInMillis = triggerConfig["intervalInMillis"];
+            if (configuration["initialDelayInMillis"] == ()) {
+                configuration.initialDelayInMillis = configuration.intervalInMillis;
             }
-            configuration.triggerConfig = triggerConfig;
-        } else if (instruction is InstructionForRecurringTrigger || instruction is InstructionForOneOffTrigger) {
-            panic ListenerError("Wrong misfire instruction has given for cron trigger");
+        } else if (!(policy is AppointmentTaskPolicy)) {
+            panic ListenerError("Wrong misfire policy has given for the appointment task");
         }
         self.listenerConfiguration = configuration;
+        self.misfireConfiguration = misfireConfiguration;
         var result = initExternal(self);
         if (result is ListenerError) {
             panic result;

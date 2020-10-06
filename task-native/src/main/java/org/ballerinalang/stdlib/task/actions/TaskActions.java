@@ -29,7 +29,6 @@ import org.ballerinalang.stdlib.task.objects.Task;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 
 import static org.ballerinalang.stdlib.task.utils.TaskConstants.NATIVE_DATA_TASK_OBJECT;
-import static org.ballerinalang.stdlib.task.utils.TaskConstants.TRIGGER_CONFIG;
 import static org.ballerinalang.stdlib.task.utils.Utils.createTaskError;
 import static org.ballerinalang.stdlib.task.utils.Utils.processAppointment;
 import static org.ballerinalang.stdlib.task.utils.Utils.processTimer;
@@ -120,14 +119,15 @@ public class TaskActions {
     @SuppressWarnings("unchecked")
     public static Object init(BObject taskListener) {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
-        BMap<BString, Object> triggerConfig = (BMap<BString, Object>) configurations.getMapValue(TRIGGER_CONFIG);
-        String configurationTypeName = triggerConfig.getType().getName();
+        BMap<BString, Object> misfireConfigurations = taskListener.getMapValue(TaskConstants.
+                MEMBER_MISFIRE_CONFIGURATION);
+        String configurationTypeName = configurations.getType().getName();
         Task task;
         try {
             if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
-                task = processTimer(configurations);
+                task = processTimer(configurations, misfireConfigurations);
             } else { // Record type validates at the compile time; Hence we do not need exhaustive validation.
-                task = processAppointment(configurations);
+                task = processAppointment(configurations, misfireConfigurations);
             }
             taskListener.addNativeData(NATIVE_DATA_TASK_OBJECT, task);
         } catch (SchedulingException e) {

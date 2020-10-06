@@ -42,6 +42,7 @@ public class TaskConstants {
     // Member names used in records
     public static final BString MEMBER_LISTENER_CONFIGURATION = BStringUtils.fromString("listenerConfiguration");
     public static final BString MEMBER_APPOINTMENT_DETAILS = BStringUtils.fromString("appointmentDetails");
+    public static final BString MEMBER_MISFIRE_CONFIGURATION = BStringUtils.fromString("misfireConfiguration");
 
     // Fields used in TaskConfiguration
     public static final BString TRIGGER_CONFIG = BStringUtils.fromString("triggerConfig");
@@ -53,13 +54,13 @@ public class TaskConstants {
     public static final String NEXT_WITH_EXISTING_COUNT = "fireNextWithExistingCount";
     public static final String NEXT_WITH_REMAINING_COUNT = "fireNextWithRemainingCount";
     public static final String NOW_WITH_EXISTING_COUNT = "fireNowWithExistingCount";
-    public static final String NOW_WITH_REMAINING_COUNT = "fireNowWithRemainingRepeatCount";
+    public static final String NOW_WITH_REMAINING_COUNT = "fireNowWithRemainingCount";
     public static final String DO_NOTHING = "doNothing";
     public static final String FIRE_AND_PROCEED = "fireAndProceed";
 
     // Fields used in MisfireConfiguration
     public static final BString THRESHOLD_IN_MILLIS = BStringUtils.fromString("thresholdInMillis");
-    public static final BString INSTRUCTION = BStringUtils.fromString("instruction");
+    public static final BString POLICY = BStringUtils.fromString("policy");
 
     // Allowed resource function names
     public static final String RESOURCE_ON_TRIGGER = "onTrigger";
