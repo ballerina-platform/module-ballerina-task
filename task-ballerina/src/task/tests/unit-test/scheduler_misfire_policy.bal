@@ -71,7 +71,7 @@ function testTaskTimerWithIgnoreMisfiresPoilcyMisfirePolicy() {
                                      noOfRecurrences: 1
                                   },
                                   misfireConfig: {
-                                     instruction: "ignoreMisfiresPoilcy"
+                                     instruction: "ignorePoilcy"
                                   }});
     var attachResult = taskTimer.attach(misfireService8);
     if (attachResult is SchedulerError) {

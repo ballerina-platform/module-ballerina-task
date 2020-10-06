@@ -138,12 +138,11 @@ public class Appointment extends AbstractTask {
 
     private static CronScheduleBuilder buildCronScheduler(String cronExpression) {
         CronScheduleBuilder cronScheduleBuilder = cronSchedule(cronExpression);
-        if (instruction.equalsIgnoreCase("doNothing")) {
+        if (instruction.equalsIgnoreCase(TaskConstants.DO_NOTHING)) {
             cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
-
-        } else if (instruction.equalsIgnoreCase("ignoreMisfiresPolicy")) {
+        } else if (instruction.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
             cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-        } else if (instruction.equalsIgnoreCase("fireAndProceed")) {
+        } else if (instruction.equalsIgnoreCase(TaskConstants.FIRE_AND_PROCEED)) {
             cronScheduleBuilder.withMisfireHandlingInstructionFireAndProceed();
         }
         return cronScheduleBuilder;

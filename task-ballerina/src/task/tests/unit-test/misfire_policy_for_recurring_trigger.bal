@@ -33,7 +33,7 @@ function testRecurringTriggerWithExistingRepeatCountMisfirePolicy() {
                                         noOfRecurrences: 5
                                   },
                                   misfireConfig: {
-                                        instruction: "rescheduleNowWithExistingRepeatCount"
+                                        instruction: "fireNowWithExistingRepeatCount"
                                   }});
     var attachResult = taskTimer.attach(misfireService2);
     if (attachResult is SchedulerError) {
@@ -78,7 +78,7 @@ function testRecurringTriggerWithNowWithRemainingRepeatCountMisfirePolicy() {
                                     noOfRecurrences: 7
                                   },
                                   misfireConfig: {
-                                    instruction: "handlingInstructionNowWithRemainingRepeatCount"
+                                    instruction: "fireNowWithRemainingRepeatCount"
                                   }});
     var attachResult = taskTimer.attach(misfireService3);
     if (attachResult is SchedulerError) {
@@ -122,7 +122,7 @@ function testRecurringTriggerWithNextWithExistingCountMisfirePolicy() {
                                      noOfRecurrences: 7
                                   },
                                   misfireConfig: {
-                                      instruction: "rescheduleNextWithExistingCount"
+                                      instruction: "fireNextWithExistingCount"
                                   }});
     var attachResult = taskTimer.attach(misfireService4);
     if (attachResult is SchedulerError) {
@@ -165,7 +165,7 @@ function testRecurringTriggerWithNextWithRemainigCountMisfirePolicy() {
                                      noOfRecurrences: 7
                                  },
                                  misfireConfig: {
-                                     instruction: "rescheduleNextWithRemainingCount"
+                                     instruction: "fireNextWithRemainingCount"
                                  }});
     var attachResult = taskTimer.attach(misfireService5);
     if (attachResult is SchedulerError) {

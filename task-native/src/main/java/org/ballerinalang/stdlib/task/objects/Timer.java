@@ -170,9 +170,9 @@ public class Timer extends AbstractTask {
             // Hence we subtract 1 from the maxRuns to get the repeat count.
             simpleScheduleBuilder.withRepeatCount((int) (maxRuns - 1));
             if (maxRuns == 1) {
-                if (instruction.equalsIgnoreCase("fireNow")) {
+                if (instruction.equalsIgnoreCase(TaskConstants.FIRE_NOW)) {
                     simpleScheduleBuilder.withMisfireHandlingInstructionFireNow();
-                } else if (instruction.equalsIgnoreCase("ignoreMisfiresPolicy")) {
+                } else if (instruction.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
                     simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
                 }
             } else {
@@ -186,15 +186,15 @@ public class Timer extends AbstractTask {
     }
 
     private static void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder) {
-        if (instruction.equalsIgnoreCase("rescheduleNextWithExistingCount")) {
+        if (instruction.equalsIgnoreCase(TaskConstants.NEXT_WITH_EXISTING_COUNT)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
-        } else if (instruction.equalsIgnoreCase("ignoreMisfiresPolicy")) {
+        } else if (instruction.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-        } else if (instruction.equalsIgnoreCase("rescheduleNextWithRemainingCount")) {
+        } else if (instruction.equalsIgnoreCase(TaskConstants.NEXT_WITH_REMAINING_COUNT)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
-        } else if (instruction.equalsIgnoreCase("rescheduleNowWithExistingRepeatCount")) {
+        } else if (instruction.equalsIgnoreCase(TaskConstants.NOW_WITH_EXISTING_COUNT)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
-        } else if (instruction.equalsIgnoreCase("handlingInstructionNowWithRemainingRepeatCount")) {
+        } else if (instruction.equalsIgnoreCase(TaskConstants.NOW_WITH_REMAINING_COUNT)) {
             simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
         }
     }

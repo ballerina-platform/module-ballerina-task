@@ -47,6 +47,16 @@ public class TaskConstants {
     public static final BString TRIGGER_CONFIG = BStringUtils.fromString("triggerConfig");
     public static final BString MISFIRE_CONFIG = BStringUtils.fromString("misfireConfig");
 
+    // Misfire instructions
+    public static final String FIRE_NOW = "fireNow";
+    public static final String IGNORE_POLICY = "ignorePolicy";
+    public static final String NEXT_WITH_EXISTING_COUNT = "fireNextWithExistingCount";
+    public static final String NEXT_WITH_REMAINING_COUNT = "fireNextWithRemainingCount";
+    public static final String NOW_WITH_EXISTING_COUNT = "fireNowWithExistingCount";
+    public static final String NOW_WITH_REMAINING_COUNT = "fireNowWithRemainingRepeatCount";
+    public static final String DO_NOTHING = "doNothing";
+    public static final String FIRE_AND_PROCEED = "fireAndProceed";
+
     // Fields used in MisfireConfiguration
     public static final BString THRESHOLD_IN_MILLIS = BStringUtils.fromString("thresholdInMillis");
     public static final BString INSTRUCTION = BStringUtils.fromString("instruction");
