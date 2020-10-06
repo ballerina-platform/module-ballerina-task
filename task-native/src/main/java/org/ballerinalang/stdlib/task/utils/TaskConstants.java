@@ -44,10 +44,6 @@ public class TaskConstants {
     public static final BString MEMBER_APPOINTMENT_DETAILS = BStringUtils.fromString("appointmentDetails");
     public static final BString MEMBER_MISFIRE_CONFIGURATION = BStringUtils.fromString("misfireConfiguration");
 
-    // Fields used in TaskConfiguration
-    public static final BString TRIGGER_CONFIG = BStringUtils.fromString("triggerConfig");
-    public static final BString MISFIRE_CONFIG = BStringUtils.fromString("misfireConfig");
-
     // Misfire instructions
     public static final String FIRE_NOW = "fireNow";
     public static final String IGNORE_POLICY = "ignorePolicy";

@@ -32,8 +32,6 @@ import org.ballerinalang.stdlib.task.objects.Timer;
 
 import java.util.Objects;
 
-import static org.ballerinalang.stdlib.task.utils.TaskConstants.MISFIRE_CONFIG;
-import static org.ballerinalang.stdlib.task.utils.TaskConstants.TRIGGER_CONFIG;
 import static org.quartz.CronExpression.isValidExpression;
 
 /**

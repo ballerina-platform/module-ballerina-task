@@ -53,7 +53,7 @@ public class TaskManager {
             this.scheduler = stdSchedulerFactory.getScheduler();
             this.scheduler.start();
         } catch (SchedulerException e) {
-            throw new SchedulingException("Cannot start the Task Listener/Scheduler." + e.toString(), e);
+            throw new SchedulingException("Cannot start the Task Listener/Scheduler.", e);
         }
         return this.scheduler;
     }
