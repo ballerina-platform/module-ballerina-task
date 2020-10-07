@@ -22,7 +22,7 @@ public class Scheduler {
     # a configuration error.
     #
     # + configuration - The configurations associated with the `task:Scheduler`
-    # + misfireConfiguration - The `task:MisfireConfiguration` record which is used to configure the misfire situations
+    # + misfireConfiguration - The `task:MisfireConfiguration` record, which is used to configure the misfire situations
     #                          of the scheduler
     public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
                                   MisfireConfiguration misfireConfiguration = {}) {

@@ -103,7 +103,7 @@ public type AppointmentData record {|
 #                              if it had fired at the proper time.
 #               doNothing - Instructs the scheduler if the trigger misfires. Then, the trigger wants to have
 #                           it's next-fire-time updated to the next time in the schedule after the current time.
-#               fireAndProceed - Instructs the scheduler If the trigger misfires, the trigger wants to be fired
+#               fireAndProceed - Instructs the scheduler if the trigger misfires. Then, the trigger wants to be fired
 #                                now by the scheduler.
 public type MisfireConfiguration record {|
     int thresholdInMillis = 5000;
