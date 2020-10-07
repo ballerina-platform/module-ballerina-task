@@ -26,7 +26,7 @@ service misfireService1 = service {
 };
 
 @test:Config {}
-function testTaskTimerWithFireNowMisfirePolicy() {
+function testFireNowWithService1() {
 
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1},
                                { policy: "fireNow" });
@@ -60,7 +60,7 @@ service misfireService8 = service {
     }
 };
 @test:Config {}
-function testTaskTimerWithIgnoreMisfiresPoilcyMisfirePolicy() {
+function testIgnoreMisfiresPoilcyWithService8() {
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1 },
                                { policy: "ignorePolicy" });
     var attachResult = taskTimer.attach(misfireService8);
@@ -95,7 +95,7 @@ service misfireService9 = service {
 };
 
 @test:Config {}
-function testTaskTimerWithSmartPolicyMisfirePolicy() {
+function testSmartPolicyWithService9() {
 
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1});
     var attachResult = taskTimer.attach(misfireService9);

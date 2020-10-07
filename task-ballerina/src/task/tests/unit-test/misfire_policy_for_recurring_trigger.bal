@@ -26,7 +26,7 @@ service misfireService2 = service {
 };
 
 @test:Config {}
-function testRecurringTriggerWithExistingRepeatCountMisfirePolicy() {
+function testExistingRepeatCountWithService2() {
 
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 5 },
                                { policy: "fireNowWithExistingCount" });
@@ -67,7 +67,7 @@ service misfireService3 = service {
 };
 
 @test:Config {}
-function testRecurringTriggerWithNowWithRemainingRepeatCountMisfirePolicy() {
+function testNowWithRemainingRepeatCountWithService3() {
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7},
                                { policy: "fireNowWithRemainingCount" });
     var attachResult = taskTimer.attach(misfireService3);
@@ -106,7 +106,7 @@ service misfireService4 = service {
 };
 
 @test:Config {}
-function testRecurringTriggerWithNextWithExistingCountMisfirePolicy() {
+function testNextWithExistingCountWithService4() {
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 },
                                { policy: "fireNextWithExistingCount" });
     var attachResult = taskTimer.attach(misfireService4);
@@ -144,7 +144,7 @@ service misfireService5 = service {
     }
 };
 @test:Config {}
-function testRecurringTriggerWithNextWithRemainigCountMisfirePolicy() {
+function testNextWithRemainigCountWithService5() {
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 },
                                { policy: "fireNextWithRemainingCount" });
     var attachResult = taskTimer.attach(misfireService5);
@@ -183,7 +183,7 @@ service misfireService11 = service {
 };
 
 @test:Config {}
-function testRecurringTriggerWithSmartPolicyMisfirePolicy() {
+function testSmartPolicyWithService11() {
 
     Scheduler taskTimer = new ({intervalInMillis: 3000, noOfRecurrences: 5 });
     var attachResult = taskTimer.attach(misfireService11);

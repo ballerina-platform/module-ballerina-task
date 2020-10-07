@@ -26,7 +26,7 @@ service misfireService6 = service {
 };
 
 @test:Config {}
-function testCronTriggerWithfireAndProceedMisfirePolicy() {
+function testFireAndProceedWithService6() {
 
     Scheduler taskTimer = new ({ appointmentDetails: "* * * * * ? *", noOfRecurrences: 8 },
                                { policy: "fireAndProceed" });
@@ -64,7 +64,7 @@ service misfireService7 = service {
 };
 
 @test:Config {}
-function testCronTriggerWithdoNothingMisfirePolicy() {
+function testdoNothingWithService7() {
 
     Scheduler taskTimer = new ({ appointmentDetails: "* * * * * ? *", noOfRecurrences: 5 },
                                { policy: "doNothing" });
