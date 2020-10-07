@@ -50,10 +50,10 @@ public class Appointment extends AbstractTask {
     private static String policy;
 
     /**
-     * Creates an Appointment object with provided cron expression.
+     * Creates an Appointment object with provided CRON expression.
      *
-     * @param cronExpression Cron expression for which the Appointment triggers.
-     * @throws SchedulingException When initializing this Appointment is failed.
+     * @param cronExpression The CRON expression for which the Appointment triggers.
+     * @throws SchedulingException When initializing, this Appointment is failed.
      */
     public Appointment(String cronExpression, BMap<BString, Object> misfireConfig) throws SchedulingException {
         super();

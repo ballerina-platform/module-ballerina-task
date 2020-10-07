@@ -166,8 +166,8 @@ public class Timer extends AbstractTask {
         SimpleScheduleBuilder simpleScheduleBuilder = simpleSchedule()
                 .withIntervalInMilliseconds(interval);
         if (maxRuns > 0) {
-            // Quartz uses number of repeats, but we count total number of runs.
-            // Hence we subtract 1 from the maxRuns to get the repeat count.
+            // Quartz uses number of repeats but total number of runs are counted here.
+            // Hence, 1 is subtracted from the `maxRuns` to get the repeat count.
             simpleScheduleBuilder.withRepeatCount((int) (maxRuns - 1));
             if (maxRuns == 1) {
                 if (policy.equalsIgnoreCase(TaskConstants.FIRE_NOW)) {

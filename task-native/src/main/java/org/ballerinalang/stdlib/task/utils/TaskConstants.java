@@ -54,11 +54,11 @@ public class TaskConstants {
     public static final String DO_NOTHING = "doNothing";
     public static final String FIRE_AND_PROCEED = "fireAndProceed";
 
-    // Fields used in MisfireConfiguration
+    // Fields used in the `MisfireConfiguration`.
     public static final BString THRESHOLD_IN_MILLIS = BStringUtils.fromString("thresholdInMillis");
     public static final BString POLICY = BStringUtils.fromString("policy");
 
-    // Allowed resource function names
+    // Allowed resource function names.
     public static final String RESOURCE_ON_TRIGGER = "onTrigger";
 
     // Common field for TimerConfiguration and AppointmentConfiguration
@@ -92,6 +92,6 @@ public class TaskConstants {
     public static final String QUARTZ_THREAD_COUNT = "org.quartz.threadPool.threadCount";
     public static final String QUARTZ_MISFIRE_THRESHOLD = "org.quartz.jobStore.misfireThreshold";
 
-    // Quartz property values
+    // Quartz property values.
     public static final String QUARTZ_THREAD_COUNT_VALUE = "10";
 }

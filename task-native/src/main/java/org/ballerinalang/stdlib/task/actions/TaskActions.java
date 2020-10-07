@@ -126,7 +126,7 @@ public class TaskActions {
         try {
             if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
                 task = processTimer(configurations, misfireConfigurations);
-            } else { // Record type validates at the compile time; Hence we do not need exhaustive validation.
+            } else { // Record type validates at the compile time. Hence, exhaustive validation is not needed.
                 task = processAppointment(configurations, misfireConfigurations);
             }
             taskListener.addNativeData(NATIVE_DATA_TASK_OBJECT, task);

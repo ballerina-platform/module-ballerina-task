@@ -30,7 +30,7 @@ public class Listener {
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #                   `task:Listener` behavior
-    # + misfireConfiguration - The `task:MisfireConfiguration` record which is used to configure the misfire situations
+    # + misfireConfiguration - The `task:MisfireConfiguration` record, which is used to configure the misfire situations
     #                          of the scheduler
     public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
                                   MisfireConfiguration misfireConfiguration = {}) {
@@ -40,12 +40,12 @@ public class Listener {
             if (noOfRecurrences is int) {
                 if (noOfRecurrences == 1) {
                     if (!(policy is OneTimeTaskPolicy)) {
-                        panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks");
+                        panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
                     }
 
                 } else {
                     if (!(policy is RecurringTaskPolicy)) {
-                        panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks");
+                        panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
                     }
                 }
             }
@@ -53,7 +53,7 @@ public class Listener {
                 configuration.initialDelayInMillis = configuration.intervalInMillis;
             }
         } else if (!(policy is AppointmentTaskPolicy)) {
-            panic ListenerError("Wrong misfire policy has given for the appointment task");
+            panic ListenerError("Wrong misfire policy has given for the appointment task.");
         }
         self.listenerConfiguration = configuration;
         self.misfireConfiguration = misfireConfiguration;
