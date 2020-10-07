@@ -45,15 +45,15 @@ service multipleAttachService = service {
 };
 
 @test:Config {}
-function multipleAttachmentTest() {
+function multipleAttachmentTest() returns error? {
     Person sam = {name: "Sam", age: 29};
     Account acc = {number: 150590, balance: 11.35};
     TimerConfiguration timerConfiguration = {intervalInMillis: 1000};
     Scheduler multipleAttachmentTimer = new (timerConfiguration);
-    var attachResult = multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
-    var startResult = multipleAttachmentTimer.start();
+    check multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
+    check multipleAttachmentTimer.start();
     runtime:sleep(4000);
-    checkpanic multipleAttachmentTimer.stop();
+    check multipleAttachmentTimer.stop();
     test:assertEquals(output, "Name: Sam Age: 29 A/C: 150590 Balance: 11.35",
             msg = "Response payload mismatched");
 }

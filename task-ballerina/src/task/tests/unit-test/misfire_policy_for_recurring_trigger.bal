@@ -26,36 +26,24 @@ service misfireService2 = service {
 };
 
 @test:Config {}
-function testExistingRepeatCountWithService2() {
+function testExistingRepeatCountWithService2() returns error? {
 
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 5 },
                                { policy: "fireNowWithExistingCount" });
-    var attachResult = taskTimer.attach(misfireService2);
-    if (attachResult is SchedulerError) {
-        panic attachResult;
-    }
-    var startResult = taskTimer.start();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    check taskTimer.attach(misfireService2);
+    check taskTimer.start();
      // Sleep for 8 seconds.
     runtime:sleep(8000);
-    test:assertEquals(triggeredCount2, 2, msg = "Output mismatched");
-    var pauseResult = taskTimer.pause();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount2, 2, msg = "Expected count mismatched before pausing the scheduler.");
+    check taskTimer.pause();
     runtime:sleep(8000);
-    test:assertEquals(triggeredCount2, 2, msg = "Output mismatched");
-    var resumeResult = taskTimer.resume();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount2, 2, msg = "Expected count mismatched during the scheduler pause.");
+    check taskTimer.resume();
     runtime:sleep(1000);
-    test:assertEquals(triggeredCount2, 3, msg = "Output mismatched");
+    test:assertEquals(triggeredCount2, 3, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(8000);
-    test:assertEquals(triggeredCount2, 5, msg = "Output mismatched");
-    checkpanic taskTimer.stop();
+    test:assertEquals(triggeredCount2, 5, msg = "Expected count mismatched.");
+    check taskTimer.stop();
 }
 
 int triggeredCount3 = 0;
@@ -67,34 +55,22 @@ service misfireService3 = service {
 };
 
 @test:Config {}
-function testNowWithRemainingRepeatCountWithService3() {
+function testNowWithRemainingRepeatCountWithService3() returns error? {
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7},
                                { policy: "fireNowWithRemainingCount" });
-    var attachResult = taskTimer.attach(misfireService3);
-    if (attachResult is SchedulerError) {
-        panic attachResult;
-    }
-    var startResult = taskTimer.start();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    check taskTimer.attach(misfireService3);
+    check taskTimer.start();
     runtime:sleep(8000);
-    test:assertEquals(triggeredCount3, 2, msg = "Output mismatched");
-    var pauseResult = taskTimer.pause();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount3, 2, msg = "Expected count mismatched before pausing the scheduler.");
+    check taskTimer.pause();
     runtime:sleep(8000);
-    test:assertEquals(triggeredCount3, 2, msg = "Output mismatched");
-    var resumeResult = taskTimer.resume();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount3, 2, msg = "Expected count mismatched during the scheduler pause.");
+    check taskTimer.resume();
     runtime:sleep(1000);
-    test:assertEquals(triggeredCount3, 3, msg = "Output mismatched");
+    test:assertEquals(triggeredCount3, 3, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(8000);
-    test:assertEquals(triggeredCount3, 5, msg = "Output mismatched");
-    checkpanic taskTimer.stop();
+    test:assertEquals(triggeredCount3, 5, msg = "Expected count mismatched.");
+    check taskTimer.stop();
 }
 
 int triggeredCount4 = 0;
@@ -106,34 +82,22 @@ service misfireService4 = service {
 };
 
 @test:Config {}
-function testNextWithExistingCountWithService4() {
+function testNextWithExistingCountWithService4() returns error? {
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 },
                                { policy: "fireNextWithExistingCount" });
-    var attachResult = taskTimer.attach(misfireService4);
-    if (attachResult is SchedulerError) {
-        panic attachResult;
-    }
-    var startResult = taskTimer.start();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    check taskTimer.attach(misfireService4);
+    check taskTimer.start();
     runtime:sleep(7000);
-    test:assertEquals(triggeredCount4, 2, msg = "Output mismatched");
-    var pauseResult = taskTimer.pause();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched before pausing the scheduler.");
+    check taskTimer.pause();
     runtime:sleep(7000);
-    test:assertEquals(triggeredCount4, 2, msg = "Output mismatched");
-    var resumeResult = taskTimer.resume();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched during the scheduler pause.");
+    check taskTimer.resume();
     runtime:sleep(500);
-    test:assertEquals(triggeredCount4, 2, msg = "Output mismatched");
+    test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(10000);
-    test:assertEquals(triggeredCount4, 5, msg = "Output mismatched");
-    checkpanic taskTimer.stop();
+    test:assertEquals(triggeredCount4, 5, msg = "Expected count mismatched.");
+    check taskTimer.stop();
 }
 
 int triggeredCount5 = 0;
@@ -144,34 +108,22 @@ service misfireService5 = service {
     }
 };
 @test:Config {}
-function testNextWithRemainigCountWithService5() {
+function testNextWithRemainigCountWithService5() returns error? {
     Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 },
                                { policy: "fireNextWithRemainingCount" });
-    var attachResult = taskTimer.attach(misfireService5);
-    if (attachResult is SchedulerError) {
-        panic attachResult;
-    }
-    var startResult = taskTimer.start();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    check taskTimer.attach(misfireService5);
+    check taskTimer.start();
     runtime:sleep(7000);
-    test:assertEquals(triggeredCount5, 2, msg = "Output mismatched");
-    var pauseResult = taskTimer.pause();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched before pausing the scheduler.");
+    check taskTimer.pause();
     runtime:sleep(7000);
-    test:assertEquals(triggeredCount5, 2, msg = "Output mismatched");
-    var resumeResult = taskTimer.resume();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched during the scheduler pause.");
+    check taskTimer.resume();
     runtime:sleep(500);
-    test:assertEquals(triggeredCount5, 2, msg = "Output mismatched");
+    test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(10000);
-    test:assertEquals(triggeredCount5, 5, msg = "Output mismatched");
-    checkpanic taskTimer.stop();
+    test:assertEquals(triggeredCount5, 5, msg = "Expected count mismatched.");
+    check taskTimer.stop();
 }
 
 int triggeredCount11 = 0;
@@ -183,32 +135,19 @@ service misfireService11 = service {
 };
 
 @test:Config {}
-function testSmartPolicyWithService11() {
-
+function testSmartPolicyWithService11() returns error? {
     Scheduler taskTimer = new ({intervalInMillis: 3000, noOfRecurrences: 5 });
-    var attachResult = taskTimer.attach(misfireService11);
-    if (attachResult is SchedulerError) {
-        panic attachResult;
-    }
-    var startResult = taskTimer.start();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    check taskTimer.attach(misfireService11);
+    check taskTimer.start();
     runtime:sleep(8000);
-    test:assertEquals(triggeredCount11, 2, msg = "Output mismatched");
-    var pauseResult = taskTimer.pause();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount11, 2, msg = "Expected count mismatched before pausing the scheduler.");
+    check taskTimer.pause();
     runtime:sleep(8000);
-    test:assertEquals(triggeredCount11, 2, msg = "Output mismatched");
-    var resumeResult = taskTimer.resume();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
+    test:assertEquals(triggeredCount11, 2, msg = "Expected count mismatched during the scheduler pause.");
+    check taskTimer.resume();
     runtime:sleep(1000);
-    test:assertEquals(triggeredCount11, 3, msg = "Output mismatched");
+    test:assertEquals(triggeredCount11, 3, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(10000);
-    test:assertEquals(triggeredCount11, 5, msg = "Output mismatched");
-    checkpanic taskTimer.stop();
+    test:assertEquals(triggeredCount11, 5, msg = "Expected count mismatched.");
+    check taskTimer.stop();
 }

@@ -34,27 +34,7 @@ public class Listener {
     #                          of the scheduler
     public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
                                   MisfireConfiguration misfireConfiguration = {}) {
-        var noOfRecurrences = configuration["noOfRecurrences"];
-        var policy = misfireConfiguration.policy;
-        if (configuration is TimerConfiguration) {
-            if (noOfRecurrences is int) {
-                if (noOfRecurrences == 1) {
-                    if (!(policy is OneTimeTaskPolicy)) {
-                        panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
-                    }
-
-                } else {
-                    if (!(policy is RecurringTaskPolicy)) {
-                        panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
-                    }
-                }
-            }
-            if (configuration["initialDelayInMillis"] == ()) {
-                configuration.initialDelayInMillis = configuration.intervalInMillis;
-            }
-        } else if (!(policy is AppointmentTaskPolicy)) {
-            panic ListenerError("Wrong misfire policy has given for the appointment task.");
-        }
+        validateConfiguration(configuration, misfireConfiguration);
         self.listenerConfiguration = configuration;
         self.misfireConfiguration = misfireConfiguration;
         var result = initExternal(self);
@@ -179,3 +159,28 @@ isolated function attachExternal(Listener task, service s, any... attachments) r
     name: "attach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
+
+isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration,
+                                         MisfireConfiguration misfireConfiguration) {
+    var noOfRecurrences = configuration[NO_OF_RECURRENCE];
+    var policy = misfireConfiguration.policy;
+    if (configuration is TimerConfiguration) {
+        if (noOfRecurrences is int) {
+            if (noOfRecurrences == 1) {
+                if (!(policy is OneTimeTaskPolicy)) {
+                    panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
+                }
+
+            } else {
+                if (!(policy is RecurringTaskPolicy)) {
+                    panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
+                }
+            }
+        }
+        if (configuration[INITIAL_DELAY] == ()) {
+            configuration.initialDelayInMillis = configuration.intervalInMillis;
+        }
+    } else if (!(policy is AppointmentTaskPolicy)) {
+        panic ListenerError("Wrong misfire policy has given for the appointment task.");
+    }
+}

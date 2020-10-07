@@ -126,12 +126,24 @@ FIRE_NEXT_WITH_REMAINING_COUNT|FIRE_NOW_WITH_EXISTING_COUNT|FIRE_NOW_WITH_REMAIN
 # Possible types of parameters that can be passed into the `OneTimeTaskPolicy`.
 public type OneTimeTaskPolicy SMART_POLICY|IGNORE_POLICY|FIRE_NOW;
 
+# The value of this constant is `smartPolicy`.
 public const string SMART_POLICY = "smartPolicy";
+# The value of this constant is `doNothing`.
 public const string DO_NOTHING = "doNothing";
+# The value of this constant is `fireAndProceed`.
 public const string FIRE_AND_PROCEED = "fireAndProceed";
+# The value of this constant is `fireNextWithExistingCount`.
 public const string FIRE_NEXT_WITH_EXISTING_COUNT = "fireNextWithExistingCount";
+# The value of this constant is `fireNextWithRemainingCount`.
 public const string FIRE_NEXT_WITH_REMAINING_COUNT = "fireNextWithRemainingCount";
+# The value of this constant is `fireNowWithExistingCount`.
 public const string FIRE_NOW_WITH_EXISTING_COUNT = "fireNowWithExistingCount";
+# The value of this constant is `fireNowWithRemainingCount`.
 public const string FIRE_NOW_WITH_REMAINING_COUNT = "fireNowWithRemainingCount";
+# The value of this constant is `fireNow`.
 public const string FIRE_NOW = "fireNow";
+# The value of this constant is `ignorePolicy`.
 public const string IGNORE_POLICY = "ignorePolicy";
+
+const string NO_OF_RECURRENCE = "noOfRecurrences";
+const string INITIAL_DELAY = "initialDelayInMillis";
