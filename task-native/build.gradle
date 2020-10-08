@@ -26,6 +26,13 @@ dependencies {
     compile group: 'org.ballerinalang', name: 'ballerina-runtime', version: "${ballerinaLangVersion}"
     compile group: 'org.slf4j', name: 'slf4j-jdk14', version: "${slf4jVersion}"
     compile group: 'org.quartz-scheduler', name:"quartz", version: "${quartzVersion}"
-    compile group: 'org.apache.ws.commons.axiom', name: 'axiom-api', version: "${axiomVersion}"
-    compile group: 'org.apache.ws.commons.axiom', name: 'axiom-impl', version: "${axiomVersion}"
+}
+
+compileJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+        ]
+        classpath = files()
+    }
 }
