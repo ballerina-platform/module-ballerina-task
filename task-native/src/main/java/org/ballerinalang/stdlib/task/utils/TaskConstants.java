@@ -56,7 +56,7 @@ public class TaskConstants {
 
     // Fields used in the `MisfireConfiguration`.
     public static final BString THRESHOLD_IN_MILLIS = BStringUtils.fromString("thresholdInMillis");
-    public static final BString POLICY = BStringUtils.fromString("policy");
+    public static final BString MISFIRE_POLICY = BStringUtils.fromString("misfirePolicy");
 
     // Allowed resource function names.
     public static final String RESOURCE_ON_TRIGGER = "onTrigger";

@@ -23,20 +23,15 @@ public class Listener {
     boolean started = false;
 
     private TimerConfiguration|AppointmentConfiguration listenerConfiguration;
-    private MisfireConfiguration misfireConfiguration;
 
     # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a configuration
     # error.
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #                   `task:Listener` behavior
-    # + misfireConfiguration - The `task:MisfireConfiguration` record, which is used to configure the misfire situations
-    #                          of the scheduler
-    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
-                                  MisfireConfiguration misfireConfiguration = {}) {
-        validateConfiguration(configuration, misfireConfiguration);
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
+        validateConfiguration(configuration);
         self.listenerConfiguration = configuration;
-        self.misfireConfiguration = misfireConfiguration;
         var result = initExternal(self);
         if (result is ListenerError) {
             panic result;
@@ -160,19 +155,18 @@ isolated function attachExternal(Listener task, service s, any... attachments) r
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration,
-                                         MisfireConfiguration misfireConfiguration) {
+isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration) {
     var noOfRecurrences = configuration[NO_OF_RECURRENCE];
-    var policy = misfireConfiguration.policy;
+    var misfirePolicy = configuration.misfirePolicy;
     if (configuration is TimerConfiguration) {
         if (noOfRecurrences is int) {
             if (noOfRecurrences == 1) {
-                if (!(policy is OneTimeTaskPolicy)) {
+                if (!(misfirePolicy is OneTimeTaskPolicy)) {
                     panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
                 }
 
             } else {
-                if (!(policy is RecurringTaskPolicy)) {
+                if (!(misfirePolicy is RecurringTaskPolicy)) {
                     panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
                 }
             }
@@ -180,7 +174,7 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
         if (configuration[INITIAL_DELAY] == ()) {
             configuration.initialDelayInMillis = configuration.intervalInMillis;
         }
-    } else if (!(policy is AppointmentTaskPolicy)) {
+    } else if (!(misfirePolicy is AppointmentTaskPolicy)) {
         panic ListenerError("Wrong misfire policy has given for the appointment task.");
     }
 }

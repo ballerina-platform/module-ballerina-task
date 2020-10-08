@@ -27,9 +27,8 @@ service misfireService2 = service {
 
 @test:Config {}
 function testExistingRepeatCountWithService2() returns error? {
-
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 5 },
-                               { policy: "fireNowWithExistingCount" });
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 5 ,
+                                 misfirePolicy: "fireNowWithExistingCount" });
     check taskTimer.attach(misfireService2);
     check taskTimer.start();
      // Sleep for 8 seconds.
@@ -56,8 +55,8 @@ service misfireService3 = service {
 
 @test:Config {}
 function testNowWithRemainingRepeatCountWithService3() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7},
-                               { policy: "fireNowWithRemainingCount" });
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7,
+                                 misfirePolicy: "fireNowWithRemainingCount"});
     check taskTimer.attach(misfireService3);
     check taskTimer.start();
     runtime:sleep(8000);
@@ -83,8 +82,8 @@ service misfireService4 = service {
 
 @test:Config {}
 function testNextWithExistingCountWithService4() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 },
-                               { policy: "fireNextWithExistingCount" });
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7,
+                                 misfirePolicy: "fireNextWithExistingCount"});
     check taskTimer.attach(misfireService4);
     check taskTimer.start();
     runtime:sleep(7000);
@@ -109,8 +108,8 @@ service misfireService5 = service {
 };
 @test:Config {}
 function testNextWithRemainigCountWithService5() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 },
-                               { policy: "fireNextWithRemainingCount" });
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 ,
+                                 misfirePolicy: "fireNextWithExistingCount"});
     check taskTimer.attach(misfireService5);
     check taskTimer.start();
     runtime:sleep(7000);

@@ -119,15 +119,13 @@ public class TaskActions {
     @SuppressWarnings("unchecked")
     public static Object init(BObject taskListener) {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
-        BMap<BString, Object> misfireConfigurations = taskListener.getMapValue(TaskConstants.
-                MEMBER_MISFIRE_CONFIGURATION);
         String configurationTypeName = configurations.getType().getName();
         Task task;
         try {
             if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
-                task = processTimer(configurations, misfireConfigurations);
+                task = processTimer(configurations);
             } else { // Record type validates at the compile time. Hence, exhaustive validation is not needed.
-                task = processAppointment(configurations, misfireConfigurations);
+                task = processAppointment(configurations);
             }
             taskListener.addNativeData(NATIVE_DATA_TASK_OBJECT, task);
         } catch (SchedulingException e) {

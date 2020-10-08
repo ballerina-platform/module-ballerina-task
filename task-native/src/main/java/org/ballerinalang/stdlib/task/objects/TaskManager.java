@@ -58,7 +58,7 @@ public class TaskManager {
         return this.scheduler;
     }
 
-    public static void createSchedulerProperties(int thresholdInMillis) {
+    public static void createSchedulerProperties(long thresholdInMillis) {
         properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, String.valueOf(thresholdInMillis));
         properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, TaskConstants.QUARTZ_THREAD_COUNT_VALUE);
     }

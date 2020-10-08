@@ -27,8 +27,7 @@ service misfireService1 = service {
 
 @test:Config {}
 function testFireNowWithService1() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1},
-                               { policy: "fireNow" });
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1, misfirePolicy: "fireNow"});
     check taskTimer.attach(misfireService1);
     check taskTimer.start();
     check taskTimer.pause();
@@ -48,8 +47,7 @@ service misfireService8 = service {
 };
 @test:Config {}
 function testIgnoreMisfiresPoilcyWithService8() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1 },
-                               { policy: "ignorePolicy" });
+    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1 , misfirePolicy: "ignorePolicy"});
     check taskTimer.attach(misfireService8);
     check taskTimer.start();
     check taskTimer.pause();

@@ -31,6 +31,7 @@ import org.quartz.TriggerUtils;
 import org.quartz.impl.calendar.BaseCalendar;
 import org.quartz.spi.OperableTrigger;
 
+import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -46,7 +47,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class Appointment extends AbstractTask {
 
     private String cronExpression;
-    private static int thresholdInMillis;
+    private static long thresholdInMillis;
     private static String policy;
 
     /**
@@ -55,11 +56,11 @@ public class Appointment extends AbstractTask {
      * @param cronExpression The CRON expression for which the Appointment triggers.
      * @throws SchedulingException When initializing, this Appointment is failed.
      */
-    public Appointment(String cronExpression, BMap<BString, Object> misfireConfig) throws SchedulingException {
+    public Appointment(String cronExpression, long thresholdInMillis, String misfirePolicy) throws SchedulingException {
         super();
         this.cronExpression = cronExpression;
-        thresholdInMillis = misfireConfig.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        policy = misfireConfig.getStringValue(TaskConstants.POLICY).toString();
+        this.thresholdInMillis = thresholdInMillis;
+        this.policy = misfirePolicy;
     }
 
     /**
@@ -70,12 +71,12 @@ public class Appointment extends AbstractTask {
      * @param maxRuns        Number of times after which the Appointment will cancel.
      * @throws SchedulingException When initializing this Appointment is failed.
      */
-    public Appointment(String cronExpression, BMap<BString, Object> misfireConfig,
+    public Appointment(String cronExpression, long thresholdInMillis, String misfirePolicy,
                        long maxRuns) throws SchedulingException {
         super(maxRuns);
         this.cronExpression = cronExpression;
-        thresholdInMillis = misfireConfig.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        policy = misfireConfig.getStringValue(TaskConstants.POLICY).toString();
+        this.thresholdInMillis = thresholdInMillis;
+        this.policy = misfirePolicy;
     }
 
     /**
@@ -117,6 +118,9 @@ public class Appointment extends AbstractTask {
      */
     private void scheduleAppointment(JobDataMap jobData) throws SchedulerException, SchedulingException {
         String triggerId = this.getId();
+        PrintStream asd = System.out;
+        asd.println("@@@@@@@@@@@@@@@@");
+        asd.println(thresholdInMillis);
         TaskManager.createSchedulerProperties(thresholdInMillis);
         JobDetail job = newJob(TaskJob.class).usingJobData(jobData).withIdentity(triggerId).build();
         CronTrigger trigger = newTrigger()
@@ -138,11 +142,11 @@ public class Appointment extends AbstractTask {
 
     private static CronScheduleBuilder buildCronScheduler(String cronExpression) {
         CronScheduleBuilder cronScheduleBuilder = cronSchedule(cronExpression);
-        if (policy.equalsIgnoreCase(TaskConstants.DO_NOTHING)) {
+        if (policy.equals(TaskConstants.DO_NOTHING)) {
             cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
-        } else if (policy.equalsIgnoreCase(TaskConstants.IGNORE_POLICY)) {
+        } else if (policy.equals(TaskConstants.IGNORE_POLICY)) {
             cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-        } else if (policy.equalsIgnoreCase(TaskConstants.FIRE_AND_PROCEED)) {
+        } else if (policy.equals(TaskConstants.FIRE_AND_PROCEED)) {
             cronScheduleBuilder.withMisfireHandlingInstructionFireAndProceed();
         }
         return cronScheduleBuilder;
