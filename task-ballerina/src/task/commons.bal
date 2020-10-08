@@ -62,7 +62,7 @@ public type TimerConfiguration record {|
     int initialDelayInMillis?;
     int noOfRecurrences?;
     int thresholdInMillis = 5000;
-    MisfirePolicy misfirePolicy = "smartPolicy";
+    TimerMisfirePolicy misfirePolicy = "smartPolicy";
 |};
 
 # Configurations related to an appointment, which are used to define the behavior of an appointment when initializing
@@ -87,7 +87,7 @@ public type AppointmentConfiguration record {|
     string|AppointmentData appointmentDetails;
     int noOfRecurrences?;
     int thresholdInMillis = 5000;
-    MisfirePolicy misfirePolicy = "smartPolicy";
+    AppointmentMisfirePolicy misfirePolicy = "smartPolicy";
 |};
 
 # The CRON expression required for scheduling an appointment.
@@ -109,14 +109,11 @@ public type AppointmentData record {|
     string year?;
 |};
 
-# Possible types of parameters that can be passed into the `Policy`.
-public type MisfirePolicy TimerTaskPolicy|AppointmentTaskPolicy;
-
 # Possible types of parameters that can be passed into the `TimerTaskPolicy`.
-public type TimerTaskPolicy RecurringTaskPolicy|OneTimeTaskPolicy;
+public type TimerMisfirePolicy RecurringTaskPolicy|OneTimeTaskPolicy;
 
 # Possible types of parameters that can be passed into the `AppointmentTaskPolicy`.
-public type AppointmentTaskPolicy SMART_POLICY|DO_NOTHING|FIRE_AND_PROCEED|IGNORE_POLICY;
+public type AppointmentMisfirePolicy SMART_POLICY|DO_NOTHING|FIRE_AND_PROCEED|IGNORE_POLICY;
 
 # Possible types of parameters that can be passed into the `RecurringTaskPolicy`.
 public type RecurringTaskPolicy SMART_POLICY|IGNORE_POLICY|FIRE_NEXT_WITH_EXISTING_COUNT|

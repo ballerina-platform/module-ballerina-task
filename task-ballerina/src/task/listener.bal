@@ -174,7 +174,7 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
         if (configuration[INITIAL_DELAY] == ()) {
             configuration.initialDelayInMillis = configuration.intervalInMillis;
         }
-    } else if (!(misfirePolicy is AppointmentTaskPolicy)) {
+    } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {
         panic ListenerError("Wrong misfire policy has given for the appointment task.");
     }
 }
