@@ -26,7 +26,6 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 
-import java.io.PrintStream;
 import java.util.Date;
 
 import static org.quartz.JobBuilder.newJob;
@@ -134,9 +133,6 @@ public class Timer extends AbstractTask {
      * @throws SchedulerException if scheduling is failed.
      */
     private void scheduleTimer(JobDataMap jobData) throws SchedulerException, SchedulingException {
-        PrintStream asd = System.out;
-        asd.println("@@@@@@@!!!!!!!!!!!!!!!");
-        asd.println(thresholdInMillis);
         TaskManager.createSchedulerProperties(thresholdInMillis);
         SimpleScheduleBuilder schedule = createSchedulerBuilder(this.getInterval(), this.getMaxRuns());
         String triggerId = this.getId();

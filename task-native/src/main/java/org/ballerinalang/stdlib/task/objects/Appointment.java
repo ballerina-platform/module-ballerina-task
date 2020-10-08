@@ -17,8 +17,6 @@
 */
 package org.ballerinalang.stdlib.task.objects;
 
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
@@ -31,7 +29,6 @@ import org.quartz.TriggerUtils;
 import org.quartz.impl.calendar.BaseCalendar;
 import org.quartz.spi.OperableTrigger;
 
-import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -118,9 +115,6 @@ public class Appointment extends AbstractTask {
      */
     private void scheduleAppointment(JobDataMap jobData) throws SchedulerException, SchedulingException {
         String triggerId = this.getId();
-        PrintStream asd = System.out;
-        asd.println("@@@@@@@@@@@@@@@@");
-        asd.println(thresholdInMillis);
         TaskManager.createSchedulerProperties(thresholdInMillis);
         JobDetail job = newJob(TaskJob.class).usingJobData(jobData).withIdentity(triggerId).build();
         CronTrigger trigger = newTrigger()

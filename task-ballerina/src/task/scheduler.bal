@@ -21,7 +21,8 @@ public class Scheduler {
     # Initializes a `task:Scheduler` object. This may panic if the initialization causes any error due to
     # a configuration error.
     #
-    # + configuration - The configurations associated with the `task:Scheduler`
+    # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
+    #                   `task:Sceduler` behavior
     public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
         self.taskListener = new(configuration);
     }
