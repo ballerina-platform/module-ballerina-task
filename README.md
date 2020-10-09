@@ -20,7 +20,7 @@ For a quick sample on demonstrating the usage see [Ballerina By Example](https:/
 1. Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
    * [Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
    
-   * [OpenJDK](https://openjdk.java.net/projects/jdk/11/)
+   * [OpenJDK](https://adoptopenjdk.net/)
    
         > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
      
