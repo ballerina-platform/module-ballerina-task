@@ -43,9 +43,9 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class Appointment extends AbstractTask {
 
-    private String cronExpression;
-    private static long thresholdInMillis;
-    private static String policy;
+    private final String cronExpression;
+    private long thresholdInMillis;
+    private String policy;
 
     /**
      * Creates an Appointment object with provided CRON expression.
@@ -134,14 +134,19 @@ public class Appointment extends AbstractTask {
         quartzJobs.put(triggerId, job.getKey());
     }
 
-    private static CronScheduleBuilder buildCronScheduler(String cronExpression) {
+    private CronScheduleBuilder buildCronScheduler(String cronExpression) {
         CronScheduleBuilder cronScheduleBuilder = cronSchedule(cronExpression);
-        if (policy.equals(TaskConstants.DO_NOTHING)) {
-            cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
-        } else if (policy.equals(TaskConstants.IGNORE_POLICY)) {
-            cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-        } else if (policy.equals(TaskConstants.FIRE_AND_PROCEED)) {
-            cronScheduleBuilder.withMisfireHandlingInstructionFireAndProceed();
+        switch (policy) {
+            case TaskConstants.DO_NOTHING:
+                cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
+                break;
+            case TaskConstants.IGNORE_POLICY:
+                cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+                break;
+            case TaskConstants.FIRE_AND_PROCEED:
+                cronScheduleBuilder.withMisfireHandlingInstructionFireAndProceed();
+                break;
+            default:
         }
         return cronScheduleBuilder;
     }
