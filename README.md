@@ -15,6 +15,16 @@ For more information on all the operations supported by the `task:Listener` and 
 For a quick sample on demonstrating the usage see [Ballerina By Example](https://ballerina.io/swan-lake/learn/by-example/).
 
 ## Building from the Source
+### Setting Up the Prerequisites
+
+1. Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
+   * [Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
+   
+   * [OpenJDK](https://adoptopenjdk.net/)
+   
+        > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
+     
+### Building the Source
 
 Execute the commands below to build from source.
 
