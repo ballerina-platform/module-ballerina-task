@@ -43,7 +43,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class Appointment extends AbstractTask {
 
-    private final String cronExpression;
+    private String cronExpression;
     private long thresholdInMillis;
     private String policy;
 

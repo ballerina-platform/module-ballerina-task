@@ -39,8 +39,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class Timer extends AbstractTask {
 
-    private final long interval;
-    private final long delay;
+    private long interval, delay;
     private long thresholdInMillis;
     private String policy;
 
