@@ -42,8 +42,23 @@ public class TaskConstants {
     // Member names used in records
     public static final BString MEMBER_LISTENER_CONFIGURATION = BStringUtils.fromString("listenerConfiguration");
     public static final BString MEMBER_APPOINTMENT_DETAILS = BStringUtils.fromString("appointmentDetails");
+    public static final BString MEMBER_MISFIRE_CONFIGURATION = BStringUtils.fromString("misfireConfiguration");
 
-    // Allowed resource function names
+    // Misfire instructions
+    public static final String FIRE_NOW = "fireNow";
+    public static final String IGNORE_POLICY = "ignorePolicy";
+    public static final String NEXT_WITH_EXISTING_COUNT = "fireNextWithExistingCount";
+    public static final String NEXT_WITH_REMAINING_COUNT = "fireNextWithRemainingCount";
+    public static final String NOW_WITH_EXISTING_COUNT = "fireNowWithExistingCount";
+    public static final String NOW_WITH_REMAINING_COUNT = "fireNowWithRemainingCount";
+    public static final String DO_NOTHING = "doNothing";
+    public static final String FIRE_AND_PROCEED = "fireAndProceed";
+
+    // Fields used in the `MisfireConfiguration`.
+    public static final BString THRESHOLD_IN_MILLIS = BStringUtils.fromString("thresholdInMillis");
+    public static final BString MISFIRE_POLICY = BStringUtils.fromString("misfirePolicy");
+
+    // Allowed resource function names.
     public static final String RESOURCE_ON_TRIGGER = "onTrigger";
 
     // Common field for TimerConfiguration and AppointmentConfiguration
@@ -77,8 +92,6 @@ public class TaskConstants {
     public static final String QUARTZ_THREAD_COUNT = "org.quartz.threadPool.threadCount";
     public static final String QUARTZ_MISFIRE_THRESHOLD = "org.quartz.jobStore.misfireThreshold";
 
-    // Quartz property values
+    // Quartz property values.
     public static final String QUARTZ_THREAD_COUNT_VALUE = "10";
-    // Defines how late the trigger should be to be considered misfired
-    public static final String QUARTZ_MISFIRE_THRESHOLD_VALUE = "5000";
 }

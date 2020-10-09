@@ -18,6 +18,7 @@
 package org.ballerinalang.stdlib.task.objects;
 
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
+import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
@@ -43,16 +44,20 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class Appointment extends AbstractTask {
 
     private String cronExpression;
+    private static long thresholdInMillis;
+    private static String policy;
 
     /**
-     * Creates an Appointment object with provided cron expression.
+     * Creates an Appointment object with provided CRON expression.
      *
-     * @param cronExpression Cron expression for which the Appointment triggers.
-     * @throws SchedulingException When initializing this Appointment is failed.
+     * @param cronExpression The CRON expression for which the Appointment triggers.
+     * @throws SchedulingException When initializing, this Appointment is failed.
      */
-    public Appointment(String cronExpression) throws SchedulingException {
+    public Appointment(String cronExpression, long thresholdInMillis, String misfirePolicy) throws SchedulingException {
         super();
         this.cronExpression = cronExpression;
+        this.thresholdInMillis = thresholdInMillis;
+        this.policy = misfirePolicy;
     }
 
     /**
@@ -63,9 +68,12 @@ public class Appointment extends AbstractTask {
      * @param maxRuns        Number of times after which the Appointment will cancel.
      * @throws SchedulingException When initializing this Appointment is failed.
      */
-    public Appointment(String cronExpression, long maxRuns) throws SchedulingException {
+    public Appointment(String cronExpression, long thresholdInMillis, String misfirePolicy,
+                       long maxRuns) throws SchedulingException {
         super(maxRuns);
         this.cronExpression = cronExpression;
+        this.thresholdInMillis = thresholdInMillis;
+        this.policy = misfirePolicy;
     }
 
     /**
@@ -107,6 +115,7 @@ public class Appointment extends AbstractTask {
      */
     private void scheduleAppointment(JobDataMap jobData) throws SchedulerException, SchedulingException {
         String triggerId = this.getId();
+        TaskManager.createSchedulerProperties(thresholdInMillis);
         JobDetail job = newJob(TaskJob.class).usingJobData(jobData).withIdentity(triggerId).build();
         CronTrigger trigger = newTrigger()
                 .withIdentity(triggerId)
@@ -126,6 +135,14 @@ public class Appointment extends AbstractTask {
     }
 
     private static CronScheduleBuilder buildCronScheduler(String cronExpression) {
-        return cronSchedule(cronExpression).withMisfireHandlingInstructionDoNothing();
+        CronScheduleBuilder cronScheduleBuilder = cronSchedule(cronExpression);
+        if (policy.equals(TaskConstants.DO_NOTHING)) {
+            cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
+        } else if (policy.equals(TaskConstants.IGNORE_POLICY)) {
+            cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+        } else if (policy.equals(TaskConstants.FIRE_AND_PROCEED)) {
+            cronScheduleBuilder.withMisfireHandlingInstructionFireAndProceed();
+        }
+        return cronScheduleBuilder;
     }
 }

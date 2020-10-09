@@ -82,8 +82,7 @@ type DuplicateAppointmentData record {
     string year?;
 };
 
-@test:Config {
-}
+@test:Config {}
 public function testInvalidAppointmentDataRecord() {
 
     DuplicateAppointmentData appointmentData = {

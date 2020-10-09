@@ -28,13 +28,9 @@ public class Listener {
     # error.
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
-    #   `task:Listener` behavior
+    #                   `task:Listener` behavior
     public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
-        if (configuration is TimerConfiguration) {
-            if (configuration["initialDelayInMillis"] == ()) {
-                configuration.initialDelayInMillis = configuration.intervalInMillis;
-            }
-        }
+        validateConfiguration(configuration);
         self.listenerConfiguration = configuration;
         var result = initExternal(self);
         if (result is ListenerError) {
@@ -158,3 +154,27 @@ isolated function attachExternal(Listener task, service s, any... attachments) r
     name: "attach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
+
+isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration) {
+    var noOfRecurrences = configuration[NO_OF_RECURRENCE];
+    var misfirePolicy = configuration.misfirePolicy;
+    if (configuration is TimerConfiguration) {
+        if (noOfRecurrences is int) {
+            if (noOfRecurrences == 1) {
+                if (!(misfirePolicy is OneTimeTaskPolicy)) {
+                    panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
+                }
+
+            } else {
+                if (!(misfirePolicy is RecurringTaskPolicy)) {
+                    panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
+                }
+            }
+        }
+        if (configuration[INITIAL_DELAY] == ()) {
+            configuration.initialDelayInMillis = configuration.intervalInMillis;
+        }
+    } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {
+        panic ListenerError("Wrong misfire policy has given for the appointment task.");
+    }
+}

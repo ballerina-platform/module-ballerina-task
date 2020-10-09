@@ -121,30 +121,36 @@ public class Utils {
         }
     }
 
-    public static Timer processTimer(BMap<BString, Object> configurations) throws SchedulingException {
+    public static Timer processTimer(BMap<BString, Object> configurations)
+            throws SchedulingException {
         Timer task;
         long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
         long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
+        long thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
+        String misfirePolicy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
 
         if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
-            task = new Timer(delay, interval);
+            task = new Timer(delay, interval, thresholdInMillis, misfirePolicy);
         } else {
             long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
-            task = new Timer(delay, interval, noOfRuns);
+            task = new Timer(delay, interval, thresholdInMillis, misfirePolicy, noOfRuns);
         }
         return task;
     }
 
-    public static Appointment processAppointment(BMap<BString, Object> configurations) throws SchedulingException {
+    public static Appointment processAppointment(BMap<BString, Object> configurations)
+            throws SchedulingException {
         Appointment appointment;
         Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
         String cronExpression = getCronExpressionFromAppointmentRecord(appointmentDetails);
+        long thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
+        String misfirePolicy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
 
         if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
-            appointment = new Appointment(cronExpression);
+            appointment = new Appointment(cronExpression, thresholdInMillis, misfirePolicy);
         } else {
             long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
-            appointment = new Appointment(cronExpression, noOfRuns);
+            appointment = new Appointment(cronExpression, thresholdInMillis, misfirePolicy, noOfRuns);
         }
         return appointment;
     }
