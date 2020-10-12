@@ -40,8 +40,8 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class Timer extends AbstractTask {
 
     private long interval, delay;
-    private static long thresholdInMillis;
-    private static String policy;
+    private long thresholdInMillis;
+    private String policy;
 
     /**
      * Creates a Timer object.
@@ -160,7 +160,7 @@ public class Timer extends AbstractTask {
         quartzJobs.put(triggerId, job.getKey());
     }
 
-    private static SimpleScheduleBuilder createSchedulerBuilder(long interval, long maxRuns) {
+    private SimpleScheduleBuilder createSchedulerBuilder(long interval, long maxRuns) {
         SimpleScheduleBuilder simpleScheduleBuilder = simpleSchedule()
                 .withIntervalInMilliseconds(interval);
         if (maxRuns > 0) {
@@ -183,17 +183,25 @@ public class Timer extends AbstractTask {
         return simpleScheduleBuilder;
     }
 
-    private static void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder) {
-        if (policy.equals(TaskConstants.NEXT_WITH_EXISTING_COUNT)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
-        } else if (policy.equals(TaskConstants.IGNORE_POLICY)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-        } else if (policy.equals(TaskConstants.NEXT_WITH_REMAINING_COUNT)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
-        } else if (policy.equals(TaskConstants.NOW_WITH_EXISTING_COUNT)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
-        } else if (policy.equals(TaskConstants.NOW_WITH_REMAINING_COUNT)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
+    private void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder) {
+        switch (policy) {
+            case TaskConstants.NEXT_WITH_EXISTING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
+                break;
+            case TaskConstants.IGNORE_POLICY:
+                simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+                break;
+            case TaskConstants.NEXT_WITH_REMAINING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
+                break;
+            case TaskConstants.NOW_WITH_EXISTING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
+                break;
+            case TaskConstants.NOW_WITH_REMAINING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
+                break;
+            default:
+                break;
         }
     }
 }
