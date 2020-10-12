@@ -29,10 +29,9 @@ import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.objects.Appointment;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
 import org.ballerinalang.stdlib.task.objects.Timer;
+import org.quartz.CronExpression;
 
 import java.util.Objects;
-
-import static org.quartz.CronExpression.isValidExpression;
 
 /**
  * Utility functions used in ballerina task module.
@@ -59,12 +58,12 @@ public class Utils {
         String cronExpression;
         if (TaskConstants.RECORD_APPOINTMENT_DATA.equals(TypeChecker.getType(record).getName())) {
             cronExpression = buildCronExpression((BMap<BString, Object>) record);
-            if (!isValidExpression(cronExpression)) {
+            if (!CronExpression.isValidExpression(cronExpression)) {
                 throw new SchedulingException("AppointmentData \"" + record.toString() + "\" is invalid.");
             }
         } else {
             cronExpression = record.toString();
-            if (!isValidExpression(cronExpression)) {
+            if (!CronExpression.isValidExpression(cronExpression)) {
                 throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
             }
         }
@@ -135,8 +134,7 @@ public class Utils {
     }
 
     public static Appointment processAppointment(BMap<BString, Object> configurations,
-                                                 BMap<BString, Object> threadConfiguration)
-            throws SchedulingException {
+                                                 BMap<BString, Object> threadConfiguration) throws SchedulingException {
         Appointment appointment;
         if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
             appointment = new Appointment(configurations, threadConfiguration);
