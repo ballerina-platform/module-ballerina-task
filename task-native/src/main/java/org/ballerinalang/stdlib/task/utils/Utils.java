@@ -118,9 +118,8 @@ public class Utils {
 
     private static void validateOnTriggerResource(BType returnParameterType) throws SchedulingException {
         if (returnParameterType != org.ballerinalang.jvm.types.BTypes.typeNull) {
-            throw new SchedulingException(
-                    "Invalid resource function signature: \'" + TaskConstants.RESOURCE_ON_TRIGGER +
-                            "\' should not return a value.");
+            throw new SchedulingException("Invalid resource function signature: \'" +
+                    TaskConstants.RESOURCE_ON_TRIGGER + "\' should not return a value.");
         }
     }
 
