@@ -183,7 +183,7 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
         panic ListenerError("Wrong misfire policy has given for the appointment task.");
     }
     if (threadConfiguration.threadCount < 1) {
-        panic ListenerError("Thread count must be greater than 1.");
+        panic ListenerError("Thread count must be greater than 0.");
     }
     if (threadConfiguration.threadPriority < 1 || threadConfiguration.threadPriority > 10) {
         panic ListenerError("Thread priority must be an integer value between 1 and 10.");
