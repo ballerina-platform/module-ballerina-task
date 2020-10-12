@@ -50,7 +50,8 @@ public class Utils {
     }
 
     public static BError createTaskError(String reason, String message) {
-        return BErrorCreator.createDistinctError(reason, TaskConstants.TASK_PACKAGE_ID, BStringUtils.fromString(message));
+        return BErrorCreator.createDistinctError(reason, TaskConstants.TASK_PACKAGE_ID,
+                BStringUtils.fromString(message));
     }
 
     @SuppressWarnings("unchecked")
@@ -83,7 +84,8 @@ public class Utils {
     }
 
     private static String getStringFieldValue(BMap<BString, Object> record, BString fieldName) {
-        if (TaskConstants.FIELD_DAYS_OF_MONTH.equals(fieldName) && Objects.isNull(record.get(TaskConstants.FIELD_DAYS_OF_MONTH))) {
+        if (TaskConstants.FIELD_DAYS_OF_MONTH.equals(fieldName) && Objects.isNull(record.get(TaskConstants.
+                FIELD_DAYS_OF_MONTH))) {
             return "?";
         } else if (Objects.nonNull(record.get(fieldName))) {
             return record.get(fieldName).toString();
@@ -117,40 +119,32 @@ public class Utils {
     private static void validateOnTriggerResource(BType returnParameterType) throws SchedulingException {
         if (returnParameterType != org.ballerinalang.jvm.types.BTypes.typeNull) {
             throw new SchedulingException(
-                    "Invalid resource function signature: \'" + TaskConstants.RESOURCE_ON_TRIGGER + "\' should not return a value.");
+                    "Invalid resource function signature: \'" + TaskConstants.RESOURCE_ON_TRIGGER +
+                            "\' should not return a value.");
         }
     }
 
-    public static Timer processTimer(BMap<BString, Object> configurations)
+    public static Timer processTimer(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration)
             throws SchedulingException {
         Timer task;
-        long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
-        long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
-        long thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        String misfirePolicy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
-
         if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
-            task = new Timer(delay, interval, thresholdInMillis, misfirePolicy);
+            task = new Timer(configurations, threadConfiguration);
         } else {
             long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
-            task = new Timer(delay, interval, thresholdInMillis, misfirePolicy, noOfRuns);
+            task = new Timer(configurations, threadConfiguration, noOfRuns);
         }
         return task;
     }
 
-    public static Appointment processAppointment(BMap<BString, Object> configurations)
+    public static Appointment processAppointment(BMap<BString, Object> configurations,
+                                                 BMap<BString, Object> threadConfiguration)
             throws SchedulingException {
         Appointment appointment;
-        Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
-        String cronExpression = getCronExpressionFromAppointmentRecord(appointmentDetails);
-        long thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        String misfirePolicy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
-
         if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
-            appointment = new Appointment(cronExpression, thresholdInMillis, misfirePolicy);
+            appointment = new Appointment(configurations, threadConfiguration);
         } else {
             long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
-            appointment = new Appointment(cronExpression, thresholdInMillis, misfirePolicy, noOfRuns);
+            appointment = new Appointment(configurations, threadConfiguration, noOfRuns);
         }
         return appointment;
     }

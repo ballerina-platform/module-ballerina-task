@@ -65,6 +65,18 @@ public type TimerConfiguration record {|
     TimerMisfirePolicy misfirePolicy = "smartPolicy";
 |};
 
+# Configurations related to a ThreadPool.
+#
+# + threadCount - Specifies the number of threads that are available for concurrent execution of jobs.
+#                 It can be set to a positive integer between 1 and 10. Values greater than 10 are allowed but
+#                 might be impractical.
+# + threadPriority - Specifies the priority that the worker threads run at. The value can be any integer
+#                    between 1 and 10. The default is 5.
+public type ThreadConfiguration record {|
+    int threadCount = 10;
+    int threadPriority = 5;
+|};
+
 # Configurations related to an appointment, which are used to define the behavior of an appointment when initializing
 # the `task:Listener`.
 #

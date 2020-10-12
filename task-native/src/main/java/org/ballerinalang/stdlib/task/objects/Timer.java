@@ -17,14 +17,12 @@
 */
 package org.ballerinalang.stdlib.task.objects;
 
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.Trigger;
+import org.quartz.*;
 
 import java.util.Date;
 
@@ -39,42 +37,34 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class Timer extends AbstractTask {
 
-    private long interval, delay;
-    private static long thresholdInMillis;
-    private static String policy;
+    private long interval, delay, thresholdInMillis, threadCount, threadPriority;
+    private String policy;
 
     /**
      * Creates a Timer object.
      *
-     * @param delay    The initial delay.
-     * @param interval The interval between two task executions.
+     * @param configurations      Configurations related to a task.
+     * @param threadConfiguration Configurations related to a ThreadPool.
      * @throws SchedulingException When provided configuration values are invalid.
      */
-    public Timer(long delay, long interval, long thresholdInMillis, String misfirePolicy) throws SchedulingException {
+    public Timer(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration) throws
+            SchedulingException {
         super();
-        validateTimerConfigurations(delay, interval);
-        this.interval = interval;
-        this.delay = delay;
-        this.thresholdInMillis = thresholdInMillis;
-        this.policy = misfirePolicy;
+        setConfigs(configurations, threadConfiguration);
     }
 
     /**
      * Creates a Timer object with limited number of running times.
      *
-     * @param delay    The initial delay.
-     * @param interval The interval between two task executions.
+     * @param configurations      Configurations related to a task.
+     * @param threadConfiguration Configurations related to a ThreadPool.
      * @param maxRuns  Number of times after which the timer will turn off.
      * @throws SchedulingException When provided configuration values are invalid.
      */
-    public Timer(long delay, long interval, long thresholdInMillis, String misfirePolicy, long maxRuns) throws
+    public Timer(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration, long maxRuns) throws
             SchedulingException {
         super(maxRuns);
-        validateTimerConfigurations(delay, interval);
-        this.interval = interval;
-        this.delay = delay;
-        this.thresholdInMillis = thresholdInMillis;
-        this.policy = misfirePolicy;
+        setConfigs(configurations, threadConfiguration);
     }
 
     /**
@@ -133,7 +123,7 @@ public class Timer extends AbstractTask {
      * @throws SchedulerException if scheduling is failed.
      */
     private void scheduleTimer(JobDataMap jobData) throws SchedulerException, SchedulingException {
-        TaskManager.createSchedulerProperties(thresholdInMillis);
+        TaskManager.createSchedulerProperties(thresholdInMillis, threadCount, threadPriority);
         SimpleScheduleBuilder schedule = createSchedulerBuilder(this.getInterval(), this.getMaxRuns());
         String triggerId = this.getId();
         JobDetail job = newJob(TaskJob.class).usingJobData(jobData).withIdentity(triggerId).build();
@@ -160,7 +150,7 @@ public class Timer extends AbstractTask {
         quartzJobs.put(triggerId, job.getKey());
     }
 
-    private static SimpleScheduleBuilder createSchedulerBuilder(long interval, long maxRuns) {
+    private SimpleScheduleBuilder createSchedulerBuilder(long interval, long maxRuns) {
         SimpleScheduleBuilder simpleScheduleBuilder = simpleSchedule()
                 .withIntervalInMilliseconds(interval);
         if (maxRuns > 0) {
@@ -183,17 +173,36 @@ public class Timer extends AbstractTask {
         return simpleScheduleBuilder;
     }
 
-    private static void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder) {
-        if (policy.equals(TaskConstants.NEXT_WITH_EXISTING_COUNT)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
-        } else if (policy.equals(TaskConstants.IGNORE_POLICY)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-        } else if (policy.equals(TaskConstants.NEXT_WITH_REMAINING_COUNT)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
-        } else if (policy.equals(TaskConstants.NOW_WITH_EXISTING_COUNT)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
-        } else if (policy.equals(TaskConstants.NOW_WITH_REMAINING_COUNT)) {
-            simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
+    private void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder) {
+        switch (policy) {
+            case TaskConstants.NEXT_WITH_EXISTING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
+                break;
+            case TaskConstants.IGNORE_POLICY:
+                simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+                break;
+            case TaskConstants.NEXT_WITH_REMAINING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
+                break;
+            case TaskConstants.NOW_WITH_EXISTING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
+                break;
+            case TaskConstants.NOW_WITH_REMAINING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
+                break;
+            default:
+                break;
         }
+    }
+
+    public void setConfigs(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration) throws
+            SchedulingException {
+        this.interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
+        this.delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
+        validateTimerConfigurations(delay, interval);
+        this.thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
+        this.policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
+        this.threadCount = threadConfiguration.getIntValue(TaskConstants.THREAD_COUNT).intValue();
+        this.threadPriority = threadConfiguration.getIntValue(TaskConstants.THREAD_PRIORITY).intValue();
     }
 }
