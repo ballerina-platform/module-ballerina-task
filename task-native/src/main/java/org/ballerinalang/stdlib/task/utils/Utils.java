@@ -102,9 +102,8 @@ public class Utils {
     public static void validateService(ServiceInformation serviceInformation) throws SchedulingException {
         AttachedFunction[] resources = serviceInformation.getService().getType().getAttachedFunctions();
         if (resources.length != VALID_RESOURCE_COUNT) {
-            throw new SchedulingException(
-                    "Invalid number of resources found in service \'" + serviceInformation.getServiceName()
-                            + "\'. Task service should include only one resource.");
+            throw new SchedulingException("Invalid number of resources found in service \'" +
+                    serviceInformation.getServiceName() + "\'. Task service should include only one resource.");
         }
         AttachedFunction resource = resources[0];
 
