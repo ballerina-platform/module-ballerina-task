@@ -69,8 +69,8 @@ public type TimerConfiguration record {|
 # the `task:Listener`.
 #
 # + cronExpression - A CRON expression (eg: `* * * * ? *`) as a string for scheduling an appointment that is made up
-#                    of seven sub-expressions that describe individual details of the schedule. This sub-expression
-#                    is separated with white-space, and represent:
+#                    of six or seven sub-expressions that describe individual details of the schedule. This
+#                    sub-expression is separated with white-space, and represent:
 #                       Seconds
 #                       Minutes
 #                       Hours

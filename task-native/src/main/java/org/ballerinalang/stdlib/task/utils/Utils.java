@@ -53,8 +53,7 @@ public class Utils {
 
     @SuppressWarnings("unchecked")
     public static String getCronExpressionFromAppointmentRecord(Object record) throws SchedulingException {
-        String cronExpression;
-        cronExpression = record.toString();
+        String cronExpression = record.toString();
         if (!isValidExpression(cronExpression)) {
             throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
         }
