@@ -50,57 +50,9 @@ public function testNegativeInteval() {
 }
 
 @test:Config {}
-public function testInvalidAppointmentData() {
-    AppointmentData appointmentData = {
-        seconds: "invalid",
-        minutes: " ",
-        hours: "Appointment",
-        daysOfMonth: " ",
-        months: "Data",
-        daysOfWeek: "*",
-        year: "*"
-    };
-
-    AppointmentConfiguration configuration = {
-        appointmentDetails: appointmentData
-    };
-
-    Scheduler|error timer = trap new (configuration);
-    test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"AppointmentData \"{\"seconds\":\"invalid\",\"minutes\":\" \"," +
-        "\"hours\":\"Appointment\",\"daysOfMonth\":\" \",\"months\":\"Data\",\"daysOfWeek\":\"*\",\"year\":\"*\"}\" " +
-        "is invalid.\")");
-}
-
-type DuplicateAppointmentData record {
-    string seconds?;
-    string minutes?;
-    string hours?;
-    string daysOfMonth?;
-    string months?;
-    string daysOfWeek?;
-    string year?;
-};
-
-@test:Config {}
-public function testInvalidAppointmentDataRecord() {
-
-    DuplicateAppointmentData appointmentData = {
-        seconds: "0/2",
-        minutes: "*",
-        hours: "*",
-        daysOfMonth: "*",
-        months: "*",
-        daysOfWeek: "?",
-        year: "*"
-    };
-    test:assertFalse(appointmentData is AppointmentData);
-}
-
-@test:Config {}
 public function testInvalidCronExpression() {
     AppointmentConfiguration configuration = {
-        appointmentDetails: "invalid cron expression"
+        cronExpression: "invalid cron expression"
     };
     Scheduler|error timer = trap new (configuration);
     test:assertTrue(timer is error);
