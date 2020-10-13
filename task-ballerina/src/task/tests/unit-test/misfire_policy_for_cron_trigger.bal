@@ -27,8 +27,8 @@ service misfireService6 = service {
 
 @test:Config {}
 function testFireAndProceedWithService6() returns error? {
-    Scheduler taskTimer = new ({ appointmentDetails: "* * * * * ? *", noOfRecurrences: 8,
-                                  misfirePolicy: "fireAndProceed"  });
+    Scheduler taskTimer = new ({ cronExpression: "* * * * * ? *", noOfRecurrences: 8,
+                                 misfirePolicy: "fireAndProceed"  });
     check taskTimer.attach(misfireService6);
     check taskTimer.start();
     runtime:sleep(1500);
@@ -52,7 +52,7 @@ service misfireService7 = service {
 
 @test:Config {}
 function testdoNothingWithService7() returns error? {
-    Scheduler taskTimer = new ({ appointmentDetails: "* * * * * ? *", noOfRecurrences: 5, misfirePolicy: "doNothing" });
+    Scheduler taskTimer = new ({ cronExpression: "* * * * * ? *", noOfRecurrences: 5, misfirePolicy: "doNothing" });
     check taskTimer.attach(misfireService7);
     check taskTimer.start();
     runtime:sleep(1500);

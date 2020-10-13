@@ -17,7 +17,6 @@
  */
 package org.ballerinalang.stdlib.task.utils;
 
-import org.ballerinalang.jvm.TypeChecker;
 import org.ballerinalang.jvm.api.BErrorCreator;
 import org.ballerinalang.jvm.api.BStringUtils;
 import org.ballerinalang.jvm.api.values.BError;
@@ -29,10 +28,7 @@ import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.objects.Appointment;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
 import org.ballerinalang.stdlib.task.objects.Timer;
-
-import java.util.Objects;
-
-import static org.quartz.CronExpression.isValidExpression;
+import org.quartz.CronExpression;
 
 /**
  * Utility functions used in ballerina task module.
@@ -56,42 +52,11 @@ public class Utils {
 
     @SuppressWarnings("unchecked")
     public static String getCronExpressionFromAppointmentRecord(Object record) throws SchedulingException {
-        String cronExpression;
-        if (TaskConstants.RECORD_APPOINTMENT_DATA.equals(TypeChecker.getType(record).getName())) {
-            cronExpression = buildCronExpression((BMap<BString, Object>) record);
-            if (!isValidExpression(cronExpression)) {
-                throw new SchedulingException("AppointmentData \"" + record.toString() + "\" is invalid.");
-            }
-        } else {
-            cronExpression = record.toString();
-            if (!isValidExpression(cronExpression)) {
-                throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
-            }
+        String cronExpression = record.toString();
+        if (!CronExpression.isValidExpression(cronExpression)) {
+            throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
         }
         return cronExpression;
-    }
-
-    // Following code is reported as duplicates since all the lines doing same function call.
-    private static String buildCronExpression(BMap<BString, Object> record) {
-        String cronExpression = getStringFieldValue(record, TaskConstants.FIELD_SECONDS) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_MINUTES) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_HOURS) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_DAYS_OF_MONTH) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_MONTHS) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_DAYS_OF_WEEK) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_YEAR);
-        return cronExpression.trim();
-    }
-
-    private static String getStringFieldValue(BMap<BString, Object> record, BString fieldName) {
-        if (TaskConstants.FIELD_DAYS_OF_MONTH.equals(fieldName) && Objects.isNull(record.get(TaskConstants.
-                FIELD_DAYS_OF_MONTH))) {
-            return "?";
-        } else if (Objects.nonNull(record.get(fieldName))) {
-            return record.get(fieldName).toString();
-        } else {
-            return "*";
-        }
     }
 
     /*
@@ -144,7 +109,7 @@ public class Utils {
     public static Appointment processAppointment(BMap<BString, Object> configurations)
             throws SchedulingException {
         Appointment appointment;
-        Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
+        Object appointmentDetails = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
         String cronExpression = getCronExpressionFromAppointmentRecord(appointmentDetails);
         long thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
         String misfirePolicy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));

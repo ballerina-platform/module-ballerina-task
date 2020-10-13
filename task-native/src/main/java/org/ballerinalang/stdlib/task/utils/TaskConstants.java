@@ -41,7 +41,7 @@ public class TaskConstants {
 
     // Member names used in records
     public static final BString MEMBER_LISTENER_CONFIGURATION = BStringUtils.fromString("listenerConfiguration");
-    public static final BString MEMBER_APPOINTMENT_DETAILS = BStringUtils.fromString("appointmentDetails");
+    public static final BString MEMBER_CRON_EXPRESSION = BStringUtils.fromString("cronExpression");
     public static final BString MEMBER_MISFIRE_CONFIGURATION = BStringUtils.fromString("misfireConfiguration");
 
     // Misfire instructions
