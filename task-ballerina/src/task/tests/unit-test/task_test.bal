@@ -17,7 +17,20 @@
 import ballerina/test;
 import ballerina/runtime;
 
-AppointmentConfiguration appointmentConfiguration = { cronExpression: "0/2 * * * * ? *"};
+// Service for the appointment task
+AppointmentData appointmentData = {
+    seconds: "0/2",
+    minutes: "*",
+    hours: "*",
+    daysOfMonth: "*",
+    months: "*",
+    daysOfWeek: "?",
+    year: "*"
+};
+
+AppointmentConfiguration appointmentConfiguration = {
+    appointmentDetails: appointmentData
+};
 
 int count = 0;
 
