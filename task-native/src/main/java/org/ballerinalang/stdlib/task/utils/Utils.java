@@ -67,9 +67,8 @@ public class Utils {
     public static void validateService(ServiceInformation serviceInformation) throws SchedulingException {
         AttachedFunction[] resources = serviceInformation.getService().getType().getAttachedFunctions();
         if (resources.length != VALID_RESOURCE_COUNT) {
-            throw new SchedulingException(
-                    "Invalid number of resources found in service \'" + serviceInformation.getServiceName()
-                            + "\'. Task service should include only one resource.");
+            throw new SchedulingException("Invalid number of resources found in service \'" +
+                    serviceInformation.getServiceName() + "\'. Task service should include only one resource.");
         }
         AttachedFunction resource = resources[0];
 
@@ -83,14 +82,12 @@ public class Utils {
 
     private static void validateOnTriggerResource(BType returnParameterType) throws SchedulingException {
         if (returnParameterType != org.ballerinalang.jvm.types.BTypes.typeNull) {
-            throw new SchedulingException(
-                    "Invalid resource function signature: \'" + TaskConstants.RESOURCE_ON_TRIGGER +
-                            "\' should not return a value.");
+            throw new SchedulingException("Invalid resource function signature: \'" +
+                    TaskConstants.RESOURCE_ON_TRIGGER + "\' should not return a value.");
         }
     }
 
-    public static Timer processTimer(BMap<BString, Object> configurations)
-            throws SchedulingException {
+    public static Timer processTimer(BMap<BString, Object> configurations) throws SchedulingException {
         Timer task;
         long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
         long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
