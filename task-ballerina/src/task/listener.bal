@@ -23,15 +23,19 @@ public class Listener {
     boolean started = false;
 
     private TimerConfiguration|AppointmentConfiguration listenerConfiguration;
+    private ThreadConfiguration threadConfiguration;
 
     # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a configuration
     # error.
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #                   `task:Listener` behavior
-    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
-        validateConfiguration(configuration);
+    # + threadConfiguration - The `task:ThreadConfiguration` record to define the `task:Listener` behavior
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
+                                  ThreadConfiguration threadConfiguration = {}) {
+        validateConfiguration(configuration, threadConfiguration);
         self.listenerConfiguration = configuration;
+        self.threadConfiguration = threadConfiguration;
         var result = initExternal(self);
         if (result is ListenerError) {
             panic result;
@@ -155,7 +159,8 @@ isolated function attachExternal(Listener task, service s, any... attachments) r
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration) {
+isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration,
+                                        ThreadConfiguration threadConfiguration) {
     var noOfRecurrences = configuration[NO_OF_RECURRENCE];
     var misfirePolicy = configuration.misfirePolicy;
     if (configuration is TimerConfiguration) {
@@ -176,5 +181,11 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
         }
     } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {
         panic ListenerError("Wrong misfire policy has given for the appointment task.");
+    }
+    if (threadConfiguration.threadCount < 1) {
+        panic ListenerError("Thread count must be greater than 0.");
+    }
+    if (threadConfiguration.threadPriority < 1 || threadConfiguration.threadPriority > 10) {
+        panic ListenerError("Thread priority must be an integer value between 1 and 10.");
     }
 }

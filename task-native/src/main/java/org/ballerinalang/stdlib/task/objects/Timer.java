@@ -17,6 +17,8 @@
 */
 package org.ballerinalang.stdlib.task.objects;
 
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
@@ -39,42 +41,34 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class Timer extends AbstractTask {
 
-    private long interval, delay;
-    private long thresholdInMillis;
+    private long interval, delay, thresholdInMillis, threadCount, threadPriority;
     private String policy;
 
     /**
      * Creates a Timer object.
      *
-     * @param delay    The initial delay.
-     * @param interval The interval between two task executions.
+     * @param configurations      Configurations related to a task.
+     * @param threadConfiguration Configurations related to a ThreadPool.
      * @throws SchedulingException When provided configuration values are invalid.
      */
-    public Timer(long delay, long interval, long thresholdInMillis, String misfirePolicy) throws SchedulingException {
+    public Timer(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration) throws
+            SchedulingException {
         super();
-        validateTimerConfigurations(delay, interval);
-        this.interval = interval;
-        this.delay = delay;
-        this.thresholdInMillis = thresholdInMillis;
-        this.policy = misfirePolicy;
+        setConfigs(configurations, threadConfiguration);
     }
 
     /**
      * Creates a Timer object with limited number of running times.
      *
-     * @param delay    The initial delay.
-     * @param interval The interval between two task executions.
+     * @param configurations      Configurations related to a task.
+     * @param threadConfiguration Configurations related to a ThreadPool.
      * @param maxRuns  Number of times after which the timer will turn off.
      * @throws SchedulingException When provided configuration values are invalid.
      */
-    public Timer(long delay, long interval, long thresholdInMillis, String misfirePolicy, long maxRuns) throws
+    public Timer(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration, long maxRuns) throws
             SchedulingException {
         super(maxRuns);
-        validateTimerConfigurations(delay, interval);
-        this.interval = interval;
-        this.delay = delay;
-        this.thresholdInMillis = thresholdInMillis;
-        this.policy = misfirePolicy;
+        setConfigs(configurations, threadConfiguration);
     }
 
     /**
@@ -133,7 +127,7 @@ public class Timer extends AbstractTask {
      * @throws SchedulerException if scheduling is failed.
      */
     private void scheduleTimer(JobDataMap jobData) throws SchedulerException, SchedulingException {
-        TaskManager.createSchedulerProperties(thresholdInMillis);
+        TaskManager.createSchedulerProperties(thresholdInMillis, threadCount, threadPriority);
         SimpleScheduleBuilder schedule = createSchedulerBuilder(this.getInterval(), this.getMaxRuns());
         String triggerId = this.getId();
         JobDetail job = newJob(TaskJob.class).usingJobData(jobData).withIdentity(triggerId).build();
@@ -203,5 +197,16 @@ public class Timer extends AbstractTask {
             default:
                 break;
         }
+    }
+
+    public void setConfigs(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration) throws
+            SchedulingException {
+        this.interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
+        this.delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
+        validateTimerConfigurations(delay, interval);
+        this.thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
+        this.policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
+        this.threadCount = threadConfiguration.getIntValue(TaskConstants.THREAD_COUNT).intValue();
+        this.threadPriority = threadConfiguration.getIntValue(TaskConstants.THREAD_PRIORITY).intValue();
     }
 }

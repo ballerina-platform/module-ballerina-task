@@ -42,6 +42,9 @@ public class TaskConstants {
     // Member names used in records
     public static final BString MEMBER_LISTENER_CONFIGURATION = BStringUtils.fromString("listenerConfiguration");
     public static final BString MEMBER_CRON_EXPRESSION = BStringUtils.fromString("cronExpression");
+    public static final BString THREAD_CONFIGURATION = BStringUtils.fromString("threadConfiguration");
+    public static final BString THREAD_COUNT = BStringUtils.fromString("threadCount");
+    public static final BString THREAD_PRIORITY = BStringUtils.fromString("threadPriority");
 
     // Misfire instructions
     public static final String FIRE_NOW = "fireNow";
@@ -89,6 +92,7 @@ public class TaskConstants {
 
     // Quarts property names
     public static final String QUARTZ_THREAD_COUNT = "org.quartz.threadPool.threadCount";
+    public static final String QUARTZ_THREAD_PRIORITY = "org.quartz.threadPool.threadPriority";
     public static final String QUARTZ_MISFIRE_THRESHOLD = "org.quartz.jobStore.misfireThreshold";
 
     // Quartz property values.

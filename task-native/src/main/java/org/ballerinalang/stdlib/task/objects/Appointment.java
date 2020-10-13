@@ -17,24 +17,25 @@
 */
 package org.ballerinalang.stdlib.task.objects;
 
+import org.ballerinalang.jvm.api.values.BMap;
+import org.ballerinalang.jvm.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
+import org.ballerinalang.stdlib.task.utils.Utils;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.SchedulerException;
+import org.quartz.TriggerBuilder;
 import org.quartz.TriggerUtils;
 import org.quartz.impl.calendar.BaseCalendar;
 import org.quartz.spi.OperableTrigger;
 
 import java.util.Calendar;
 import java.util.Date;
-
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * Represents an appointment.
@@ -44,36 +45,35 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class Appointment extends AbstractTask {
 
     private String cronExpression;
-    private long thresholdInMillis;
+    private long thresholdInMillis, threadCount, threadPriority;
     private String policy;
 
     /**
      * Creates an Appointment object with provided CRON expression.
      *
-     * @param cronExpression The CRON expression for which the Appointment triggers.
+     * @param configurations      Configurations related to a task.
+     * @param threadConfiguration Configurations related to a ThreadPool.
      * @throws SchedulingException When initializing, this Appointment is failed.
      */
-    public Appointment(String cronExpression, long thresholdInMillis, String misfirePolicy) throws SchedulingException {
+    public Appointment(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration) throws
+            SchedulingException {
         super();
-        this.cronExpression = cronExpression;
-        this.thresholdInMillis = thresholdInMillis;
-        this.policy = misfirePolicy;
+        setConfigs(configurations, threadConfiguration);
     }
 
     /**
      * Creates an Appointment object with provided cron expression,
      * which will stop after running provided number of times.
      *
-     * @param cronExpression Cron expression for which the Appointment triggers.
+     * @param configurations      Configurations related to a task.
+     * @param threadConfiguration Configurations related to a ThreadPool.
      * @param maxRuns        Number of times after which the Appointment will cancel.
      * @throws SchedulingException When initializing this Appointment is failed.
      */
-    public Appointment(String cronExpression, long thresholdInMillis, String misfirePolicy,
-                       long maxRuns) throws SchedulingException {
+    public Appointment(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration, long maxRuns)
+            throws SchedulingException {
         super(maxRuns);
-        this.cronExpression = cronExpression;
-        this.thresholdInMillis = thresholdInMillis;
-        this.policy = misfirePolicy;
+        setConfigs(configurations, threadConfiguration);
     }
 
     /**
@@ -115,9 +115,9 @@ public class Appointment extends AbstractTask {
      */
     private void scheduleAppointment(JobDataMap jobData) throws SchedulerException, SchedulingException {
         String triggerId = this.getId();
-        TaskManager.createSchedulerProperties(thresholdInMillis);
-        JobDetail job = newJob(TaskJob.class).usingJobData(jobData).withIdentity(triggerId).build();
-        CronTrigger trigger = newTrigger()
+        TaskManager.createSchedulerProperties(thresholdInMillis, threadCount, threadPriority);
+        JobDetail job = JobBuilder.newJob(TaskJob.class).usingJobData(jobData).withIdentity(triggerId).build();
+        CronTrigger trigger = TriggerBuilder.newTrigger()
                 .withIdentity(triggerId)
                 .withSchedule(buildCronScheduler(this.getCronExpression()))
                 .build();
@@ -135,7 +135,7 @@ public class Appointment extends AbstractTask {
     }
 
     private CronScheduleBuilder buildCronScheduler(String cronExpression) {
-        CronScheduleBuilder cronScheduleBuilder = cronSchedule(cronExpression);
+        CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(cronExpression);
         switch (policy) {
             case TaskConstants.DO_NOTHING:
                 cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
@@ -149,5 +149,15 @@ public class Appointment extends AbstractTask {
             default:
         }
         return cronScheduleBuilder;
+    }
+
+    public void setConfigs(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration) throws
+            SchedulingException {
+        Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
+        this.cronExpression = Utils.getCronExpressionFromAppointmentRecord(appointmentDetails);
+        this.thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
+        this.policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
+        this.threadCount = threadConfiguration.getIntValue(TaskConstants.THREAD_COUNT).intValue();
+        this.threadPriority = threadConfiguration.getIntValue(TaskConstants.THREAD_PRIORITY).intValue();
     }
 }

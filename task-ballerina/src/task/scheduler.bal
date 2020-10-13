@@ -23,8 +23,10 @@ public class Scheduler {
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #                   `task:Sceduler` behavior
-    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
-        self.taskListener = new(configuration);
+    # + threadConfiguration - The `task:ThreadConfiguration` record to define the `task:Sceduler` behavior
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
+                                  ThreadConfiguration threadConfiguration = {}) {
+        self.taskListener = new(configuration, threadConfiguration);
     }
 
     # Attaches the provided `service` to the task.
