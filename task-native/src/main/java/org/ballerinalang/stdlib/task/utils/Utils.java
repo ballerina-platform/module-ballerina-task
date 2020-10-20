@@ -17,14 +17,15 @@
  */
 package org.ballerinalang.stdlib.task.utils;
 
-import org.ballerinalang.jvm.TypeChecker;
-import org.ballerinalang.jvm.api.BErrorCreator;
-import org.ballerinalang.jvm.api.BStringUtils;
-import org.ballerinalang.jvm.api.values.BError;
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BString;
-import org.ballerinalang.jvm.types.AttachedFunction;
-import org.ballerinalang.jvm.types.BType;
+import io.ballerina.runtime.TypeChecker;
+import io.ballerina.runtime.api.ErrorCreator;
+import io.ballerina.runtime.api.PredefinedTypes;
+import io.ballerina.runtime.api.StringUtils;
+import io.ballerina.runtime.api.types.AttachedFunctionType;
+import io.ballerina.runtime.api.types.Type;
+import io.ballerina.runtime.api.values.BError;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.objects.Appointment;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
@@ -50,8 +51,8 @@ public class Utils {
     }
 
     public static BError createTaskError(String reason, String message) {
-        return BErrorCreator.createDistinctError(reason, TaskConstants.TASK_PACKAGE_ID,
-                BStringUtils.fromString(message));
+        return ErrorCreator.createDistinctError(reason, TaskConstants.TASK_PACKAGE_ID,
+                StringUtils.fromString(message));
     }
 
     @SuppressWarnings("unchecked")
@@ -100,12 +101,12 @@ public class Utils {
      *       Issue: https://github.com/ballerina-platform/ballerina-lang/issues/14148
      */
     public static void validateService(ServiceInformation serviceInformation) throws SchedulingException {
-        AttachedFunction[] resources = serviceInformation.getService().getType().getAttachedFunctions();
+        AttachedFunctionType[] resources = serviceInformation.getService().getType().getAttachedFunctions();
         if (resources.length != VALID_RESOURCE_COUNT) {
             throw new SchedulingException("Invalid number of resources found in service \'" +
                     serviceInformation.getServiceName() + "\'. Task service should include only one resource.");
         }
-        AttachedFunction resource = resources[0];
+        AttachedFunctionType resource = resources[0];
 
         if (TaskConstants.RESOURCE_ON_TRIGGER.equals(resource.getName())) {
             validateOnTriggerResource(resource.getReturnParameterType());
@@ -115,8 +116,8 @@ public class Utils {
         }
     }
 
-    private static void validateOnTriggerResource(BType returnParameterType) throws SchedulingException {
-        if (returnParameterType != org.ballerinalang.jvm.types.BTypes.typeNull) {
+    private static void validateOnTriggerResource(Type returnParameterType) throws SchedulingException {
+        if (returnParameterType != PredefinedTypes.TYPE_NULL) {
             throw new SchedulingException("Invalid resource function signature: \'" +
                     TaskConstants.RESOURCE_ON_TRIGGER + "\' should not return a value.");
         }
