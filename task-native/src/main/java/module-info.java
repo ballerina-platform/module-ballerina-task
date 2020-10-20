@@ -17,7 +17,7 @@
  */
 
 module io.ballerina.stdlib.task {
-    requires io.ballerina.jvm;
+    requires io.ballerina.runtime;
     requires quartz;
     exports org.ballerinalang.stdlib.task.actions;
     exports org.ballerinalang.stdlib.task.api;

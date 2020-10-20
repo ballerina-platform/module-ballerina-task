@@ -17,12 +17,12 @@
 */
 package org.ballerinalang.stdlib.task.utils;
 
-import org.ballerinalang.jvm.api.BRuntime;
-import org.ballerinalang.jvm.scheduling.StrandMetadata;
-import org.ballerinalang.jvm.types.AttachedFunction;
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.async.StrandMetadata;
+import io.ballerina.runtime.api.types.AttachedFunctionType;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
 
-import static org.ballerinalang.jvm.util.BLangConstants.BALLERINA_BUILTIN_PKG_PREFIX;
+import static io.ballerina.runtime.util.BLangConstants.BALLERINA_BUILTIN_PKG_PREFIX;
 
 /**
  * This class invokes the Ballerina onTrigger function, and if an error occurs while invoking that function, it invokes
@@ -35,17 +35,17 @@ public class TaskExecutor {
                     TaskConstants.RESOURCE_ON_TRIGGER);
 
     public static void executeFunction(ServiceInformation serviceInformation) {
-        AttachedFunction onTriggerFunction = serviceInformation.getOnTriggerFunction();
+        AttachedFunctionType onTriggerFunction = serviceInformation.getOnTriggerFunction();
         Object[] onTriggerFunctionArgs = getParameterList(onTriggerFunction, serviceInformation);
 
-        BRuntime runtime = serviceInformation.getRuntime();
+        Runtime runtime = serviceInformation.getRuntime();
         runtime.invokeMethodAsync(serviceInformation.getService(), TaskConstants.RESOURCE_ON_TRIGGER, null,
                 TASK_METADATA, null, onTriggerFunctionArgs);
     }
 
-    private static Object[] getParameterList(AttachedFunction function, ServiceInformation serviceInformation) {
+    private static Object[] getParameterList(AttachedFunctionType function, ServiceInformation serviceInformation) {
         Object[] attachments = serviceInformation.getAttachment();
-        int numberOfParameters = function.type.paramTypes.length;
+        int numberOfParameters = function.getType().getParameterTypes().length;
         Object[] parameters = null;
         if (numberOfParameters == attachments.length) {
             int i = 0;
