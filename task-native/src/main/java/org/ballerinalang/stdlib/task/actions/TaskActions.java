@@ -17,10 +17,10 @@
  */
 package org.ballerinalang.stdlib.task.actions;
 
-import org.ballerinalang.jvm.api.BRuntime;
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BObject;
-import org.ballerinalang.jvm.api.values.BString;
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.stdlib.task.api.TaskServerConnector;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.impl.TaskServerConnectorImpl;
@@ -97,9 +97,9 @@ public class TaskActions {
     public static Object attach(BObject taskListener, BObject service, Object... attachments) {
         ServiceInformation serviceInformation;
         if (attachments == null) {
-            serviceInformation = new ServiceInformation(BRuntime.getCurrentRuntime(), service);
+            serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service);
         } else {
-            serviceInformation = new ServiceInformation(BRuntime.getCurrentRuntime(), service, attachments);
+            serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service, attachments);
         }
 
         /*
