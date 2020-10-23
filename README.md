@@ -2,7 +2,6 @@ Ballerina Task Library
 ===================
 
   [![Build](https://github.com/ballerina-platform/module-ballerina-task/workflows/PR%20build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions?query=workflow%3ABuild) 
-  [![Daily build](https://github.com/ballerina-platform/module-ballerina-task/workflows/Daily%20build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions?query=workflow%3A%22Daily+build%22)
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-task.svg)](https://github.com/ballerina-platform/module-ballerina-task/commits/master)
   [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/io.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Fio)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -50,8 +49,6 @@ Execute the commands below to build from source.
 ## Contributing to Ballerina
 
 As an open source project, Ballerina welcomes contributions from the community. To start contributing, read these [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md) for information on how you should go about contributing to our project.
-
-Check the issue tracker for open issues that interest you. We look forward to receiving your contributions.
 
 ## Code of Conduct
 
