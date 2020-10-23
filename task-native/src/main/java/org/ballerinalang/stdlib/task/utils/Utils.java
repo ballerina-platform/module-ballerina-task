@@ -19,7 +19,6 @@ package org.ballerinalang.stdlib.task.utils;
 
 import io.ballerina.runtime.TypeChecker;
 import io.ballerina.runtime.api.ErrorCreator;
-import io.ballerina.runtime.api.PredefinedTypes;
 import io.ballerina.runtime.api.StringUtils;
 import io.ballerina.runtime.api.types.AttachedFunctionType;
 import io.ballerina.runtime.api.types.Type;
@@ -117,7 +116,7 @@ public class Utils {
     }
 
     private static void validateOnTriggerResource(Type returnParameterType) throws SchedulingException {
-        if (returnParameterType != PredefinedTypes.TYPE_NULL) {
+        if (returnParameterType != io.ballerina.runtime.api.PredefinedTypes.TYPE_NULL) {
             throw new SchedulingException("Invalid resource function signature: \'" +
                     TaskConstants.RESOURCE_ON_TRIGGER + "\' should not return a value.");
         }
