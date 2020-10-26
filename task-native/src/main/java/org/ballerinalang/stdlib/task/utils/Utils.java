@@ -17,7 +17,6 @@
  */
 package org.ballerinalang.stdlib.task.utils;
 
-import io.ballerina.runtime.TypeChecker;
 import io.ballerina.runtime.api.ErrorCreator;
 import io.ballerina.runtime.api.StringUtils;
 import io.ballerina.runtime.api.types.AttachedFunctionType;
@@ -41,7 +40,6 @@ import org.quartz.spi.OperableTrigger;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -69,42 +67,11 @@ public class Utils {
 
     @SuppressWarnings("unchecked")
     public static String getCronExpressionFromAppointmentRecord(Object record) throws SchedulingException {
-        String cronExpression;
-        if (TaskConstants.RECORD_APPOINTMENT_DATA.equals(TypeChecker.getType(record).getName())) {
-            cronExpression = buildCronExpression((BMap<BString, Object>) record);
-            if (!CronExpression.isValidExpression(cronExpression)) {
-                throw new SchedulingException("AppointmentData \"" + record.toString() + "\" is invalid.");
-            }
-        } else {
-            cronExpression = record.toString();
-            if (!CronExpression.isValidExpression(cronExpression)) {
-                throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
-            }
+        String cronExpression = record.toString();
+        if (!CronExpression.isValidExpression(cronExpression)) {
+            throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
         }
         return cronExpression;
-    }
-
-    // Following code is reported as duplicates since all the lines doing same function call.
-    private static String buildCronExpression(BMap<BString, Object> record) {
-        String cronExpression = getStringFieldValue(record, TaskConstants.FIELD_SECONDS) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_MINUTES) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_HOURS) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_DAYS_OF_MONTH) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_MONTHS) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_DAYS_OF_WEEK) + " " +
-                getStringFieldValue(record, TaskConstants.FIELD_YEAR);
-        return cronExpression.trim();
-    }
-
-    private static String getStringFieldValue(BMap<BString, Object> record, BString fieldName) {
-        if (TaskConstants.FIELD_DAYS_OF_MONTH.equals(fieldName) && Objects.isNull(record.get(TaskConstants.
-                FIELD_DAYS_OF_MONTH))) {
-            return "?";
-        } else if (Objects.nonNull(record.get(fieldName))) {
-            return record.get(fieldName).toString();
-        } else {
-            return "*";
-        }
     }
 
     /*

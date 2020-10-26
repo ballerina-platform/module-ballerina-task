@@ -68,7 +68,16 @@ public type TimerConfiguration record {|
 # Configurations related to an appointment, which are used to define the behavior of an appointment when initializing
 # the `task:Listener`.
 #
-# + appointmentDetails - A CRON expression as a string or `task:AppointmentData` for scheduling an appointment
+# + cronExpression - A CRON expression (eg: `* * * * ? *`) as a string for scheduling an appointment that is made up
+#                    of six or seven sub-expressions that describe individual details of the schedule. This
+#                    sub-expression is separated with white-space, and represent:
+#                       Seconds
+#                       Minutes
+#                       Hours
+#                       Day-of-Month
+#                       Month
+#                       Day-of-Week
+#                       Year (optional field)
 # + noOfRecurrences - Number of times to trigger the task after which the task stops running
 # + thresholdInMillis - The number of milliseconds the scheduler will tolerate a trigger to pass its
 #                       next-fire-time by being considered `misfired` before.
@@ -84,29 +93,10 @@ public type TimerConfiguration record {|
 #                       fireAndProceed - Instructs the scheduler if the trigger misfires. Then, the trigger wants
 #                                        to be fired now by the scheduler.
 public type AppointmentConfiguration record {|
-    string|AppointmentData appointmentDetails;
+    string cronExpression;
     int noOfRecurrences?;
     int thresholdInMillis = 5000;
     AppointmentMisfirePolicy misfirePolicy = "smartPolicy";
-|};
-
-# The CRON expression required for scheduling an appointment.
-#
-# + seconds - Second(s) in a given minute in which the appointment will run
-# + minutes - Minute(s) in a given hour in which the appointment will run
-# + hours - Hour(s) in a given day in which the appointment will run
-# + daysOfMonth - Day(s) of the month in which the appointment will run
-# + months - Month(s) in a given year in which the appointment will run
-# + daysOfWeek - Day(s) of a week in which the appointment will run
-# + year - Year(s) in which the appointment will run
-public type AppointmentData record {|
-    string seconds?;
-    string minutes?;
-    string hours?;
-    string daysOfMonth?;
-    string months?;
-    string daysOfWeek?;
-    string year?;
 |};
 
 # Possible types of parameters that can be passed into the `TimerTaskPolicy`.

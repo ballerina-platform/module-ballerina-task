@@ -82,7 +82,7 @@ public class TaskScheduler {
                 SimpleScheduleBuilder scheduleBuilder = Utils.createSchedulerBuilder(configurations);
                 trigger = Utils.createTrigger(scheduleBuilder, name, delay);
             } else {
-                Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
+                Object appointmentDetails = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
                 String cronExpression = Utils.getCronExpressionFromAppointmentRecord(appointmentDetails);
                 String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
                 CronScheduleBuilder scheduleBuilder = Utils.createCronScheduleBuilder(cronExpression, policy);

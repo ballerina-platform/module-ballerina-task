@@ -119,7 +119,7 @@ public class TaskActions {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
         try {
             if (!TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurations.getType().getName())) {
-                Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
+                Object appointmentDetails = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
                 Utils.getCronExpressionFromAppointmentRecord(appointmentDetails);
             }
             TaskScheduler taskScheduler = new TaskScheduler(Utils.createSchedulerProperties(configurations));
