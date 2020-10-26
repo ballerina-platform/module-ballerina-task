@@ -180,7 +180,7 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
             configuration.initialDelayInMillis = configuration.intervalInMillis;
         }
     } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {
-        panic ListenerError("Wrong misfire policy has given for the appointment task.");
+        panic ListenerError("Wrong misfire policy has been given for the appointment task.");
     }
     if (threadConfiguration.threadCount < 1) {
         panic ListenerError("Thread count must be greater than 0.");
