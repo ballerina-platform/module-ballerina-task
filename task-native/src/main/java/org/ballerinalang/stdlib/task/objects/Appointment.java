@@ -17,8 +17,8 @@
 */
 package org.ballerinalang.stdlib.task.objects;
 
-import org.ballerinalang.jvm.api.values.BMap;
-import org.ballerinalang.jvm.api.values.BString;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
@@ -153,8 +153,8 @@ public class Appointment extends AbstractTask {
 
     public void setConfigs(BMap<BString, Object> configurations, BMap<BString, Object> threadConfiguration) throws
             SchedulingException {
-        Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
-        this.cronExpression = Utils.getCronExpressionFromAppointmentRecord(appointmentDetails);
+        Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
+        this.cronExpression = Utils.getCronExpressionFromAppointmentRecord(cronExpression);
         this.thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
         this.policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
         this.threadCount = threadConfiguration.getIntValue(TaskConstants.THREAD_COUNT).intValue();
