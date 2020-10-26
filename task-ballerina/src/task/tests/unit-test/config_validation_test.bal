@@ -21,7 +21,7 @@ Scheduler timerForNoResourceService = new ({
 });
 
 @test:Config {}
-public function testZeroInterval() {
+public isolated function testZeroInterval() {
     Scheduler|error timer = trap new ({
         intervalInMillis: 0
     });
@@ -30,7 +30,7 @@ public function testZeroInterval() {
 }
 
 @test:Config {}
-public function testNegativeDelay() {
+public isolated function testNegativeDelay() {
     Scheduler|error timer = trap new ({
         intervalInMillis: 500,
         initialDelayInMillis: -1000
@@ -40,7 +40,7 @@ public function testNegativeDelay() {
 }
 
 @test:Config {}
-public function testNegativeInteval() {
+public isolated function testNegativeInteval() {
     Scheduler|error timer = trap new ({
         intervalInMillis: -500,
         initialDelayInMillis: 1000
@@ -50,57 +50,9 @@ public function testNegativeInteval() {
 }
 
 @test:Config {}
-public function testInvalidAppointmentData() {
-    AppointmentData appointmentData = {
-        seconds: "invalid",
-        minutes: " ",
-        hours: "Appointment",
-        daysOfMonth: " ",
-        months: "Data",
-        daysOfWeek: "*",
-        year: "*"
-    };
-
+public isolated function testInvalidCronExpression() {
     AppointmentConfiguration configuration = {
-        appointmentDetails: appointmentData
-    };
-
-    Scheduler|error timer = trap new (configuration);
-    test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"AppointmentData \"{\"seconds\":\"invalid\",\"minutes\":\" \"," +
-        "\"hours\":\"Appointment\",\"daysOfMonth\":\" \",\"months\":\"Data\",\"daysOfWeek\":\"*\",\"year\":\"*\"}\" " +
-        "is invalid.\")");
-}
-
-type DuplicateAppointmentData record {
-    string seconds?;
-    string minutes?;
-    string hours?;
-    string daysOfMonth?;
-    string months?;
-    string daysOfWeek?;
-    string year?;
-};
-
-@test:Config {}
-public function testInvalidAppointmentDataRecord() {
-
-    DuplicateAppointmentData appointmentData = {
-        seconds: "0/2",
-        minutes: "*",
-        hours: "*",
-        daysOfMonth: "*",
-        months: "*",
-        daysOfWeek: "?",
-        year: "*"
-    };
-    test:assertFalse(appointmentData is AppointmentData);
-}
-
-@test:Config {}
-public function testInvalidCronExpression() {
-    AppointmentConfiguration configuration = {
-        appointmentDetails: "invalid cron expression"
+        cronExpression: "invalid cron expression"
     };
     Scheduler|error timer = trap new (configuration);
     test:assertTrue(timer is error);

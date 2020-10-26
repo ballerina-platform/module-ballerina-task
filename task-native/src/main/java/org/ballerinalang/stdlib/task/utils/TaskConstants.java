@@ -41,8 +41,7 @@ public class TaskConstants {
 
     // Member names used in records
     public static final BString MEMBER_LISTENER_CONFIGURATION = StringUtils.fromString("listenerConfiguration");
-    public static final BString MEMBER_APPOINTMENT_DETAILS = StringUtils.fromString("appointmentDetails");
-    public static final BString MEMBER_MISFIRE_CONFIGURATION = StringUtils.fromString("misfireConfiguration");
+    public static final BString MEMBER_CRON_EXPRESSION = StringUtils.fromString("cronExpression");
 
     // Misfire instructions
     public static final String FIRE_NOW = "fireNow";
@@ -67,15 +66,6 @@ public class TaskConstants {
     // Fields used in TimerConfiguration
     public static final BString FIELD_INTERVAL = StringUtils.fromString("intervalInMillis");
     public static final BString FIELD_DELAY = StringUtils.fromString("initialDelayInMillis");
-
-    // Fields used in AppointmentData
-    static final BString FIELD_SECONDS = StringUtils.fromString("seconds");
-    static final BString FIELD_MINUTES = StringUtils.fromString("minutes");
-    static final BString FIELD_HOURS = StringUtils.fromString("hours");
-    static final BString FIELD_DAYS_OF_MONTH = StringUtils.fromString("daysOfMonth");
-    static final BString FIELD_MONTHS = StringUtils.fromString("months");
-    static final BString FIELD_DAYS_OF_WEEK = StringUtils.fromString("daysOfWeek");
-    static final BString FIELD_YEAR = StringUtils.fromString("year");
 
     // Fields related to TaskError record
     public static final String SCHEDULER_ERROR = "SchedulerError";
