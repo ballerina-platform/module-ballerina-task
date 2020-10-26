@@ -21,18 +21,12 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import org.ballerinalang.stdlib.task.api.TaskServerConnector;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
-import org.ballerinalang.stdlib.task.impl.TaskServerConnectorImpl;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
-import org.ballerinalang.stdlib.task.objects.Task;
+import org.ballerinalang.stdlib.task.objects.TaskScheduler;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
-
-import static org.ballerinalang.stdlib.task.utils.TaskConstants.NATIVE_DATA_TASK_OBJECT;
-import static org.ballerinalang.stdlib.task.utils.Utils.createTaskError;
-import static org.ballerinalang.stdlib.task.utils.Utils.processAppointment;
-import static org.ballerinalang.stdlib.task.utils.Utils.processTimer;
-import static org.ballerinalang.stdlib.task.utils.Utils.validateService;
+import org.ballerinalang.stdlib.task.utils.Utils;
+import org.quartz.SchedulerException;
 
 /**
  * Class to handle ballerina external functions in Task library.
@@ -42,94 +36,98 @@ import static org.ballerinalang.stdlib.task.utils.Utils.validateService;
 public class TaskActions {
 
     public static Object pause(BObject taskListener) {
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            task.pause();
-        } catch (SchedulingException e) {
-            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
+            taskScheduler.pause();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError("Cannot pause Listener/Scheduler." + e.getMessage());
         }
         return null;
     }
 
     public static Object resume(BObject taskListener) {
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            task.resume();
-        } catch (SchedulingException e) {
-            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
+            taskScheduler.resume();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError("Cannot resume Listener/Scheduler." + e.getMessage());
         }
         return null;
     }
 
     public static Object detach(BObject taskListener, BObject service) {
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-            String serviceName = service.getType().getName();
-            task.removeService(serviceName);
-        } catch (Exception e) {
-            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
+            taskScheduler.removeService(service);
+        } catch (SchedulerException e) {
+            return Utils.createTaskError("Cannot detach the service to the Listener/Scheduler" + e.getMessage());
         }
         return null;
     }
 
     public static Object start(BObject taskListener) {
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-        TaskServerConnector serverConnector = new TaskServerConnectorImpl(task);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            serverConnector.start();
-        } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
+            taskScheduler.start();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError("Cannot start Listener/Scheduler." + e.getMessage());
         }
         return null;
     }
 
     public static Object stop(BObject taskListener) {
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-        TaskServerConnector serverConnector = new TaskServerConnectorImpl(task);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            serverConnector.stop();
-        } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
+            taskScheduler.stop();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError("Cannot stop Listener/Scheduler." + e.getMessage());
+        }
+        return null;
+    }
+
+    public static Object gracefulStop(BObject taskListener) {
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
+        try {
+            taskScheduler.gracefulStop();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError("Cannot stop Listener/Scheduler." + e.getMessage());
         }
         return null;
     }
 
     public static Object attach(BObject taskListener, BObject service, Object... attachments) {
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         ServiceInformation serviceInformation;
         if (attachments == null) {
             serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service);
         } else {
             serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service, attachments);
         }
-
-        /*
-         * TODO: After #14148 fixed, use compiler plugin to validate the service
-         */
         try {
-            validateService(serviceInformation);
+            Utils.validateService(serviceInformation);
+            taskScheduler.addService(taskListener, serviceInformation);
         } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
+            return Utils.createTaskError(e.getMessage());
+        } catch (SchedulerException e) {
+            return Utils.createTaskError("Cannot attach the service to the Listener/Scheduler." + e.getMessage());
         }
-
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-        task.addService(serviceInformation);
         return null;
     }
 
     @SuppressWarnings("unchecked")
     public static Object init(BObject taskListener) {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
-        String configurationTypeName = configurations.getType().getName();
-        Task task;
         try {
-            if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
-                task = processTimer(configurations);
-            } else { // Record type validates at the compile time. Hence, exhaustive validation is not needed.
-                task = processAppointment(configurations);
+            if (!TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurations.getType().getName())) {
+                Object appointmentDetails = configurations.get(TaskConstants.MEMBER_APPOINTMENT_DETAILS);
+                Utils.getCronExpressionFromAppointmentRecord(appointmentDetails);
             }
-            taskListener.addNativeData(NATIVE_DATA_TASK_OBJECT, task);
+            TaskScheduler taskScheduler = new TaskScheduler(Utils.createSchedulerProperties(configurations));
+            taskListener.addNativeData(TaskConstants.SCHEDULER, taskScheduler);
+        } catch (SchedulerException e) {
+            return Utils.createTaskError("Cannot initialize Listener/Scheduler." + e.getMessage());
         } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }

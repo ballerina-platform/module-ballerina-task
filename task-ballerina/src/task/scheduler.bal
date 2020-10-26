@@ -27,7 +27,7 @@ public class Scheduler {
         self.taskListener = new(configuration);
     }
 
-    # Attaches the provided `service` to the task.
+    # Attaches the provided `service` to the scheduler.
     #
     # + serviceToAttach - Ballerina `service` object, which needs to be attached to the task
     # + attachments - Set of optional parameters, which need to be passed inside the resources
@@ -40,7 +40,7 @@ public class Scheduler {
         }
     }
 
-    # Detaches the provided `service` from the task.
+    # Detaches the provided `service` from the scheduler.
     #
     # + attachedService - Ballerina `service` object, which needs to be detached from the task
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
@@ -52,7 +52,7 @@ public class Scheduler {
         }
     }
 
-    # Starts running the task. Task Scheduler will not run until this has been called.
+    # Starts the scheduler. Task Scheduler will not run until this has been called.
     #
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
     public isolated function 'start() returns SchedulerError? {
@@ -63,7 +63,7 @@ public class Scheduler {
         }
     }
 
-    # Stops the task. This will stop after running the existing jobs.
+    # Stops the scheduler. This will stop after running the existing jobs.
     #
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
     public isolated function stop() returns SchedulerError? {
@@ -74,7 +74,19 @@ public class Scheduler {
         }
     }
 
-    # Pauses the task.
+    # Stops the scheduler and the attached services gracefully. It will wait if there are any service still to be
+    # completed. This may panic if the stopping causes any error.
+    #
+    # + return - () or else a `task:ListenerError` upon failure to stop the listener
+    public isolated function gracefulStop() returns error? {
+        var result = gracefulStopExternal(self.taskListener);
+        if (result is ListenerError) {
+            string message = "Scheduler failed to stop";
+            return SchedulerError(message, result);
+        }
+    }
+
+    # Pauses the scheduler.
     #
     # + return - A `task:SchedulerError` if an error is occurred while pausing or else ()
     public isolated function pause() returns SchedulerError? {
@@ -85,7 +97,7 @@ public class Scheduler {
         }
     }
 
-    # Resumes a paused task.
+    # Resumes a scheduler.
     #
     # + return - A `task:SchedulerError` when an error occurred while resuming or else ()
     public isolated function resume() returns SchedulerError? {
@@ -96,7 +108,7 @@ public class Scheduler {
         }
     }
 
-    # Checks whether the task listener is started or not.
+    # Checks whether the listener is started or not.
     #
     # + return - `true` if the `Scheduler` is already started or else `false` if the `Scheduler` is
     #            not started yet or stopped calling the `Scheduler.stop()` function

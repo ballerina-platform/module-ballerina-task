@@ -21,36 +21,39 @@ Scheduler timerForNoResourceService = new ({
 });
 
 @test:Config {}
-public function testZeroInterval() {
+public isolated function testZeroInterval() {
     Scheduler|error timer = trap new ({
         intervalInMillis: 0
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
+    test:assertEquals(timer.toString(), "error ListenerError (\"Timer scheduling interval should be a positive " +
+    "integer.\")");
 }
 
 @test:Config {}
-public function testNegativeDelay() {
+public isolated function testNegativeDelay() {
     Scheduler|error timer = trap new ({
         intervalInMillis: 500,
         initialDelayInMillis: -1000
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"Timer scheduling delay should be a non-negative value.\")");
+    test:assertEquals(timer.toString(), "error ListenerError (\"Timer scheduling delay should be a " +
+    "non-negative value.\")");
 }
 
 @test:Config {}
-public function testNegativeInteval() {
+public isolated function testNegativeInteval() {
     Scheduler|error timer = trap new ({
         intervalInMillis: -500,
         initialDelayInMillis: 1000
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
+    test:assertEquals(timer.toString(), "error ListenerError (\"Timer scheduling interval should be a " +
+    "positive integer.\")");
 }
 
 @test:Config {}
-public function testInvalidAppointmentData() {
+public isolated function testInvalidAppointmentData() {
     AppointmentData appointmentData = {
         seconds: "invalid",
         minutes: " ",
@@ -83,7 +86,7 @@ type DuplicateAppointmentData record {
 };
 
 @test:Config {}
-public function testInvalidAppointmentDataRecord() {
+public isolated function testInvalidAppointmentDataRecord() {
 
     DuplicateAppointmentData appointmentData = {
         seconds: "0/2",
@@ -98,7 +101,7 @@ public function testInvalidAppointmentDataRecord() {
 }
 
 @test:Config {}
-public function testInvalidCronExpression() {
+public isolated function testInvalidCronExpression() {
     AppointmentConfiguration configuration = {
         appointmentDetails: "invalid cron expression"
     };
