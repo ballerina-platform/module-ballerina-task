@@ -14,6 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/runtime;
 import ballerina/test;
 
 service stopTimerService = service {
@@ -34,4 +35,28 @@ function testSchedulerStop() {
     if (expectedResult is error) {
         test:assertFail("Scheduler stop failed");
     }
+}
+
+
+int gracefulStopCounter = 0;
+service gracefulStopTimerService = service {
+    resource function onTrigger() {
+        gracefulStopCounter = gracefulStopCounter + 1;
+        runtime:sleep(2000);
+        gracefulStopCounter = gracefulStopCounter + 1;
+    }
+};
+
+@test:Config {}
+function testGracefullStop() {
+    TimerConfiguration configuration = {
+        intervalInMillis: 1000
+    };
+    Scheduler timer = new (configuration);
+    checkpanic timer.attach(gracefulStopTimerService);
+    checkpanic timer.start();
+    runtime:sleep(1100);
+    checkpanic timer.gracefulStop();
+     runtime:sleep(2000);
+    test:assertEquals(gracefulStopCounter, 2, msg = "Expected count mismatched");
 }

@@ -108,6 +108,27 @@ public class Scheduler {
         }
     }
 
+    // Need to discuss
+    //public isolated function resumeService(service resumedService) returns SchedulerError? {}
+    //
+    //public isolated function pauseService(service pauseedService) returns SchedulerError? {}
+    //
+    // public isolated function attach(service serviceToAttach,
+    //         TimerConfiguration|AppointmentConfiguration configuration, any... attachments) returns SchedulerError?{}
+    //
+    // public type TimerConfiguration record {|
+    //    int intervalInMillis;
+    //    int initialDelayInMillis = 0;
+    //    int noOfRecurrences = 0;
+    //    int thresholdInMillis = 5000;
+    //    TimerMisfirePolicy misfirePolicy = "smartPolicy";
+    //|};
+    // public type TaskConfiguration record {|
+    //    int threadCount = 10;
+    //    int threadPriority = 5;
+    //    TimerConfiguration|AppointmentConfiguration config;
+    //|};
+
     # Checks whether the listener is started or not.
     #
     # + return - `true` if the `Scheduler` is already started or else `false` if the `Scheduler` is

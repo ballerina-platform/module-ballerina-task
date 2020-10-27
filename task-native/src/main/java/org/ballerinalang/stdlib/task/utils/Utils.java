@@ -39,7 +39,6 @@ import org.quartz.spi.OperableTrigger;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -66,7 +65,7 @@ public class Utils {
     }
 
     @SuppressWarnings("unchecked")
-    public static String getCronExpressionFromAppointmentRecord(Object record) throws SchedulingException {
+    public static String validateCronExpression(Object record) throws SchedulingException {
         String cronExpression = record.toString();
         if (!CronExpression.isValidExpression(cronExpression)) {
             throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
@@ -103,10 +102,7 @@ public class Utils {
     }
 
     public static String getServiceName(BObject service) {
-        String name = service.getType().getName().split("\\$\\$")[1].replace("$_", "");
-        String str = "";
-        name = str.toUpperCase(Locale.forLanguageTag(name.substring(0, 1))) + name.substring(1);
-        return name;
+        return service.getType().getName().split("\\$\\$")[1];
     }
 
     public static Properties createSchedulerProperties(BMap<BString, Object> configurations) {

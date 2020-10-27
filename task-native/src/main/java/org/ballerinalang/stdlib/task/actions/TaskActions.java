@@ -119,8 +119,8 @@ public class TaskActions {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
         try {
             if (!TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurations.getType().getName())) {
-                Object appointmentDetails = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
-                Utils.getCronExpressionFromAppointmentRecord(appointmentDetails);
+                Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
+                Utils.validateCronExpression(cronExpression);
             }
             TaskScheduler taskScheduler = new TaskScheduler(Utils.createSchedulerProperties(configurations));
             taskListener.addNativeData(TaskConstants.SCHEDULER, taskScheduler);

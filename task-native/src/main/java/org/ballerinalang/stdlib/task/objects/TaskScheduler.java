@@ -20,7 +20,6 @@ package org.ballerinalang.stdlib.task.objects;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
 import org.ballerinalang.stdlib.task.utils.Utils;
@@ -76,21 +75,17 @@ public class TaskScheduler {
         this.jobInfoMap.put(name, job.getKey());
         Trigger trigger;
         String configurationTypeName = configurations.getType().getName();
-        try {
-            if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
-                long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
-                SimpleScheduleBuilder scheduleBuilder = Utils.createSchedulerBuilder(configurations);
-                trigger = Utils.createTrigger(scheduleBuilder, name, delay);
-            } else {
-                Object appointmentDetails = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
-                String cronExpression = Utils.getCronExpressionFromAppointmentRecord(appointmentDetails);
-                String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
-                CronScheduleBuilder scheduleBuilder = Utils.createCronScheduleBuilder(cronExpression, policy);
-                long maxRuns = Utils.getMaxRuns(configurations);
-                trigger = Utils.createCronTrigger(scheduleBuilder, name, maxRuns);
-            }
-        } catch (SchedulingException e) {
-            throw Utils.createTaskError(e.getMessage());
+        if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
+            long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
+            SimpleScheduleBuilder scheduleBuilder = Utils.createSchedulerBuilder(configurations);
+            trigger = Utils.createTrigger(scheduleBuilder, name, delay);
+        } else {
+            Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
+            String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
+            CronScheduleBuilder scheduleBuilder = Utils.createCronScheduleBuilder(cronExpression.toString(),
+                    policy);
+            long maxRuns = Utils.getMaxRuns(configurations);
+            trigger = Utils.createCronTrigger(scheduleBuilder, name, maxRuns);
         }
         this.scheduler.scheduleJob(job, trigger);
     }
