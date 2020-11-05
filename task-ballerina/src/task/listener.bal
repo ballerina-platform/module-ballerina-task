@@ -178,7 +178,7 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
             configuration.initialDelayInMillis = configuration.intervalInMillis;
         } else {
             if (initalDelay is int && initalDelay < 0) {
-                panic ListenerError("Timer scheduling delay should be a non-negative value.");
+                panic ListenerError("Timer scheduling delay should be a non-negative integer.");
             }
         }
     } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {

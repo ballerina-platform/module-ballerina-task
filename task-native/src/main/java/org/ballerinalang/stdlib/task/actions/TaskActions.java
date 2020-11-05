@@ -43,7 +43,7 @@ public class TaskActions {
         try {
             taskScheduler.pause(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Cannot pause Listener/Scheduler." + e.getMessage());
+            return Utils.createTaskError("Couldn't pause the Listener/Scheduler. " + e.getMessage());
         }
         return null;
     }
@@ -54,7 +54,7 @@ public class TaskActions {
         try {
             taskScheduler.resume(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Cannot resume Listener/Scheduler." + e.getMessage());
+            return Utils.createTaskError("Couldn't resume the Listener/Scheduler. " + e.getMessage());
         }
         return null;
     }
@@ -64,7 +64,7 @@ public class TaskActions {
         try {
             taskScheduler.removeService(service);
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Cannot detach the service to the Listener/Scheduler" + e.getMessage());
+            return Utils.createTaskError("Couldn't detach the service from the Listener/Scheduler. " + e.getMessage());
         }
         return null;
     }
@@ -74,7 +74,7 @@ public class TaskActions {
         try {
             taskScheduler.start();
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Cannot start Listener/Scheduler." + e.getMessage());
+            return Utils.createTaskError("Couldn't start the Listener/Scheduler. " + e.getMessage());
         }
         return null;
     }
@@ -85,11 +85,12 @@ public class TaskActions {
         try {
             taskScheduler.stop(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Cannot stop Listener/Scheduler." + e.getMessage());
+            return Utils.createTaskError("Couldn't stop the Listener/Scheduler. " + e.getMessage());
         }
         return null;
     }
 
+    @SuppressWarnings("unchecked")
     public static Object attach(BObject taskListener, BObject service, Object... attachments) {
         String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
         TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
@@ -107,7 +108,7 @@ public class TaskActions {
         } catch (SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Cannot attach the service to the Listener/Scheduler." + e.getMessage());
+            return Utils.createTaskError("Couldn't attach the service to the Listener/Scheduler. " + e.getMessage());
         }
         return null;
     }
@@ -117,7 +118,7 @@ public class TaskActions {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
         try {
             if (!TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurations.getType().getName())) {
-                Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
+                BString cronExpression = configurations.getStringValue(TaskConstants.MEMBER_CRON_EXPRESSION);
                 Utils.validateCronExpression(cronExpression);
             }
             TaskScheduler taskScheduler = new TaskScheduler();

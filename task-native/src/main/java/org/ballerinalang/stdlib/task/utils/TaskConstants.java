@@ -75,7 +75,6 @@ public class TaskConstants {
     // Quarts property names
     public static final String QUARTZ_THREAD_COUNT = "org.quartz.threadPool.threadCount";
     public static final String QUARTZ_MISFIRE_THRESHOLD = "org.quartz.jobStore.misfireThreshold";
-    public static final String QUARTZ_INSTANCE_NAME = "org.quartz.scheduler.instanceName";
 
     // Quartz property values.
     public static final String QUARTZ_THREAD_COUNT_VALUE = "10";

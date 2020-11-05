@@ -62,8 +62,8 @@ public class Utils {
     }
 
     @SuppressWarnings("unchecked")
-    public static String validateCronExpression(Object record) throws SchedulingException {
-        String cronExpression = record.toString();
+    public static String validateCronExpression(BString expression) throws SchedulingException {
+        String cronExpression = String.valueOf(expression);
         if (!CronExpression.isValidExpression(cronExpression)) {
             throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
         }
@@ -124,7 +124,7 @@ public class Utils {
 
     public static SimpleScheduleBuilder createSchedulerBuilder(BMap<BString, Object> configurations) {
         long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
-        long maxRuns = getMaxRuns(configurations);
+        long maxRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS).intValue();;
         String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
         SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
                 .withIntervalInMilliseconds(interval);
@@ -204,16 +204,6 @@ public class Utils {
         return cronScheduleBuilder;
     }
 
-    public static long getMaxRuns(BMap<BString, Object> configurations) {
-        long maxRuns;
-        if (configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS) == null) {
-            maxRuns = 0;
-        } else {
-            maxRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS).intValue();
-        }
-        return maxRuns;
-    }
-
     public static Trigger getTrigger(BMap<BString, Object> configurations, String triggerID) {
         Trigger trigger;
         String configurationTypeName = configurations.getType().getName();
@@ -226,7 +216,7 @@ public class Utils {
             String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
             CronScheduleBuilder scheduleBuilder = Utils.createCronScheduleBuilder(cronExpression.toString(),
                     policy);
-            long maxRuns = Utils.getMaxRuns(configurations);
+            long maxRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS).intValue();;
             trigger = Utils.createCronTrigger(scheduleBuilder, maxRuns, triggerID);
         }
         return trigger;

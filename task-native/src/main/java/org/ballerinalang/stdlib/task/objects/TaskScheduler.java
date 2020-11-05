@@ -67,7 +67,6 @@ public class TaskScheduler {
         this.scheduler.start();
     }
 
-    @SuppressWarnings("unchecked")
     public void addService(ServiceInformation serviceInformation, BMap<BString, Object> configurations,
                            String triggerId) throws SchedulerException {
         String name = serviceInformation.getServiceName();
@@ -79,7 +78,6 @@ public class TaskScheduler {
         this.scheduler.scheduleJob(job, trigger);
     }
 
-    @SuppressWarnings("unchecked")
     public void removeService(BObject service) throws SchedulerException {
         String serviceName = Utils.getServiceName(service);
         this.scheduler.deleteJob(this.jobInfoMap.get(serviceName));
