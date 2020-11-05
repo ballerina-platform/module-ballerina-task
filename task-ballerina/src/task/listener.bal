@@ -162,15 +162,13 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
     if (configuration is TimerConfiguration) {
         if (noOfRecurrences < 0) {
             panic ListenerError("Task noOfOccurrences should be a positive integer.");
+        } else if (noOfRecurrences == 1) {
+            if (!(misfirePolicy is OneTimeTaskPolicy)) {
+                panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
+            }
         } else {
-            if (noOfRecurrences == 1) {
-                if (!(misfirePolicy is OneTimeTaskPolicy)) {
-                    panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
-                }
-            } else {
-                if (!(misfirePolicy is RecurringTaskPolicy)) {
-                    panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
-                }
+            if (!(misfirePolicy is RecurringTaskPolicy)) {
+                panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
             }
         }
         if (configuration.intervalInMillis < 1) {

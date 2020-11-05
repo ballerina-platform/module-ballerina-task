@@ -44,7 +44,7 @@ public class TaskManager {
 
     public Scheduler getScheduler() throws SchedulingException {
         try {
-            if (this.scheduler != null && !this.scheduler.isShutdown()) {
+            if (this.scheduler != null && this.scheduler.isStarted()) {
                 return this.scheduler;
             }
             StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory(createSchedulerProperties());
