@@ -20,44 +20,47 @@ package org.ballerinalang.stdlib.task.objects;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.TaskJob;
 import org.ballerinalang.stdlib.task.utils.Utils;
-import org.quartz.CronScheduleBuilder;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
-import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.TriggerKey;
+import org.quartz.impl.matchers.GroupMatcher;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Set;
 
 /**
  * Task scheduler handles the quartz scheduler functions.
+ *
+ * @since 2.0.0
  */
 public class TaskScheduler {
 
     Scheduler scheduler = null;
     Map<String, JobKey> jobInfoMap;
 
-    public TaskScheduler(Properties properties) throws SchedulerException {
-        StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory(properties);
-        this.scheduler = stdSchedulerFactory.getScheduler();
+    public TaskScheduler() throws SchedulingException {
+        this.scheduler = TaskManager.getInstance().getScheduler();
         jobInfoMap = new HashMap<>();
     }
 
-    public void stop() throws SchedulerException {
-        this.scheduler.shutdown();
-    }
+    public void stop(String triggerId) throws SchedulerException {
+        Set<TriggerKey> keys = this.scheduler.getTriggerKeys(GroupMatcher.groupEquals(triggerId));
+        if (!keys.isEmpty()) {
+            for (TriggerKey key :keys) {
+                this.scheduler.unscheduleJob(key);
+            }
 
-    public void gracefulStop() throws SchedulerException {
-        this.scheduler.shutdown(true);
+        }
     }
 
     public void start() throws SchedulerException {
@@ -65,28 +68,14 @@ public class TaskScheduler {
     }
 
     @SuppressWarnings("unchecked")
-    public void addService(BObject taskListener, ServiceInformation serviceInformation)
-            throws SchedulerException {
-        BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
+    public void addService(ServiceInformation serviceInformation, BMap<BString, Object> configurations,
+                           String triggerId) throws SchedulerException {
         String name = serviceInformation.getServiceName();
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(TaskConstants.SERVICE_INFORMATION, serviceInformation);
         JobDetail job = JobBuilder.newJob(TaskJob.class).withIdentity(name).usingJobData(jobDataMap).build();
+        Trigger trigger = Utils.getTrigger(configurations, triggerId);
         this.jobInfoMap.put(name, job.getKey());
-        Trigger trigger;
-        String configurationTypeName = configurations.getType().getName();
-        if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
-            long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
-            SimpleScheduleBuilder scheduleBuilder = Utils.createSchedulerBuilder(configurations);
-            trigger = Utils.createTrigger(scheduleBuilder, name, delay);
-        } else {
-            Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
-            String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
-            CronScheduleBuilder scheduleBuilder = Utils.createCronScheduleBuilder(cronExpression.toString(),
-                    policy);
-            long maxRuns = Utils.getMaxRuns(configurations);
-            trigger = Utils.createCronTrigger(scheduleBuilder, name, maxRuns);
-        }
         this.scheduler.scheduleJob(job, trigger);
     }
 
@@ -97,11 +86,11 @@ public class TaskScheduler {
         this.jobInfoMap.remove(serviceName);
     }
 
-    public void pause() throws SchedulerException {
-        this.scheduler.pauseAll();
+    public void pause(String triggerId) throws SchedulerException {
+        this.scheduler.pauseTriggers(GroupMatcher.triggerGroupEquals(triggerId));
     }
 
-    public void resume() throws SchedulerException {
-        this.scheduler.resumeAll();
+    public void resume(String triggerId) throws SchedulerException {
+        this.scheduler.resumeTriggers(GroupMatcher.triggerGroupEquals(triggerId));
     }
 }

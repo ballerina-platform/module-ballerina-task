@@ -19,9 +19,8 @@
 #
 # + intervalInMillis - Timer interval (in milliseconds), which triggers the `onTrigger` resource
 # + initialDelayInMillis - Delay (in milliseconds) after which the timer will run
-# + noOfRecurrences - Number of times to trigger the task after which the task stops running
-# + thresholdInMillis - The number of milliseconds the scheduler will tolerate a trigger to pass its
-#                       next-fire-time by being considered `misfired` before.
+# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It will be zero,
+#                     the task will be triggered forever.
 # + misfirePolicy - The policy, which is used to inform what it should do when a misfire occurs. The following are the
 #            scenarios in which the policy can be used:
 #               One-time task (the task will be run once):
@@ -60,8 +59,7 @@
 public type TimerConfiguration record {|
     int intervalInMillis;
     int initialDelayInMillis?;
-    int noOfRecurrences?;
-    int thresholdInMillis = 5000;
+    int noOfRecurrences = 0;
     TimerMisfirePolicy misfirePolicy = "smartPolicy";
 |};
 
@@ -78,9 +76,8 @@ public type TimerConfiguration record {|
 #                       Month
 #                       Day-of-Week
 #                       Year (optional field)
-# + noOfRecurrences - Number of times to trigger the task after which the task stops running
-# + thresholdInMillis - The number of milliseconds the scheduler will tolerate a trigger to pass its
-#                       next-fire-time by being considered `misfired` before.
+# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It will be zero,
+#                     the task will be triggered forever.
 # + misfirePolicy - The policy, which is used to inform what it should do when a misfire occurs. The following are the
 #                   scenarios in which the policy can be used:
 #                       smartPolicy - This is the default policy, which will act as the `FireAndProceed`
@@ -94,8 +91,7 @@ public type TimerConfiguration record {|
 #                                        to be fired now by the scheduler.
 public type AppointmentConfiguration record {|
     string cronExpression;
-    int noOfRecurrences?;
-    int thresholdInMillis = 5000;
+    int noOfRecurrences = 0;
     AppointmentMisfirePolicy misfirePolicy = "smartPolicy";
 |};
 

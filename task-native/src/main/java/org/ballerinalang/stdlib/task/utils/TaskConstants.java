@@ -38,6 +38,7 @@ public class TaskConstants {
     public static final String RECORD_TIMER_CONFIGURATION = "TimerConfiguration";
     static final String RECORD_APPOINTMENT_DATA = "AppointmentData";
     public static final String SCHEDULER = "scheduler";
+    public static final String TRIGGER_NAME = "triggerName";
 
     // Member names used in records
     public static final BString MEMBER_LISTENER_CONFIGURATION = StringUtils.fromString("listenerConfiguration");
@@ -78,6 +79,7 @@ public class TaskConstants {
 
     // Quartz property values.
     public static final String QUARTZ_THREAD_COUNT_VALUE = "10";
+    public static final String QUARTZ_THRESHOLD_VALUE = "5000";
 
     TaskConstants() {
 

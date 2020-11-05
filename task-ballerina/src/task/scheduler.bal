@@ -74,18 +74,6 @@ public class Scheduler {
         }
     }
 
-    # Stops the scheduler and the attached services gracefully. It will wait if there are any service still to be
-    # completed. This may panic if the stopping causes any error.
-    #
-    # + return - () or else a `task:ListenerError` upon failure to stop the listener
-    public isolated function gracefulStop() returns error? {
-        var result = gracefulStopExternal(self.taskListener);
-        if (result is ListenerError) {
-            string message = "Scheduler failed to stop";
-            return SchedulerError(message, result);
-        }
-    }
-
     # Pauses the scheduler.
     #
     # + return - A `task:SchedulerError` if an error is occurred while pausing or else ()
@@ -107,27 +95,6 @@ public class Scheduler {
             return SchedulerError(message, result);
         }
     }
-
-    // Need to discuss
-    //public isolated function resumeService(service resumedService) returns SchedulerError? {}
-    //
-    //public isolated function pauseService(service pauseedService) returns SchedulerError? {}
-    //
-    // public isolated function attach(service serviceToAttach,
-    //         TimerConfiguration|AppointmentConfiguration configuration, any... attachments) returns SchedulerError?{}
-    //
-    // public type TimerConfiguration record {|
-    //    int intervalInMillis;
-    //    int initialDelayInMillis = 0;
-    //    int noOfRecurrences = 0;
-    //    int thresholdInMillis = 5000;
-    //    TimerMisfirePolicy misfirePolicy = "smartPolicy";
-    //|};
-    // public type TaskConfiguration record {|
-    //    int threadCount = 10;
-    //    int threadPriority = 5;
-    //    TimerConfiguration|AppointmentConfiguration config;
-    //|};
 
     # Checks whether the listener is started or not.
     #

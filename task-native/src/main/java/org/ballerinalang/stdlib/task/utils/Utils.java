@@ -39,10 +39,7 @@ import org.quartz.spi.OperableTrigger;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Properties;
 import java.util.UUID;
-
-import static org.ballerinalang.stdlib.task.utils.TaskConstants.QUARTZ_THREAD_COUNT_VALUE;
 
 /**
  * Utility functions used in ballerina task module.
@@ -102,31 +99,22 @@ public class Utils {
     }
 
     public static String getServiceName(BObject service) {
-        return service.getType().getName().split("\\$\\$")[1];
+        return service.getType().getName().split("\\$\\$")[0];
     }
 
-    public static Properties createSchedulerProperties(BMap<BString, Object> configurations) {
-        String uniqueID = UUID.randomUUID().toString();
-        int thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        Properties properties = new Properties();
-        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, String.valueOf(thresholdInMillis));
-        properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, QUARTZ_THREAD_COUNT_VALUE);
-        properties.setProperty(TaskConstants.QUARTZ_INSTANCE_NAME, String.valueOf(uniqueID));
-        return properties;
-    }
-
-    public static Trigger createTrigger(SimpleScheduleBuilder scheduleBuilder, String name, long delay) {
+    public static Trigger createTrigger(SimpleScheduleBuilder scheduleBuilder, long delay, String triggerId) {
         Trigger trigger;
+        String triggerKey = UUID.randomUUID().toString();
         if (delay > 0) {
             Date startTime = new Date(System.currentTimeMillis() + delay);
             trigger = TriggerBuilder.newTrigger()
-                    .withIdentity(name, name)
+                    .withIdentity(triggerKey, triggerId)
                     .startAt(startTime)
                     .withSchedule(scheduleBuilder)
                     .build();
         } else {
             trigger = TriggerBuilder.newTrigger()
-                    .withIdentity(name, name)
+                    .withIdentity(triggerKey, triggerId)
                     .startNow()
                     .withSchedule(scheduleBuilder)
                     .build();
@@ -182,9 +170,11 @@ public class Utils {
         }
     }
 
-    public static CronTrigger createCronTrigger(CronScheduleBuilder scheduleBuilder, String name, long maxRuns) {
+    public static CronTrigger createCronTrigger(CronScheduleBuilder scheduleBuilder, long maxRuns,
+                                                String triggerID) {
+        String triggerKey = UUID.randomUUID().toString();
         CronTrigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity(name, name)
+                .withIdentity(triggerKey, triggerID)
                 .withSchedule(scheduleBuilder)
                 .build();
         if (maxRuns > 0) {
@@ -222,5 +212,23 @@ public class Utils {
             maxRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS).intValue();
         }
         return maxRuns;
+    }
+
+    public static Trigger getTrigger(BMap<BString, Object> configurations, String triggerID) {
+        Trigger trigger;
+        String configurationTypeName = configurations.getType().getName();
+        if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
+            long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
+            SimpleScheduleBuilder scheduleBuilder = Utils.createSchedulerBuilder(configurations);
+            trigger = Utils.createTrigger(scheduleBuilder, delay, triggerID);
+        } else {
+            Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
+            String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
+            CronScheduleBuilder scheduleBuilder = Utils.createCronScheduleBuilder(cronExpression.toString(),
+                    policy);
+            long maxRuns = Utils.getMaxRuns(configurations);
+            trigger = Utils.createCronTrigger(scheduleBuilder, maxRuns, triggerID);
+        }
+        return trigger;
     }
 }

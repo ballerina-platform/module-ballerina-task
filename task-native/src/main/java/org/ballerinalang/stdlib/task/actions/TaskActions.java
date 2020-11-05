@@ -28,6 +28,8 @@ import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.Utils;
 import org.quartz.SchedulerException;
 
+import java.util.UUID;
+
 /**
  * Class to handle ballerina external functions in Task library.
  *
@@ -36,9 +38,10 @@ import org.quartz.SchedulerException;
 public class TaskActions {
 
     public static Object pause(BObject taskListener) {
+        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
         TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            taskScheduler.pause();
+            taskScheduler.pause(triggerID);
         } catch (SchedulerException e) {
             return Utils.createTaskError("Cannot pause Listener/Scheduler." + e.getMessage());
         }
@@ -46,9 +49,10 @@ public class TaskActions {
     }
 
     public static Object resume(BObject taskListener) {
+        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
         TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            taskScheduler.resume();
+            taskScheduler.resume(triggerID);
         } catch (SchedulerException e) {
             return Utils.createTaskError("Cannot resume Listener/Scheduler." + e.getMessage());
         }
@@ -76,19 +80,10 @@ public class TaskActions {
     }
 
     public static Object stop(BObject taskListener) {
+        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
         TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            taskScheduler.stop();
-        } catch (SchedulerException e) {
-            return Utils.createTaskError("Cannot stop Listener/Scheduler." + e.getMessage());
-        }
-        return null;
-    }
-
-    public static Object gracefulStop(BObject taskListener) {
-        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
-        try {
-            taskScheduler.gracefulStop();
+            taskScheduler.stop(triggerID);
         } catch (SchedulerException e) {
             return Utils.createTaskError("Cannot stop Listener/Scheduler." + e.getMessage());
         }
@@ -96,6 +91,7 @@ public class TaskActions {
     }
 
     public static Object attach(BObject taskListener, BObject service, Object... attachments) {
+        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
         TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         ServiceInformation serviceInformation;
         if (attachments == null) {
@@ -105,7 +101,9 @@ public class TaskActions {
         }
         try {
             Utils.validateService(serviceInformation);
-            taskScheduler.addService(taskListener, serviceInformation);
+            BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.
+                    MEMBER_LISTENER_CONFIGURATION);
+            taskScheduler.addService(serviceInformation, configurations, triggerID);
         } catch (SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         } catch (SchedulerException e) {
@@ -122,10 +120,9 @@ public class TaskActions {
                 Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
                 Utils.validateCronExpression(cronExpression);
             }
-            TaskScheduler taskScheduler = new TaskScheduler(Utils.createSchedulerProperties(configurations));
+            TaskScheduler taskScheduler = new TaskScheduler();
             taskListener.addNativeData(TaskConstants.SCHEDULER, taskScheduler);
-        } catch (SchedulerException e) {
-            return Utils.createTaskError("Cannot initialize Listener/Scheduler." + e.getMessage());
+            taskListener.addNativeData(TaskConstants.TRIGGER_NAME, UUID.randomUUID().toString());
         } catch (SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         }
