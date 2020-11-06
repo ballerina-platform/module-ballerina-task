@@ -19,7 +19,7 @@
 #
 # + intervalInMillis - Timer interval (in milliseconds), which triggers the `onTrigger` resource
 # + initialDelayInMillis - Delay (in milliseconds) after which the timer will run
-# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It will be zero,
+# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It is zero,
 #                     the task will be triggered forever.
 # + misfirePolicy - The policy, which is used to inform what it should do when a misfire occurs. The following are the
 #            scenarios in which the policy can be used:
