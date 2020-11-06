@@ -26,7 +26,11 @@ public isolated function testZeroInterval() {
         intervalInMillis: 0
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
+    if (timer is error) {
+        string message = timer.message();
+         test:assertEquals(message, "Timer scheduling interval should be a positive integer.");
+    }
+
 }
 
 @test:Config {}
@@ -36,7 +40,9 @@ public isolated function testNegativeDelay() {
         initialDelayInMillis: -1000
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"Timer scheduling delay should be a non-negative value.\")");
+    if (timer is error) {
+         test:assertEquals(timer.message(), "Timer scheduling delay should be a non-negative integer.");
+    }
 }
 
 @test:Config {}
@@ -46,7 +52,9 @@ public isolated function testNegativeInteval() {
         initialDelayInMillis: 1000
     });
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"Timer scheduling interval should be a positive integer.\")");
+    if (timer is error) {
+         test:assertEquals(timer.message(), "Timer scheduling interval should be a positive integer.");
+    }
 }
 
 @test:Config {}
@@ -56,5 +64,7 @@ public isolated function testInvalidCronExpression() {
     };
     Scheduler|error timer = trap new (configuration);
     test:assertTrue(timer is error);
-    test:assertEquals(timer.toString(), "error(\"Cron Expression \"invalid cron expression\" is invalid.\")");
+    if (timer is error) {
+         test:assertEquals(timer.message(), "Cron Expression \"invalid cron expression\" is invalid.");
+    }
 }

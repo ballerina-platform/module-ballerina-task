@@ -60,8 +60,8 @@ function testSchedulerWithMultipleServices() {
     checkpanic appointment.start();
     runtime:sleep(4000);
     checkpanic appointment.stop();
-    test:assertTrue(appoinmentFirstTriggered, msg = "Response payload mismatched");
-    test:assertTrue(appoinmentSecondTriggered, msg = "Response payload mismatched");
+    test:assertTrue(appoinmentFirstTriggered, msg = "Expected value mismatched");
+    test:assertTrue(appoinmentSecondTriggered, msg = "Expected value mismatched");
 }
 
 @test:Config {}

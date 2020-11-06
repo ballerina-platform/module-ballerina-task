@@ -18,9 +18,7 @@
 package org.ballerinalang.stdlib.task.utils;
 
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
-import org.ballerinalang.stdlib.task.objects.Task;
 import org.quartz.Job;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 
 /**
@@ -36,10 +34,7 @@ public class TaskJob implements Job {
      */
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
-        JobDataMap jobDataMap = jobExecutionContext.getMergedJobDataMap();
-        Task task = (Task) jobDataMap.get(TaskConstants.TASK_OBJECT);
-        for (ServiceInformation serviceInformation : task.getServicesMap().values()) {
-            TaskExecutor.executeFunction(serviceInformation);
-        }
+        TaskExecutor.executeFunction((ServiceInformation) jobExecutionContext.getMergedJobDataMap().
+                get(TaskConstants.SERVICE_INFORMATION));
     }
 }

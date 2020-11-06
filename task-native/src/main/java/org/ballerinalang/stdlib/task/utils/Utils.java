@@ -23,12 +23,23 @@ import io.ballerina.runtime.api.types.AttachedFunctionType;
 import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
-import org.ballerinalang.stdlib.task.objects.Appointment;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
-import org.ballerinalang.stdlib.task.objects.Timer;
 import org.quartz.CronExpression;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.CronTrigger;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.Trigger;
+import org.quartz.TriggerBuilder;
+import org.quartz.TriggerUtils;
+import org.quartz.impl.calendar.BaseCalendar;
+import org.quartz.spi.OperableTrigger;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Utility functions used in ballerina task module.
@@ -51,8 +62,8 @@ public class Utils {
     }
 
     @SuppressWarnings("unchecked")
-    public static String getCronExpressionFromAppointmentRecord(Object record) throws SchedulingException {
-        String cronExpression = record.toString();
+    public static String validateCronExpression(BString expression) throws SchedulingException {
+        String cronExpression = String.valueOf(expression);
         if (!CronExpression.isValidExpression(cronExpression)) {
             throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
         }
@@ -87,36 +98,127 @@ public class Utils {
         }
     }
 
-    public static Timer processTimer(BMap<BString, Object> configurations) throws SchedulingException {
-        Timer task;
-        long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
-        long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
-        long thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        String misfirePolicy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
-
-        if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
-            task = new Timer(delay, interval, thresholdInMillis, misfirePolicy);
-        } else {
-            long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
-            task = new Timer(delay, interval, thresholdInMillis, misfirePolicy, noOfRuns);
-        }
-        return task;
+    public static String getServiceName(BObject service) {
+        return service.getType().getName().split("\\$\\$")[0];
     }
 
-    public static Appointment processAppointment(BMap<BString, Object> configurations)
-            throws SchedulingException {
-        Appointment appointment;
-        Object appointmentDetails = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
-        String cronExpression = getCronExpressionFromAppointmentRecord(appointmentDetails);
-        long thresholdInMillis = configurations.getIntValue(TaskConstants.THRESHOLD_IN_MILLIS).intValue();
-        String misfirePolicy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
-
-        if (configurations.get(TaskConstants.FIELD_NO_OF_RUNS) == null) {
-            appointment = new Appointment(cronExpression, thresholdInMillis, misfirePolicy);
+    public static Trigger createTrigger(SimpleScheduleBuilder scheduleBuilder, long delay, String triggerId) {
+        Trigger trigger;
+        String triggerKey = UUID.randomUUID().toString();
+        if (delay > 0) {
+            Date startTime = new Date(System.currentTimeMillis() + delay);
+            trigger = TriggerBuilder.newTrigger()
+                    .withIdentity(triggerKey, triggerId)
+                    .startAt(startTime)
+                    .withSchedule(scheduleBuilder)
+                    .build();
         } else {
-            long noOfRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS);
-            appointment = new Appointment(cronExpression, thresholdInMillis, misfirePolicy, noOfRuns);
+            trigger = TriggerBuilder.newTrigger()
+                    .withIdentity(triggerKey, triggerId)
+                    .startNow()
+                    .withSchedule(scheduleBuilder)
+                    .build();
         }
-        return appointment;
+        return trigger;
+    }
+
+    public static SimpleScheduleBuilder createSchedulerBuilder(BMap<BString, Object> configurations) {
+        long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
+        long maxRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS).intValue();;
+        String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
+        SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
+                .withIntervalInMilliseconds(interval);
+        if (maxRuns > 0) {
+            // Quartz uses the number of repeats but the total number of runs is counted here.
+            // Hence, `maxRuns` is subtracted by 1 to get the repeat count.
+            simpleScheduleBuilder.withRepeatCount((int) (maxRuns - 1));
+            if (maxRuns == 1) {
+                if (policy.equals(TaskConstants.FIRE_NOW)) {
+                    simpleScheduleBuilder.withMisfireHandlingInstructionFireNow();
+                } else if (policy.equals(TaskConstants.IGNORE_POLICY)) {
+                    simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+                }
+            } else {
+                setMisfirePolicyForRecurringAction(simpleScheduleBuilder, policy);
+            }
+        } else {
+            simpleScheduleBuilder.repeatForever();
+            setMisfirePolicyForRecurringAction(simpleScheduleBuilder, policy);
+        }
+        return simpleScheduleBuilder;
+    }
+
+    private static void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder, String policy) {
+        switch (policy) {
+            case TaskConstants.NEXT_WITH_EXISTING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
+                break;
+            case TaskConstants.IGNORE_POLICY:
+                simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+                break;
+            case TaskConstants.NEXT_WITH_REMAINING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
+                break;
+            case TaskConstants.NOW_WITH_EXISTING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
+                break;
+            case TaskConstants.NOW_WITH_REMAINING_COUNT:
+                simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
+                break;
+            default:
+                break;
+        }
+    }
+
+    public static CronTrigger createCronTrigger(CronScheduleBuilder scheduleBuilder, long maxRuns,
+                                                String triggerID) {
+        String triggerKey = UUID.randomUUID().toString();
+        CronTrigger trigger = TriggerBuilder.newTrigger()
+                .withIdentity(triggerKey, triggerID)
+                .withSchedule(scheduleBuilder)
+                .build();
+        if (maxRuns > 0) {
+            int repeatCount = (int) (maxRuns - 1);
+            Date endDate = TriggerUtils.computeEndTimeToAllowParticularNumberOfFirings((OperableTrigger) trigger,
+                    new BaseCalendar(Calendar.getInstance().getTimeZone()), repeatCount);
+
+            trigger = trigger.getTriggerBuilder().endAt(endDate).build();
+        }
+        return trigger;
+    }
+
+    public static CronScheduleBuilder createCronScheduleBuilder(String cronExpression, String policy) {
+        CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(cronExpression);
+        switch (policy) {
+            case TaskConstants.DO_NOTHING:
+                cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
+                break;
+            case TaskConstants.IGNORE_POLICY:
+                cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+                break;
+            case TaskConstants.FIRE_AND_PROCEED:
+                cronScheduleBuilder.withMisfireHandlingInstructionFireAndProceed();
+                break;
+            default:
+        }
+        return cronScheduleBuilder;
+    }
+
+    public static Trigger getTrigger(BMap<BString, Object> configurations, String triggerID) {
+        Trigger trigger;
+        String configurationTypeName = configurations.getType().getName();
+        if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
+            long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
+            SimpleScheduleBuilder scheduleBuilder = Utils.createSchedulerBuilder(configurations);
+            trigger = Utils.createTrigger(scheduleBuilder, delay, triggerID);
+        } else {
+            Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
+            String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
+            CronScheduleBuilder scheduleBuilder = Utils.createCronScheduleBuilder(cronExpression.toString(),
+                    policy);
+            long maxRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS).intValue();;
+            trigger = Utils.createCronTrigger(scheduleBuilder, maxRuns, triggerID);
+        }
+        return trigger;
     }
 }

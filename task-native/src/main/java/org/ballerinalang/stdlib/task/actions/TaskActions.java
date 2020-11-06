@@ -21,18 +21,14 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import org.ballerinalang.stdlib.task.api.TaskServerConnector;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
-import org.ballerinalang.stdlib.task.impl.TaskServerConnectorImpl;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
-import org.ballerinalang.stdlib.task.objects.Task;
+import org.ballerinalang.stdlib.task.objects.TaskScheduler;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
+import org.ballerinalang.stdlib.task.utils.Utils;
+import org.quartz.SchedulerException;
 
-import static org.ballerinalang.stdlib.task.utils.TaskConstants.NATIVE_DATA_TASK_OBJECT;
-import static org.ballerinalang.stdlib.task.utils.Utils.createTaskError;
-import static org.ballerinalang.stdlib.task.utils.Utils.processAppointment;
-import static org.ballerinalang.stdlib.task.utils.Utils.processTimer;
-import static org.ballerinalang.stdlib.task.utils.Utils.validateService;
+import java.util.UUID;
 
 /**
  * Class to handle ballerina external functions in Task library.
@@ -42,94 +38,94 @@ import static org.ballerinalang.stdlib.task.utils.Utils.validateService;
 public class TaskActions {
 
     public static Object pause(BObject taskListener) {
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
+        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            task.pause();
-        } catch (SchedulingException e) {
-            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
+            taskScheduler.pause(triggerID);
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
 
     public static Object resume(BObject taskListener) {
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
+        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            task.resume();
-        } catch (SchedulingException e) {
-            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
+            taskScheduler.resume(triggerID);
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
 
     public static Object detach(BObject taskListener, BObject service) {
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-            String serviceName = service.getType().getName();
-            task.removeService(serviceName);
-        } catch (Exception e) {
-            return createTaskError(TaskConstants.SCHEDULER_ERROR, e.getMessage());
+            taskScheduler.removeService(service);
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
 
     public static Object start(BObject taskListener) {
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-        TaskServerConnector serverConnector = new TaskServerConnectorImpl(task);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            serverConnector.start();
-        } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
+            taskScheduler.start();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
 
     public static Object stop(BObject taskListener) {
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-        TaskServerConnector serverConnector = new TaskServerConnectorImpl(task);
+        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         try {
-            serverConnector.stop();
-        } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
+            taskScheduler.stop(triggerID);
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
 
+    @SuppressWarnings("unchecked") // It is used to ignore the unchecked generic types of operations warnings
+    // from the `getMapValue` by the compilers.
     public static Object attach(BObject taskListener, BObject service, Object... attachments) {
+        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
+        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         ServiceInformation serviceInformation;
         if (attachments == null) {
             serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service);
         } else {
             serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service, attachments);
         }
-
-        /*
-         * TODO: After #14148 fixed, use compiler plugin to validate the service
-         */
         try {
-            validateService(serviceInformation);
-        } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
+            Utils.validateService(serviceInformation);
+            BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.
+                    MEMBER_LISTENER_CONFIGURATION);
+            taskScheduler.addService(serviceInformation, configurations, triggerID);
+        } catch (SchedulingException | SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
         }
-
-        Task task = (Task) taskListener.getNativeData(NATIVE_DATA_TASK_OBJECT);
-        task.addService(serviceInformation);
         return null;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // It is used to ignore the unchecked generic types of operations warnings
+    // from the `getMapValue` by the compilers.
     public static Object init(BObject taskListener) {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
-        String configurationTypeName = configurations.getType().getName();
-        Task task;
         try {
-            if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
-                task = processTimer(configurations);
-            } else { // Record type validates at the compile time. Hence, exhaustive validation is not needed.
-                task = processAppointment(configurations);
+            if (!TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurations.getType().getName())) {
+                BString cronExpression = configurations.getStringValue(TaskConstants.MEMBER_CRON_EXPRESSION);
+                Utils.validateCronExpression(cronExpression);
             }
-            taskListener.addNativeData(NATIVE_DATA_TASK_OBJECT, task);
+            TaskScheduler taskScheduler = new TaskScheduler();
+            taskListener.addNativeData(TaskConstants.SCHEDULER, taskScheduler);
+            taskListener.addNativeData(TaskConstants.TRIGGER_NAME, UUID.randomUUID().toString());
         } catch (SchedulingException e) {
-            return createTaskError(e.getMessage());
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }

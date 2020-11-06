@@ -22,6 +22,7 @@ import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.types.AttachedFunctionType;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
+import org.ballerinalang.stdlib.task.utils.Utils;
 
 /**
  * Custom object to store service with the parameters to use inside the service.
@@ -44,7 +45,7 @@ public class ServiceInformation {
     }
 
     public String getServiceName() {
-        return this.service.getType().getName().split("\\$\\$")[0];
+        return Utils.getServiceName(service);
     }
 
     public AttachedFunctionType getOnTriggerFunction() {

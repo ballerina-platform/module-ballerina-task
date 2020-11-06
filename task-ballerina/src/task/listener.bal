@@ -156,23 +156,30 @@ isolated function attachExternal(Listener task, service s, any... attachments) r
 } external;
 
 isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration) {
-    var noOfRecurrences = configuration[NO_OF_RECURRENCE];
+    var noOfRecurrences = configuration.noOfRecurrences;
+    var initalDelay = configuration[INITIAL_DELAY];
     var misfirePolicy = configuration.misfirePolicy;
     if (configuration is TimerConfiguration) {
-        if (noOfRecurrences is int) {
-            if (noOfRecurrences == 1) {
-                if (!(misfirePolicy is OneTimeTaskPolicy)) {
-                    panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
-                }
-
-            } else {
-                if (!(misfirePolicy is RecurringTaskPolicy)) {
-                    panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
-                }
+        if (noOfRecurrences < 0) {
+            panic ListenerError("Task noOfOccurrences should be a positive integer.");
+        } else if (noOfRecurrences == 1) {
+            if (!(misfirePolicy is OneTimeTaskPolicy)) {
+                panic ListenerError("Wrong misfire policy has been given for the one-time execution timer tasks.");
+            }
+        } else {
+            if (!(misfirePolicy is RecurringTaskPolicy)) {
+                panic ListenerError("Wrong misfire policy has been given for the repeating execution timer tasks.");
             }
         }
-        if (configuration[INITIAL_DELAY] == ()) {
+        if (configuration.intervalInMillis < 1) {
+            panic ListenerError("Timer scheduling interval should be a positive integer.");
+        }
+        if (initalDelay == ()) {
             configuration.initialDelayInMillis = configuration.intervalInMillis;
+        } else {
+            if (initalDelay is int && initalDelay < 0) {
+                panic ListenerError("Timer scheduling delay should be a non-negative integer.");
+            }
         }
     } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {
         panic ListenerError("Wrong misfire policy has given for the appointment task.");

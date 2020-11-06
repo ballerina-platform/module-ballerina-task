@@ -26,13 +26,11 @@ import org.quartz.impl.StdSchedulerFactory;
 
 import java.util.Properties;
 
-
 /**
  * Task manager to handle schedulers in ballerina tasks.
  */
 public class TaskManager {
     private Scheduler scheduler;
-    private static Properties properties = new Properties();
 
     private static class TaskManagerHelper {
         private static final TaskManager INSTANCE = new TaskManager();
@@ -49,7 +47,7 @@ public class TaskManager {
             if (this.scheduler != null && this.scheduler.isStarted()) {
                 return this.scheduler;
             }
-            StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory(properties);
+            StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory(createSchedulerProperties());
             this.scheduler = stdSchedulerFactory.getScheduler();
             this.scheduler.start();
         } catch (SchedulerException e) {
@@ -58,8 +56,10 @@ public class TaskManager {
         return this.scheduler;
     }
 
-    public static void createSchedulerProperties(long thresholdInMillis) {
-        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, String.valueOf(thresholdInMillis));
+    public static Properties createSchedulerProperties() {
+        Properties properties = new Properties();
+        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, TaskConstants.QUARTZ_THRESHOLD_VALUE);
         properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, TaskConstants.QUARTZ_THREAD_COUNT_VALUE);
+        return properties;
     }
 }

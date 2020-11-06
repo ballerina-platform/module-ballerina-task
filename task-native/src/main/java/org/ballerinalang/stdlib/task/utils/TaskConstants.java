@@ -21,8 +21,7 @@ package org.ballerinalang.stdlib.task.utils;
 import io.ballerina.runtime.api.Module;
 import io.ballerina.runtime.api.StringUtils;
 import io.ballerina.runtime.api.values.BString;
-
-import static io.ballerina.runtime.util.BLangConstants.BALLERINA_BUILTIN_PKG_PREFIX;
+import io.ballerina.runtime.util.BLangConstants;
 
 /**
  * Task related constants.
@@ -33,11 +32,13 @@ public class TaskConstants {
     public static final String PACKAGE_NAME = "task";
     public static final String PACKAGE_VERSION = "1.1.2";
     public static final Module TASK_PACKAGE_ID =
-            new Module(BALLERINA_BUILTIN_PKG_PREFIX, PACKAGE_NAME, PACKAGE_VERSION);
+            new Module(BLangConstants.BALLERINA_BUILTIN_PKG_PREFIX, PACKAGE_NAME, PACKAGE_VERSION);
 
     // Record types used
     public static final String RECORD_TIMER_CONFIGURATION = "TimerConfiguration";
     static final String RECORD_APPOINTMENT_DATA = "AppointmentData";
+    public static final String SCHEDULER = "scheduler";
+    public static final String TRIGGER_NAME = "triggerName";
 
     // Member names used in records
     public static final BString MEMBER_LISTENER_CONFIGURATION = StringUtils.fromString("listenerConfiguration");
@@ -59,6 +60,7 @@ public class TaskConstants {
 
     // Allowed resource function names.
     public static final String RESOURCE_ON_TRIGGER = "onTrigger";
+    public static final String SERVICE_INFORMATION = "serviceInfo";
 
     // Common field for TimerConfiguration and AppointmentConfiguration
     public static final BString FIELD_NO_OF_RUNS = StringUtils.fromString("noOfRecurrences");
@@ -68,15 +70,7 @@ public class TaskConstants {
     public static final BString FIELD_DELAY = StringUtils.fromString("initialDelayInMillis");
 
     // Fields related to TaskError record
-    public static final String SCHEDULER_ERROR = "SchedulerError";
     static final String LISTENER_ERROR = "ListenerError";
-    static final String DETAIL_RECORD_NAME = "Detail";
-
-    // Fields used in Appointment job map
-    public static final String TASK_OBJECT = "ballerina.task";
-
-    // ID of the Task object in native data
-    public static final String NATIVE_DATA_TASK_OBJECT = "TaskObject";
 
     // Quarts property names
     public static final String QUARTZ_THREAD_COUNT = "org.quartz.threadPool.threadCount";
@@ -84,4 +78,9 @@ public class TaskConstants {
 
     // Quartz property values.
     public static final String QUARTZ_THREAD_COUNT_VALUE = "10";
+    public static final String QUARTZ_THRESHOLD_VALUE = "5000";
+
+    private TaskConstants() {
+
+    }
 }
