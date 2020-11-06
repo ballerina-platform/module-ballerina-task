@@ -76,7 +76,7 @@ public type TimerConfiguration record {|
 #                       Month
 #                       Day-of-Week
 #                       Year (optional field)
-# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It will be zero,
+# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It is zero,
 #                     the task will be triggered forever.
 # + misfirePolicy - The policy, which is used to inform what it should do when a misfire occurs. The following are the
 #                   scenarios in which the policy can be used:
