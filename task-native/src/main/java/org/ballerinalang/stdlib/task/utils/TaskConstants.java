@@ -80,7 +80,7 @@ public class TaskConstants {
     public static final String QUARTZ_THREAD_COUNT_VALUE = "10";
     public static final String QUARTZ_THRESHOLD_VALUE = "5000";
 
-    TaskConstants() {
+    private TaskConstants() {
 
     }
 }
