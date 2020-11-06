@@ -83,3 +83,26 @@ function testTaskTimerWithMultipleServices() {
     test:assertTrue(firstTimerServiceTriggered, msg = "Response payload mismatched");
     test:assertTrue(secondTimerServiceTriggered, msg = "Response payload mismatched");
 }
+
+boolean fourthTimerServiceTriggered = false;
+int fourthTimerServiceTriggeredCount = 0;
+
+service service4 = service {
+    resource function onTrigger() {
+        fourthTimerServiceTriggeredCount = fourthTimerServiceTriggeredCount + 1;
+        if (fourthTimerServiceTriggeredCount > 3) {
+            fourthTimerServiceTriggered = true;
+        }
+    }
+};
+
+@test:Config {}
+function testTaskTimerWithSameServices() {
+    Scheduler timerWithMultipleServices = new ({intervalInMillis: 1000});
+    checkpanic timerWithMultipleServices.attach(service4);
+    checkpanic timerWithMultipleServices.attach(service4);
+    checkpanic timerWithMultipleServices.start();
+    runtime:sleep(2500);
+    checkpanic timerWithMultipleServices.stop();
+    test:assertTrue(fourthTimerServiceTriggered, msg = "Response payload mismatched");
+}

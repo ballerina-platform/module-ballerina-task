@@ -27,7 +27,6 @@ import org.ballerinalang.stdlib.task.utils.Utils;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -37,6 +36,7 @@ import org.quartz.impl.matchers.GroupMatcher;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Task scheduler handles the quartz scheduler functions.
@@ -46,7 +46,7 @@ import java.util.Set;
 public class TaskScheduler {
 
     Scheduler scheduler = null;
-    Map<String, JobKey> jobInfoMap;
+    Map<String, JobDetail> jobInfoMap;
 
     public TaskScheduler() throws SchedulingException {
         this.scheduler = TaskManager.getInstance().getScheduler();
@@ -70,17 +70,18 @@ public class TaskScheduler {
     public void addService(ServiceInformation serviceInformation, BMap<BString, Object> configurations,
                            String triggerId) throws SchedulerException {
         String name = serviceInformation.getServiceName();
+        String jobId = UUID.randomUUID().toString();
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(TaskConstants.SERVICE_INFORMATION, serviceInformation);
-        JobDetail job = JobBuilder.newJob(TaskJob.class).withIdentity(name).usingJobData(jobDataMap).build();
+        JobDetail job = JobBuilder.newJob(TaskJob.class).withIdentity(name, jobId).usingJobData(jobDataMap).build();
+        this.jobInfoMap.put(name, job);
         Trigger trigger = Utils.getTrigger(configurations, triggerId);
-        this.jobInfoMap.put(name, job.getKey());
         this.scheduler.scheduleJob(job, trigger);
     }
 
     public void removeService(BObject service) throws SchedulerException {
         String serviceName = Utils.getServiceName(service);
-        this.scheduler.deleteJob(this.jobInfoMap.get(serviceName));
+        this.scheduler.deleteJob(this.jobInfoMap.get(serviceName).getKey());
         this.jobInfoMap.remove(serviceName);
     }
 

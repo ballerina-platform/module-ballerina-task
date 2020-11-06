@@ -43,7 +43,7 @@ public class TaskActions {
         try {
             taskScheduler.pause(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Couldn't pause the Listener/Scheduler. " + e.getMessage());
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
@@ -54,7 +54,7 @@ public class TaskActions {
         try {
             taskScheduler.resume(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Couldn't resume the Listener/Scheduler. " + e.getMessage());
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
@@ -64,7 +64,7 @@ public class TaskActions {
         try {
             taskScheduler.removeService(service);
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Couldn't detach the service from the Listener/Scheduler. " + e.getMessage());
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
@@ -74,7 +74,7 @@ public class TaskActions {
         try {
             taskScheduler.start();
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Couldn't start the Listener/Scheduler. " + e.getMessage());
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
@@ -85,7 +85,7 @@ public class TaskActions {
         try {
             taskScheduler.stop(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError("Couldn't stop the Listener/Scheduler. " + e.getMessage());
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
@@ -105,10 +105,8 @@ public class TaskActions {
             BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.
                     MEMBER_LISTENER_CONFIGURATION);
             taskScheduler.addService(serviceInformation, configurations, triggerID);
-        } catch (SchedulingException e) {
+        } catch (SchedulingException | SchedulerException e) {
             return Utils.createTaskError(e.getMessage());
-        } catch (SchedulerException e) {
-            return Utils.createTaskError("Couldn't attach the service to the Listener/Scheduler. " + e.getMessage());
         }
         return null;
     }
