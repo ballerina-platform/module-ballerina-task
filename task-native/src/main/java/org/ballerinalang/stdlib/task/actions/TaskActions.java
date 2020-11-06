@@ -90,7 +90,8 @@ public class TaskActions {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // It is used to ignore the unchecked generic types of operations warnings
+    // from the `getMapValue` by the compilers.
     public static Object attach(BObject taskListener, BObject service, Object... attachments) {
         String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
         TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
@@ -111,7 +112,8 @@ public class TaskActions {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked") // It is used to ignore the unchecked generic types of operations warnings
+    // from the `getMapValue` by the compilers.
     public static Object init(BObject taskListener) {
         BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
         try {

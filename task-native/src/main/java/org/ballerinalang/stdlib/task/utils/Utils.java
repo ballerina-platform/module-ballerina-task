@@ -129,8 +129,8 @@ public class Utils {
         SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
                 .withIntervalInMilliseconds(interval);
         if (maxRuns > 0) {
-            // Quartz uses number of repeats but total number of runs are counted here.
-            // Hence, 1 is subtracted from the `maxRuns` to get the repeat count.
+            // Quartz uses the number of repeats but the total number of runs is counted here.
+            // Hence, `maxRuns` is subtracted by 1 to get the repeat count.
             simpleScheduleBuilder.withRepeatCount((int) (maxRuns - 1));
             if (maxRuns == 1) {
                 if (policy.equals(TaskConstants.FIRE_NOW)) {

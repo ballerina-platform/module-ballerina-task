@@ -59,7 +59,6 @@ public class TaskScheduler {
             for (TriggerKey key :keys) {
                 this.scheduler.unscheduleJob(key);
             }
-
         }
     }
 
