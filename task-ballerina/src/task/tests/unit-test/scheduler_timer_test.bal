@@ -69,7 +69,7 @@ function testTaskTimerWithAttachment() {
     // Sleep for 8 seconds to check whether the task is running for more than 5 times.
     runtime:sleep(8000);
     checkpanic taskTimer.stop();
-    test:assertEquals(result, "Sam is 5 years old", msg = "Response payload mismatched");
+    test:assertEquals(result, "Sam is 5 years old", msg = "Expected value mismatched");
 }
 
 @test:Config {}
@@ -80,8 +80,8 @@ function testTaskTimerWithMultipleServices() {
     checkpanic timerWithMultipleServices.start();
     runtime:sleep(5000);
     checkpanic timerWithMultipleServices.stop();
-    test:assertTrue(firstTimerServiceTriggered, msg = "Response payload mismatched");
-    test:assertTrue(secondTimerServiceTriggered, msg = "Response payload mismatched");
+    test:assertTrue(firstTimerServiceTriggered, msg = "Expected value mismatched");
+    test:assertTrue(secondTimerServiceTriggered, msg = "Expected value mismatched");
 }
 
 boolean fourthTimerServiceTriggered = false;
@@ -104,5 +104,5 @@ function testTaskTimerWithSameServices() {
     checkpanic timerWithMultipleServices.start();
     runtime:sleep(2500);
     checkpanic timerWithMultipleServices.stop();
-    test:assertTrue(fourthTimerServiceTriggered, msg = "Response payload mismatched");
+    test:assertTrue(fourthTimerServiceTriggered, msg = "Expected value mismatched");
 }
