@@ -164,7 +164,7 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
             panic ListenerError("Task noOfOccurrences should be a positive integer.");
         } else if (noOfRecurrences == 1) {
             if (!(misfirePolicy is OneTimeTaskPolicy)) {
-                panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
+                panic ListenerError("Wrong misfire policy has been given for the one-time execution timer tasks.");
             }
         } else {
             if (!(misfirePolicy is RecurringTaskPolicy)) {
