@@ -19,7 +19,7 @@
 #
 # + intervalInMillis - Timer interval (in milliseconds), which triggers the `onTrigger` resource
 # + initialDelayInMillis - Delay (in milliseconds) after which the timer will run
-# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It will be zero,
+# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It is zero,
 #                     the task will be triggered forever.
 # + misfirePolicy - The policy, which is used to inform what it should do when a misfire occurs. The following are the
 #                   scenarios in which the policy can be used:
@@ -80,14 +80,21 @@ public type SimpleTriggerConfiguration record {|
 # + cronExpression - A CRON expression (eg: `* * * * ? *`) as a string for scheduling an appointment that is made up
 #                    of six or seven sub-expressions that describe individual details of the schedule. This
 #                    sub-expression is separated with white-space, and represent:
+#
 #                       Seconds
+#
 #                       Minutes
+#
 #                       Hours
+#
 #                       Day-of-Month
+#
 #                       Month
+#
 #                       Day-of-Week
+#
 #                       Year (optional field)
-# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It will be zero,
+# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It is zero,
 #                     the task will be triggered forever.
 # + misfirePolicy - The policy, which is used to inform what it should do when a misfire occurs. The following are the
 #                   scenarios in which the policy can be used:

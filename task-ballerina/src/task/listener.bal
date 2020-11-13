@@ -24,11 +24,10 @@ public class Listener {
 
     private SimpleTriggerConfiguration|CronTriggerConfiguration triggerConfig;
 
-    # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a
-    # configuration error.
+    # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a error.
     #
     # + configuration - The `task:SimpleTriggerConfiguration` or `task:CronTriggerConfiguration`, which is used to
-    #                   initialize the `task:Listner` define the job trigger behavior.
+    #                   initialize the `task:Listener` to define the job trigger behavior.
     public isolated function init(SimpleTriggerConfiguration|CronTriggerConfiguration triggerConfig) {
         validateConfiguration(triggerConfig);
         self.triggerConfig = triggerConfig;
@@ -74,7 +73,7 @@ public class Listener {
     }
 
     # Stops the `task:Listener` and the attached services gracefully. It will wait if there are any tasks still
-    # to be completed. This may panic if the stopping causes any error.
+    # completed. This may panic if the stopping causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to stop the listener
     public isolated function __gracefulStop() returns ListenerError? {
@@ -87,7 +86,7 @@ public class Listener {
         }
     }
 
-    # Stops the `task:Listener` and the attached services immediately.This will cancel any ongoing tasks.
+    # Stops the `task:Listener` and the attached services immediately. This will cancel any ongoing tasks.
     # This may panic if the stopping causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to stop the listener
@@ -165,11 +164,11 @@ isolated function validateConfiguration(SimpleTriggerConfiguration|CronTriggerCo
             panic ListenerError("Task noOfOccurrences should be a positive integer.");
         } else if (noOfRecurrences == 1) {
             if (!(misfirePolicy is OneTimeTaskPolicy)) {
-                panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
+                panic ListenerError("Wrong misfire policy has been given for the one-time execution timer tasks.");
             }
         } else {
             if (!(misfirePolicy is RecurringTaskPolicy)) {
-                panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
+                panic ListenerError("Wrong misfire policy has been given for the repeating execution timer tasks.");
             }
         }
         if (configuration.intervalInMillis < 1) {
