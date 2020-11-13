@@ -20,13 +20,10 @@ package org.ballerinalang.stdlib.task.objects;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
-import org.ballerinalang.stdlib.task.utils.TaskConstants;
-import org.ballerinalang.stdlib.task.utils.TaskJob;
 import org.ballerinalang.stdlib.task.utils.Utils;
-import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
@@ -46,11 +43,13 @@ import java.util.UUID;
 public class TaskScheduler {
 
     Scheduler scheduler = null;
-    Map<String, JobDetail> jobInfoMap;
+    Map<String, JobKey> jobInfoMap;
+    Map<String, TriggerKey> triggerInfoMap;
 
-    public TaskScheduler() throws SchedulingException {
-        this.scheduler = TaskManager.getInstance().getScheduler();
+    public TaskScheduler(Scheduler scheduler) {
+        this.scheduler = scheduler;
         jobInfoMap = new HashMap<>();
+        triggerInfoMap = new HashMap<>();
     }
 
     public void stop(String triggerId) throws SchedulerException {
@@ -62,6 +61,14 @@ public class TaskScheduler {
         }
     }
 
+    public void stop() throws SchedulerException {
+        this.scheduler.shutdown();
+    }
+
+    public void gracefulStop() throws SchedulerException {
+        this.scheduler.shutdown(true);
+    }
+
     public void start() throws SchedulerException {
         this.scheduler.start();
     }
@@ -69,19 +76,27 @@ public class TaskScheduler {
     public void addService(ServiceInformation serviceInformation, BMap<BString, Object> configurations,
                            String triggerId) throws SchedulerException {
         String name = serviceInformation.getServiceName();
-        String jobId = UUID.randomUUID().toString();
-        JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(TaskConstants.SERVICE_INFORMATION, serviceInformation);
-        JobDetail job = JobBuilder.newJob(TaskJob.class).withIdentity(name, jobId).usingJobData(jobDataMap).build();
-        this.jobInfoMap.put(name, job);
+        String jobId = String.valueOf(UUID.randomUUID().hashCode());
+        JobDetail job = Utils.createJob(serviceInformation, jobId);
+        this.jobInfoMap.put(name, job.getKey());
         Trigger trigger = Utils.getTrigger(configurations, triggerId);
         this.scheduler.scheduleJob(job, trigger);
     }
 
+    public void addJob(JobDataMap jobDataMap, BMap<BString, Object> configurations, String jobId)
+            throws SchedulerException {
+        JobDetail job = Utils.createJob(jobDataMap, jobId);
+        Trigger trigger = Utils.getTrigger(configurations, "trigger");
+        this.jobInfoMap.put(jobId, job.getKey());
+        this.scheduler.scheduleJob(job, trigger);
+        this.triggerInfoMap.put(jobId, trigger.getKey());
+    }
+
     public void removeService(BObject service) throws SchedulerException {
         String serviceName = Utils.getServiceName(service);
-        this.scheduler.deleteJob(this.jobInfoMap.get(serviceName).getKey());
+        this.scheduler.deleteJob(this.jobInfoMap.get(serviceName));
         this.jobInfoMap.remove(serviceName);
+        this.triggerInfoMap.remove(serviceName);
     }
 
     public void pause(String triggerId) throws SchedulerException {
@@ -90,5 +105,44 @@ public class TaskScheduler {
 
     public void resume(String triggerId) throws SchedulerException {
         this.scheduler.resumeTriggers(GroupMatcher.triggerGroupEquals(triggerId));
+    }
+
+    public void pause() throws SchedulerException {
+        this.scheduler.pauseAll();
+    }
+
+    public void resume() throws SchedulerException {
+        this.scheduler.resumeAll();
+    }
+
+    public boolean isRunning() throws SchedulerException {
+        return this.scheduler.isStarted();
+    }
+
+    public void pauseJob(String jobId) throws SchedulerException {
+        this.scheduler.pauseJob(this.jobInfoMap.get(jobId));
+    }
+
+    public void resumeJob(String jobId) throws SchedulerException {
+        this.scheduler.resumeJob(this.jobInfoMap.get(jobId));
+    }
+
+    public void unScheduleJob(String jobId) throws SchedulerException {
+        this.scheduler.unscheduleJob(this.triggerInfoMap.get(jobId));
+    }
+
+    public void rescheduleJob(String jobId, Trigger trigger) throws SchedulerException {
+        this.scheduler.rescheduleJob(this.triggerInfoMap.get(jobId), trigger);
+        this.triggerInfoMap.put(jobId, trigger.getKey());
+    }
+
+    public void deleteJob(String jobId) throws SchedulerException {
+        this.scheduler.deleteJob(this.jobInfoMap.get(jobId));
+        jobInfoMap.remove(jobId);
+        triggerInfoMap.remove(jobId);
+    }
+
+    public Set<String> getAllRunningJobs() {
+        return jobInfoMap.keySet();
     }
 }

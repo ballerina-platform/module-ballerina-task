@@ -27,9 +27,9 @@ service misfireService2 = service {
 
 @test:Config {}
 function testExistingRepeatCountWithService2() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 5 ,
-                                 misfirePolicy: "fireNowWithExistingCount" });
-    check taskTimer.attach(misfireService2);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService2, { intervalInMillis: 3000, noOfRecurrences: 5 ,
+    misfirePolicy: "fireNowWithExistingCount" });
     check taskTimer.start();
      // Sleep for 8 seconds.
     runtime:sleep(8000);
@@ -55,9 +55,9 @@ service misfireService3 = service {
 
 @test:Config {}
 function testNowWithRemainingRepeatCountWithService3() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7,
-                                 misfirePolicy: "fireNowWithRemainingCount"});
-    check taskTimer.attach(misfireService3);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService3, { intervalInMillis: 3000, noOfRecurrences: 7,
+    misfirePolicy: "fireNowWithRemainingCount"});
     check taskTimer.start();
     runtime:sleep(8000);
     test:assertEquals(triggeredCount3, 2, msg = "Expected count mismatched before pausing the scheduler.");
@@ -82,9 +82,9 @@ service misfireService4 = service {
 
 @test:Config {}
 function testNextWithExistingCountWithService4() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7,
-                                 misfirePolicy: "fireNextWithExistingCount"});
-    check taskTimer.attach(misfireService4);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService4, { intervalInMillis: 3000, noOfRecurrences: 7,
+    misfirePolicy: "fireNextWithExistingCount"});
     check taskTimer.start();
     runtime:sleep(7000);
     test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched before pausing the scheduler.");
@@ -108,9 +108,9 @@ service misfireService5 = service {
 };
 @test:Config {}
 function testNextWithRemainigCountWithService5() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 ,
-                                 misfirePolicy: "fireNextWithExistingCount"});
-    check taskTimer.attach(misfireService5);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService5, { intervalInMillis: 3000, noOfRecurrences: 7 ,
+    misfirePolicy: "fireNextWithExistingCount"});
     check taskTimer.start();
     runtime:sleep(7000);
     test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched before pausing the scheduler.");
@@ -135,8 +135,8 @@ service misfireService11 = service {
 
 @test:Config {}
 function testSmartPolicyWithService11() returns error? {
-    Scheduler taskTimer = new ({intervalInMillis: 3000, noOfRecurrences: 5 });
-    check taskTimer.attach(misfireService11);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService11, {intervalInMillis: 3000, noOfRecurrences: 5 });
     check taskTimer.start();
     runtime:sleep(8000);
     test:assertEquals(triggeredCount11, 2, msg = "Expected count mismatched before pausing the scheduler.");

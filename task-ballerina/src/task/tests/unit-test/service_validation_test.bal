@@ -20,12 +20,14 @@ service noResourceService = service {};
 
 Person person = {name: "Sam", age: 29};
 
+Scheduler simpleScheduler = new ();
+
 @test:Config {}
 public function testForNoResourceService() {
-    var attachResult = timerForNoResourceService.attach(noResourceService, person);
+    var attachResult = simpleScheduler.scheduleJob(noResourceService, {intervalInMillis: 1000}, person);
     test:assertTrue(attachResult is error);
     if (attachResult is error) {
-         test:assertEquals(attachResult.message(), "Failed to attach the service to the scheduler");
+         test:assertEquals(attachResult.message(), "Failed to schedule the job in the scheduler");
     }
 }
 
@@ -37,9 +39,9 @@ service moreThanOneResourceService = service {
 
 @test:Config {}
 public function testForMoreThanOneResource() {
-    var attachResult = timerForNoResourceService.attach(moreThanOneResourceService, person);
+    var attachResult = simpleScheduler.scheduleJob(moreThanOneResourceService, {intervalInMillis: 1000}, person);
     test:assertTrue(attachResult is error);
     if (attachResult is error) {
-         test:assertEquals(attachResult.message(), "Failed to attach the service to the scheduler");
+         test:assertEquals(attachResult.message(), "Failed to schedule the job in the scheduler");
     }
 }

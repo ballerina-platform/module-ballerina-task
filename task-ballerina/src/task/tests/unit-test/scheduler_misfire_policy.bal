@@ -27,8 +27,9 @@ service misfireService1 = service {
 
 @test:Config {}
 function testFireNowWithService1() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1, misfirePolicy: "fireNow"});
-    check taskTimer.attach(misfireService1);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService1,
+    { intervalInMillis: 3000, noOfRecurrences: 1, misfirePolicy: "fireNow"});
     check taskTimer.start();
     check taskTimer.pause();
     runtime:sleep(5000);
@@ -46,9 +47,10 @@ service misfireService8 = service {
     }
 };
 @test:Config {}
-function testIgnoreMisfiresPoilcyWithService8() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1 , misfirePolicy: "ignorePolicy"});
-    check taskTimer.attach(misfireService8);
+function testIgnoreMisfiresPolicyWithService8() returns error? {
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService8,
+    { intervalInMillis: 3000, noOfRecurrences: 1 , misfirePolicy: "ignorePolicy"});
     check taskTimer.start();
     check taskTimer.pause();
     runtime:sleep(5000);
@@ -69,8 +71,8 @@ service misfireService9 = service {
 
 @test:Config {}
 function testSmartPolicyWithService9() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 1});
-    check taskTimer.attach(misfireService9);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService9, { intervalInMillis: 3000, noOfRecurrences: 1});
     check taskTimer.start();
     check taskTimer.pause();
     runtime:sleep(5000);

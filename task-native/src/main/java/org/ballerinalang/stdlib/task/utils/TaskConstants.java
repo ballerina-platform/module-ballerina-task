@@ -35,13 +35,14 @@ public class TaskConstants {
             new Module(RuntimeConstants.BALLERINA_BUILTIN_PKG_PREFIX, PACKAGE_NAME, PACKAGE_VERSION);
 
     // Record types used
-    public static final String RECORD_TIMER_CONFIGURATION = "TimerConfiguration";
-    static final String RECORD_APPOINTMENT_DATA = "AppointmentData";
+    public static final String SIMPLE_TRIGGER_CONFIGURATION = "SimpleTriggerConfiguration";
     public static final String SCHEDULER = "scheduler";
     public static final String TRIGGER_NAME = "triggerName";
+    public static final String RUNTIME = "runtime";
 
     // Member names used in records
-    public static final BString MEMBER_LISTENER_CONFIGURATION = StringUtils.fromString("listenerConfiguration");
+    public static final BString TRIGGER_CONFIGURATION = StringUtils.fromString("triggerConfig");
+    public static final BString CONFIGURATION = StringUtils.fromString("configuration");
     public static final BString MEMBER_CRON_EXPRESSION = StringUtils.fromString("cronExpression");
 
     // Misfire instructions
@@ -60,7 +61,7 @@ public class TaskConstants {
 
     // Allowed resource function names.
     public static final String RESOURCE_ON_TRIGGER = "onTrigger";
-    public static final String SERVICE_INFORMATION = "serviceInfo";
+    public static final String JOB = "job";
 
     // Common field for TimerConfiguration and AppointmentConfiguration
     public static final BString FIELD_NO_OF_RUNS = StringUtils.fromString("noOfRecurrences");
@@ -71,10 +72,17 @@ public class TaskConstants {
 
     // Fields related to TaskError record
     static final String LISTENER_ERROR = "ListenerError";
+    static final String SCHEDULER_ERROR = "SchedulerError";
+
+    // Fields used in Scheduler Configuration
+    public static final BString THREAD_COUNT = StringUtils.fromString("threadCount");
+    public static final BString THREAD_PRIORITY = StringUtils.fromString("threadPriority");
 
     // Quarts property names
     public static final String QUARTZ_THREAD_COUNT = "org.quartz.threadPool.threadCount";
     public static final String QUARTZ_MISFIRE_THRESHOLD = "org.quartz.jobStore.misfireThreshold";
+    public static final String QUARTZ_THREAD_PRIORITY = "org.quartz.threadPool.threadPriority";
+    public static final String QUARTZ_INSTANCE_NAME = "org.quartz.scheduler.instanceName";
 
     // Quartz property values.
     public static final String QUARTZ_THREAD_COUNT_VALUE = "10";

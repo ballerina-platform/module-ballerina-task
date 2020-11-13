@@ -20,6 +20,7 @@ package org.ballerinalang.stdlib.task.utils;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.types.AttachedFunctionType;
+import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
 
 import static io.ballerina.runtime.api.constants.RuntimeConstants.BALLERINA_BUILTIN_PKG_PREFIX;
@@ -41,6 +42,11 @@ public class TaskExecutor {
         Runtime runtime = serviceInformation.getRuntime();
         runtime.invokeMethodAsync(serviceInformation.getService(), TaskConstants.RESOURCE_ON_TRIGGER, null,
                 TASK_METADATA, null, onTriggerFunctionArgs);
+    }
+
+    public static void executeFunction1(BObject job, Runtime runtime) {
+        runtime.invokeMethodAsync(job, TaskConstants.RESOURCE_ON_TRIGGER, null,
+                TASK_METADATA, null);
     }
 
     private static Object[] getParameterList(AttachedFunctionType function, ServiceInformation serviceInformation) {

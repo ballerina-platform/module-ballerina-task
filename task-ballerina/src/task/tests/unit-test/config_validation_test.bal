@@ -16,13 +16,13 @@
 
 import ballerina/test;
 
-Scheduler timerForNoResourceService = new ({
+Listener timerForNoResourceService = new ({
     intervalInMillis: 1
 });
 
 @test:Config {}
 public isolated function testZeroInterval() {
-    Scheduler|error timer = trap new ({
+    Listener|error timer = trap new ({
         intervalInMillis: 0
     });
     test:assertTrue(timer is error);
@@ -35,7 +35,7 @@ public isolated function testZeroInterval() {
 
 @test:Config {}
 public isolated function testNegativeDelay() {
-    Scheduler|error timer = trap new ({
+    Listener|error timer = trap new ({
         intervalInMillis: 500,
         initialDelayInMillis: -1000
     });
@@ -47,7 +47,7 @@ public isolated function testNegativeDelay() {
 
 @test:Config {}
 public isolated function testNegativeInteval() {
-    Scheduler|error timer = trap new ({
+    Listener|error timer = trap new ({
         intervalInMillis: -500,
         initialDelayInMillis: 1000
     });
@@ -59,12 +59,39 @@ public isolated function testNegativeInteval() {
 
 @test:Config {}
 public isolated function testInvalidCronExpression() {
-    AppointmentConfiguration configuration = {
+    CronTriggerConfiguration configuration = {
         cronExpression: "invalid cron expression"
     };
-    Scheduler|error timer = trap new (configuration);
+    Listener|error timer = trap new (configuration);
     test:assertTrue(timer is error);
     if (timer is error) {
          test:assertEquals(timer.message(), "Cron Expression \"invalid cron expression\" is invalid.");
+    }
+}
+
+@test:Config {}
+public isolated function testInvalidThreadCount() {
+    Scheduler|error timer = trap new ({ threadCount: 0});
+    test:assertTrue(timer is error);
+    if (timer is error) {
+        test:assertEquals(timer.message(), "Thread count must be greater than 0.");
+    }
+}
+
+@test:Config {}
+public isolated function testInvalidThreadPriority() {
+    Scheduler|error timer = trap new ({ threadPriority: 11});
+    test:assertTrue(timer is error);
+    if (timer is error) {
+        test:assertEquals(timer.message(), "Thread priority must be an integer value between 1 and 10.");
+    }
+}
+
+@test:Config {}
+public isolated function testInvalidThreadsholdValue() {
+    Scheduler|error timer = trap new ({ thresholdInMillis: 0});
+    test:assertTrue(timer is error);
+    if (timer is error) {
+        test:assertEquals(timer.message(), "Misfire threadshold value should be a positive integer.");
     }
 }

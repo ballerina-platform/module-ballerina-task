@@ -22,28 +22,28 @@ public class Listener {
     *'object:Listener;
     boolean started = false;
 
-    private TimerConfiguration|AppointmentConfiguration listenerConfiguration;
+    private SimpleTriggerConfiguration|CronTriggerConfiguration triggerConfig;
 
-    # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a configuration
-    # error.
+    # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a
+    # configuration error.
     #
-    # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
-    #                   `task:Listener` behavior
-    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
-        validateConfiguration(configuration);
-        self.listenerConfiguration = configuration;
+    # + configuration - The `task:SimpleTriggerConfiguration` or `task:CronTriggerConfiguration`, which is used to
+    #                   initialize the `task:Listner` define the job trigger behavior.
+    public isolated function init(SimpleTriggerConfiguration|CronTriggerConfiguration triggerConfig) {
+        validateConfiguration(triggerConfig);
+        self.triggerConfig = triggerConfig;
         var result = initExternal(self);
         if (result is ListenerError) {
             panic result;
         }
     }
 
-    # Attaches the given `service` to the `task:Listener`. This may panic if the service attachment is fails.
+    # Attaches the given `job` to the `task:Listener`. This may panic if the service attachment fails.
     #
-    # + s - Service to attach to the listener
+    # + s - Ballerina `service` or `function`, which is to be executed by the `task:Listener`
     # + name - Name of the service
     # + return - () or else a `task:ListenerError` upon failure to attach the service
-    public isolated function __attach(service s, string? name = ()) returns error? {
+    public isolated function __attach(service|(function () returns(anydata)) s, string? name = ()) returns error? {
         // ignore param 'name'
         var result = attachExternal(self, s);
         if (result is error) {
@@ -51,7 +51,7 @@ public class Listener {
         }
     }
 
-    # Detaches the given `service` from the `task:Listener`.
+    # Detaches the given `job` from the `task:Listener`.
     #
     # + s - Service to be detached from the listener
     # + return - () or else a `task:ListenerError` upon failure to detach the service
@@ -59,11 +59,11 @@ public class Listener {
         return detachExternal(self, s);
     }
 
-    # Starts dispatching the services attached to the `task:Listener`. This may panic if the service dispatching causes
-    # any error.
+    # Starts dispatching the jobs attached to the `task:Listener`. This may panic if the service dispatching
+    # causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to start the listener
-    public isolated function __start() returns error? {
+    public isolated function __start() returns ListenerError? {
         var result = startExternal(self);
         if (result is error) {
             panic result;
@@ -73,11 +73,11 @@ public class Listener {
         }
     }
 
-    # Stops the `task:Listener` and the attached services gracefully. It will wait if there are any tasks still to be
-    # completed. This may panic if the stopping causes any error.
+    # Stops the `task:Listener` and the attached services gracefully. It will wait if there are any tasks still
+    # to be completed. This may panic if the stopping causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to stop the listener
-    public isolated function __gracefulStop() returns error? {
+    public isolated function __gracefulStop() returns ListenerError? {
         var result = stopExternal(self);
         if (result is error) {
             panic result;
@@ -87,11 +87,11 @@ public class Listener {
         }
     }
 
-    # Stops the `task:Listener` and the attached services immediately. This will cancel any ongoing tasks. This may
-    # panic if the stopping causes any error.
+    # Stops the `task:Listener` and the attached services immediately.This will cancel any ongoing tasks.
+    # This may panic if the stopping causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to stop the listener
-    public isolated function __immediateStop() returns error? {
+    public isolated function __immediateStop() returns ListenerError? {
         var result = stopExternal(self);
         if (result is error) {
             panic result;
@@ -150,25 +150,26 @@ isolated function detachExternal(Listener task, service attachedService) returns
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function attachExternal(Listener task, service s, any... attachments) returns ListenerError? = @java:Method {
+isolated function attachExternal(Listener task, service|(function () returns(anydata)) job, any... attachments) returns
+ ListenerError? = @java:Method {
     name: "attach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration) {
+isolated function validateConfiguration(SimpleTriggerConfiguration|CronTriggerConfiguration configuration) {
     var noOfRecurrences = configuration.noOfRecurrences;
     var initalDelay = configuration[INITIAL_DELAY];
     var misfirePolicy = configuration.misfirePolicy;
-    if (configuration is TimerConfiguration) {
+    if (configuration is SimpleTriggerConfiguration) {
         if (noOfRecurrences < 0) {
             panic ListenerError("Task noOfOccurrences should be a positive integer.");
         } else if (noOfRecurrences == 1) {
             if (!(misfirePolicy is OneTimeTaskPolicy)) {
-                panic ListenerError("Wrong misfire policy has been given for the one-time execution timer tasks.");
+                panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
             }
         } else {
             if (!(misfirePolicy is RecurringTaskPolicy)) {
-                panic ListenerError("Wrong misfire policy has been given for the repeating execution timer tasks.");
+                panic ListenerError("Wrong misfire policy has given for the repeating execution timer tasks.");
             }
         }
         if (configuration.intervalInMillis < 1) {
@@ -181,7 +182,5 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
                 panic ListenerError("Timer scheduling delay should be a non-negative integer.");
             }
         }
-    } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {
-        panic ListenerError("Wrong misfire policy has given for the appointment task.");
     }
 }

@@ -17,7 +17,7 @@
 import ballerina/runtime;
 import ballerina/test;
 
-TimerConfiguration configuration = {
+SimpleTriggerConfiguration config = {
     intervalInMillis: 1000,
     initialDelayInMillis: 1000
 };
@@ -39,10 +39,10 @@ service pauseResumeTimerService2 = service {
 
 @test:Config {}
 function testTaskPauseAndResume() {
-    Scheduler timer1 = new (configuration);
-    Scheduler timer2 = new (configuration);
-    checkpanic timer1.attach(pauseResumeTimerService1);
-    checkpanic timer2.attach(pauseResumeTimerService2);
+    Scheduler timer1 = new ();
+    Scheduler timer2 = new ();
+    var attachResult = timer1.scheduleJob(pauseResumeTimerService1, config);
+    var attachResult1 = timer2.scheduleJob(pauseResumeTimerService2, config);
     checkpanic timer1.start();
     checkpanic timer2.start();
     runtime:sleep(3500);
@@ -58,5 +58,65 @@ function testTaskPauseAndResume() {
     }
     checkpanic timer1.stop();
     checkpanic timer2.stop();
-    test:assertEquals(counter2 - counter1, 4, msg = "Test failred");
+    test:assertTrue(counter2 - counter1 >= 3, msg = "Test failred");
+}
+
+int jobCount1 = 0;
+int jobCount2 = 0;
+
+function job1() {
+    jobCount1 = jobCount1 + 1;
+}
+
+function job2() {
+    jobCount2 = jobCount2 + 1;
+}
+
+@test:Config {}
+function testSchedulerPauseJob() {
+    Scheduler sch = new ();
+    var id1 =  sch.scheduleJob(job1, {intervalInMillis: 1000});
+    var id2 =  sch.scheduleJob(job2, {intervalInMillis: 1000});
+    checkpanic sch.start();
+    runtime:sleep(3500);
+    test:assertEquals(jobCount1, 3, msg = "Expected value mismatched");
+    test:assertEquals(jobCount2, 3, msg = "Expected value mismatched");
+    if (id1 is int) {
+        checkpanic sch.pauseJob(id1);
+        runtime:sleep(4500);
+    }
+    checkpanic sch.stop();
+    test:assertTrue(jobCount2 - jobCount1 > 3, msg = "Expected value mismatched");
+}
+
+int jobCount3 = 0;
+int jobCount4 = 0;
+
+function job3() {
+    jobCount3 = jobCount3 + 1;
+}
+
+function job4() {
+    jobCount4 = jobCount4 + 1;
+}
+
+@test:Config {}
+function testSchedulerPauseResumeJob() {
+    Scheduler sch = new ();
+    var id3 =  sch.scheduleJob(job3, {intervalInMillis: 1000});
+    var id4 =  sch.scheduleJob(job4, {intervalInMillis: 1000});
+    checkpanic sch.start();
+    runtime:sleep(3500);
+    test:assertEquals(jobCount3, 3, msg = "Output mismatched");
+    test:assertEquals(jobCount4, 3, msg = "Expected count mismatched");
+    if (id3 is int) {
+        checkpanic sch.pauseJob(id3);
+        runtime:sleep(3500);
+        test:assertEquals(jobCount3, 3, msg = "Output mismatched");
+        test:assertTrue(jobCount4 > 5, msg = "Expected count mismatched");
+        checkpanic sch.resumeJob(id3);
+        runtime:sleep(1500);
+    }
+    checkpanic sch.stop();
+    test:assertEquals(jobCount4 - jobCount3, 0, msg = "Expected value mismatched");
 }

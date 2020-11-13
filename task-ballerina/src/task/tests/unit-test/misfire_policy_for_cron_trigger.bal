@@ -27,9 +27,9 @@ service misfireService6 = service {
 
 @test:Config {}
 function testFireAndProceedWithService6() returns error? {
-    Scheduler taskTimer = new ({ cronExpression: "* * * * * ? *", noOfRecurrences: 8,
-                                 misfirePolicy: "fireAndProceed"  });
-    check taskTimer.attach(misfireService6);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService6, { cronExpression: "* * * * * ? *", noOfRecurrences: 8,
+    misfirePolicy: "fireAndProceed"  });
     check taskTimer.start();
     runtime:sleep(1500);
     int count = triggeredCount6;
@@ -52,8 +52,9 @@ service misfireService7 = service {
 
 @test:Config {}
 function testdoNothingWithService7() returns error? {
-    Scheduler taskTimer = new ({ cronExpression: "* * * * * ? *", noOfRecurrences: 5, misfirePolicy: "doNothing" });
-    check taskTimer.attach(misfireService7);
+    Scheduler taskTimer = new ();
+    var attachResult = taskTimer.scheduleJob(misfireService7, { cronExpression: "* * * * * ? *", noOfRecurrences: 5,
+    misfirePolicy: "doNothing" });
     check taskTimer.start();
     runtime:sleep(1500);
     int count = triggeredCount7;

@@ -48,9 +48,9 @@ service multipleAttachService = service {
 function multipleAttachmentTest() returns error? {
     Person sam = {name: "Sam", age: 29};
     Account acc = {number: 150590, balance: 11.35};
-    TimerConfiguration timerConfiguration = {intervalInMillis: 1000};
-    Scheduler multipleAttachmentTimer = new (timerConfiguration);
-    check multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
+    SimpleTriggerConfiguration timerConfiguration = {intervalInMillis: 1000};
+    Scheduler multipleAttachmentTimer = new ();
+    var attachResult = multipleAttachmentTimer.scheduleJob(multipleAttachService, timerConfiguration, sam, acc);
     check multipleAttachmentTimer.start();
     runtime:sleep(4000);
     check multipleAttachmentTimer.stop();
