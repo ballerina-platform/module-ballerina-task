@@ -1,107 +1,147 @@
 ## Module Overview
 
-This module provides the functionality to configure and manage Task Listeners and Task Schedulers.
-Task Listeners and Task Schedulers can be used to perform tasks periodically.
+This module provides the functionality to configure and manage Task Listeners and Task Schedulers, which can be used to schedule either one-time or periodically tasks parallely.
 
 #### Task Listeners
 
-A Task `Listener` can be used to create a service listener, which will be triggered at specified times.
+A Task `Listener` can be used to create a service listener, which is used to schedule either one-time or periodically tasks under the same scheduling logic(trigger).
 
-Below are the two types of configurations that can be used to configure a Task Listener, either as a timer or as an appointment.
+Below are the two types of trigger configurations that can be used to configure a Task Listener.
 
-- `TimerConfiguration`
-- `AppointmentConfiguration`
+- `SimpleTriggerConfiguration`: It is used to run either one-time or periodically tasks with fixed intervals of time.
+- `CronTriggerConfiguration`: It is used to run either one-time or periodically tasks at certain time(s) of day.
 
-##### Task Listener as a Timer
+##### Schedule simple trigger task by using Listener
 
-The `TimerConfiguration` can be used to configure a task that needs to be executed periodically.
+The `SimpleTriggerConfiguration` can be used to schedule tasks exactly once at a specific moment in time, or at a specific moment in time followed by repeats at a specific interval.
 
 The following code snippet shows how to create a listener, which registers a task with an initial delay of 3000 milliseconds and is executed every 1000 milliseconds for 10 times.
 
 ```ballerina
-task:TimerConfiguration timerConfiguration = {
+task:SimpleTriggerConfiguration config = {
     intervalInMillis: 1000,
     initialDelayInMillis: 3000,
     // Number of recurrences will limit the number of times the timer runs.
     noOfRecurrences: 10
 };
 
-listener task:Listener timer = new(timerConfiguration);
+listener task:Listener simpleTrigger = new(config);
 
 // Creating a service on the `timer` task Listener.
-service timerService on timer {
+service serv on simpleTrigger {
     // This resource triggers when the timer goes off.
     resource function onTrigger() {
     }
 }
 ```
 
-For an example on the usage of the `task:Listener` as a timer, see the [Task Service Timer Example](https://ballerina.io/swan-lake/learn/by-example/task-service-timer.html).
+For an example on schedule a job with a simple trigger by using the `task:Listener`, see the [Task Service Timer Example](https://ballerina.io/swan-lake/learn/by-example/task-service-timer.html).
 
-##### Task Listener as an Appointment
+##### Schedule cron trigger task by using Listener
 
-The `AppointmentConfiguration` can be used to schedule an appointment.
+The `CronTriggerConfiguration` can be used to schedule either one-time or periodically tasks based on calendar-like notions.
   
-The following code snippet shows how to create a task appointment, which registers a service using a CRON expression to execute the task every second for 10 times.
+The following code snippet shows how to create a cron trigger task, which registers a service using a CRON expression to execute the task every second for 10 times.
 
 ```ballerina
-task:AppointmentConfiguration appointmentConfiguration = {
+task:CronTriggerConfiguration config = {
     // This cron expression will schedule the appointment once every second.
-    appointmentDetails: "* * * * * ?",
+    cronExpression: "* * * * * ?",
     // Number of recurrences will limit the number of times the timer runs.
     noOfRecurrences: 10
 };
 
-listener task:Listener appointment = new(appointmentConfiguration);
+listener task:Listener cronTrigger = new(config);
 
 // Creating a service on the `appointment` task Listener.
-service appointmentService on appointment {
+service serv on cronTrigger {
     // This resource triggers when the appointment is due.
     resource function onTrigger() {
     }
 }
 ```
 
-For an example on the usage of the `task:Listener` as an appointment, see the [Task Service Appointment Example](https://ballerina.io/swan-lake/learn/by-example/task-service-appointment.html).
+For an example on schedule a job with a cron trigger by using the `task:Listener`, see the [Task Service Appointment Example](https://ballerina.io/swan-lake/learn/by-example/task-service-appointment.html).
 
 #### Task Schedulers
 
-A Task `Scheduler` can be used to create timers/appointments dynamically. Service(s) can be attached to the `Scheduler` so that they can be invoked when the Scheduler is triggered. 
+A Task `Scheduler` is a advanced scheduler for `Listner`, which can be used to create the scheduler and schedule the multiple tasks with different scheduling logic(trigger). 
 
-Similar to Task Listeners, below are the two types of configurations that can be used to configure a Task Scheduler either as a timer or as an appointment.
+below are the three types of configurations that can be used to configure a `task:Scheduler` and schedule the tasks.
 
-- `TimerConfiguration`
-- `AppointmentConfiguration`
+- `SchedulerConfiguration`: It is used to configure the `task:Scheduler`.
+- `SimpleTriggerConfiguration`: It is used to run either one-time or periodically tasks with fixed intervals of time.
+- `CronTriggerConfiguration`: It is used to run either one-time or periodically tasks at certain time(s) of day.
 
-##### Task Scheduler as a Timer
+##### Initialize scheduler
 
-A `Scheduler` can be used to create timers via its `TimerConfiguration`.
-
-The following code snippet shows how to create a `task:Scheduler` as a timer.
+The following code snippet shows how to create a `task:Scheduler`.
 
 ```ballerina
-task:TimerConfiguration timerConfiguration = {
+task:SchedulerConfiguration schedulerConfig = {
+            threadCount: 1, 
+            threadPriority: 1,
+            thresholdInMillis: 10000
+};
+task:Scheduler scheduler = new(schedulerConfig);
+```
+
+##### Schedule simple trigger tasks by using `Scheduler`
+
+The following code snippet shows how to schedule a simple trigger task.
+
+```ballerina
+int count = 0;
+
+// Represents a job by `Ballerina function pointer`
+function job() {
+    count = count + 1;
+}
+
+// Represents a job by `Ballerina service`
+service serv = service {
+    resource function onTrigger() {
+        count = count + 1;
+    }
+};
+
+task:SimpleTriggerConfiguration config = {
         intervalInMillis: 1000,
         initialDelayInMillis: 0,
         noOfRecurrences: 10
 };
-task:Scheduler timer = new(timerConfiguration);
+
+var taskId = scheduler.scheduletask(job, config);
+var id = scheduler.scheduletask(serv, config);
 ```
 
-For an example on the usage of the `task:Scheduler` as a timer, see the [Task Scheduler Timer Example](https://ballerina.io/swan-lake/learn/by-example/task-scheduler-timer.html).
+For an example on schedule a job with a simple trigger by using the `task:Scheduler`, see the [Task Scheduler Timer Example](https://ballerina.io/swan-lake/learn/by-example/task-scheduler-timer.html).
 
-#### Task Scheduler as an Appointment
+#### Schedule cron trigger tasks by using `Scheduler`
 
-A `Scheduler` can also be used to create appointments via its `AppointmentConfiguration`. 
-
-The following code snippet shows how to create a Task Scheduler as an appointment.
+The following code snippet shows how to schedule a cron trigger task.
 
 ```ballerina
-task:AppointmentConfiguration appointmentConfiguration = {
+int count = 0;
+
+// Represents a job by `Ballerina function pointer`
+function job() {
+    count = count + 1;
+}
+
+// Represents a job by `Ballerina service`
+service serv = service {
+    resource function onTrigger() {
+        count = count + 1;
+    }
+};
+
+task:CronTriggerConfiguration config = {
         appointmentDetails: "* * * * * ?",
         noOfRecurrences: 10
 };
-task:Scheduler appointment = new(appointmentConfiguration);
+var taskId = scheduler.scheduletask(job, config);
+var id = scheduler.scheduletask(serv, config);
 ```
 
-For an example on the usage of the `task:Scheduler` as an appointment, see the [Task Scheduler Appointment Example](https://ballerina.io/swan-lake/learn/by-example/task-scheduler-appointment.html).
+For an example on schedule a job with a cron trigger by using the `task:Scheduler`, see the [Task Scheduler Appointment Example](https://ballerina.io/swan-lake/learn/by-example/task-scheduler-appointment.html).

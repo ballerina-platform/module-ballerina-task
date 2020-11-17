@@ -61,7 +61,7 @@ public class TaskConstants {
 
     // Allowed resource function names.
     public static final String RESOURCE_ON_TRIGGER = "onTrigger";
-    public static final String JOB = "job";
+    public static final String JOB = "Job";
 
     // Common field for TimerConfiguration and AppointmentConfiguration
     public static final BString FIELD_NO_OF_RUNS = StringUtils.fromString("noOfRecurrences");

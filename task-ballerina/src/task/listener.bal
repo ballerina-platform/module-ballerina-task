@@ -42,7 +42,7 @@ public class Listener {
     # + s - Ballerina `service` or `function`, which is to be executed by the `task:Listener`
     # + name - Name of the service
     # + return - () or else a `task:ListenerError` upon failure to attach the service
-    public isolated function __attach(service|(function () returns(anydata)) s, string? name = ()) returns error? {
+    public isolated function __attach(service s, string? name = ()) returns error? {
         // ignore param 'name'
         var result = attachExternal(self, s);
         if (result is error) {

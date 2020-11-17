@@ -73,7 +73,7 @@ public class SchedulerActions {
         String jobId = String.valueOf(new Random().nextInt(1000000));
         JobDataMap jobDataMap = new JobDataMap();
         TaskScheduler jobScheduler = (TaskScheduler) taskScheduler.getNativeData(TaskConstants.SCHEDULER);
-        if (!job.getType().getName().equals("Job")) {
+        if (!job.getType().getName().equals(TaskConstants.JOB)) {
             try {
                 ServiceInformation serviceInformation = Utils.getServiceInformation(job, runtime, attachments);
                 jobDataMap.put(TaskConstants.JOB, serviceInformation);

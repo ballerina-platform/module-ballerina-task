@@ -125,8 +125,9 @@ function testTaskTimerWithSameServices19() {
     test:assertEquals(triggeredCount19, 3, msg = "Expected value mismatched");
 }
 
+int jobCount5 = 0;
 function job5() {
-    jobCount3 = jobCount3 + 1;
+    jobCount5 = jobCount5 + 1;
 }
 
 @test:Config {}

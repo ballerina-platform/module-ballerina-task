@@ -22,8 +22,7 @@ public class Scheduler {
 
     private SchedulerConfiguration configuration;
 
-    # Initializes a `task:Scheduler` object. This may panic if the initialization causes any error due
-    # to a configuration error.
+    # Initializes a `task:Scheduler` object. This may panic if the initialization causes any error.
     # ```ballerina
     # Scheduler scheduler = new();
     # ```
@@ -38,7 +37,9 @@ public class Scheduler {
         }
     }
 
-    # Schedules the given `job` according to the trigger config in the scheduler.
+    # Schedules the given `job` according to the trigger config in the scheduler. If the scheduler is not yet running
+    # when the job is scheduled, the job will be scheduled tentatively and its first run time will only be computed
+    # when the scheduler starts.
     # ```ballerina
     # Scheduler scheduler = new();
     # int count = 0;
@@ -48,7 +49,7 @@ public class Scheduler {
     # }
     # ```
     #
-    # + job - Ballerina `service` or `function`, which is to be executed by the scheduler
+    # + job - Ballerina `service` or `function`, which is to be executed by the scheduler.
     # + triggerConfig - The `task:SimpleTriggerConfiguration` or `task:CronTriggerConfiguration`, which is used to
     #                   configure the trigger of job.
     # + attachments - If you use the job as a `service`, set of optional parameters, which need to be
@@ -77,7 +78,7 @@ public class Scheduler {
         }
     }
 
-    # Starts the `task:Scheduler`. This may panic if the stopping causes any error.
+    # Starts the `task:Scheduler`. This may panic if the starting causes any error.
     # ```ballerina
     # Scheduler scheduler = new();
     # checkpanic scheduler.start();
@@ -92,7 +93,7 @@ public class Scheduler {
         }
     }
 
-    # Removes the `job`, which is associated with the given job id
+    # Reschedules the `job`, which is associated with the given job id.
     # ```ballerina
     # Scheduler scheduler = new();
     # var jobId = scheduler.scheduleJob(function() { count = count + 1; }, {intervalInMillis: 1000});
@@ -140,7 +141,8 @@ public class Scheduler {
         return pause(self);
     }
 
-    # Resumes a scheduler.
+    # Resumes a scheduler. If any of the Jobs missed one or more fire-times, then misfire instruction will be
+    # applied to those jobs.
     # ```ballerina
     # Scheduler scheduler = new();
     # checkpanic scheduler.start();
@@ -169,7 +171,8 @@ public class Scheduler {
         return pauseJob(self, jobId);
     }
 
-    # Resumes the particular job.
+    # Resumes the particular job. If any of the Jobs missed one or more fire-times, then misfire instruction will be
+    # applied to those jobs.
     # ```ballerina
     # Scheduler scheduler = new();
     # checkpanic scheduler.start();
@@ -209,7 +212,7 @@ public class Scheduler {
         return getAllRunningJobs(self);
     }
 
-    # Stops `task:Scheduler`. It will wait until all currently executing jobs have completed. This may panic if the
+    # Stops the `task:Scheduler`. It will wait until all currently executing jobs have completed. This may panic if the
     # stopping causes any error.
     # ```ballerina
     # Scheduler scheduler = new();
