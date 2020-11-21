@@ -23,19 +23,15 @@ public class Listener {
     boolean started = false;
 
     private TimerConfiguration|AppointmentConfiguration listenerConfiguration;
-    private ThreadConfiguration threadConfiguration;
 
     # Initializes the `task:Listener` object. This may panic if the initialization is failed due to a configuration
     # error.
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #                   `task:Listener` behavior
-    # + threadConfiguration - The `task:ThreadConfiguration` record to define the `task:Listener` behavior
-    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration,
-                                  ThreadConfiguration threadConfiguration = {}) {
-        validateConfiguration(configuration, threadConfiguration);
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
+        validateConfiguration(configuration);
         self.listenerConfiguration = configuration;
-        self.threadConfiguration = threadConfiguration;
         var result = initExternal(self);
         if (result is ListenerError) {
             panic result;
@@ -159,33 +155,33 @@ isolated function attachExternal(Listener task, service s, any... attachments) r
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration,
-                                        ThreadConfiguration threadConfiguration) {
-    var noOfRecurrences = configuration[NO_OF_RECURRENCE];
+isolated function validateConfiguration(TimerConfiguration|AppointmentConfiguration configuration) {
+    var noOfRecurrences = configuration.noOfRecurrences;
+    var initalDelay = configuration[INITIAL_DELAY];
     var misfirePolicy = configuration.misfirePolicy;
     if (configuration is TimerConfiguration) {
-        if (noOfRecurrences is int) {
-            if (noOfRecurrences == 1) {
-                if (!(misfirePolicy is OneTimeTaskPolicy)) {
-                    panic ListenerError("Wrong misfire policy has given for the one-time execution timer tasks.");
-                }
-
-            } else {
-                if (!(misfirePolicy is RecurringTaskPolicy)) {
-                    panic ListenerError("Wrong misfire policy has been given for the repeating execution timer tasks.");
-                }
+        if (noOfRecurrences < 0) {
+            panic ListenerError("Task noOfOccurrences should be a positive integer.");
+        } else if (noOfRecurrences == 1) {
+            if (!(misfirePolicy is OneTimeTaskPolicy)) {
+                panic ListenerError("Wrong misfire policy has been given for the one-time execution timer tasks.");
+            }
+        } else {
+            if (!(misfirePolicy is RecurringTaskPolicy)) {
+                panic ListenerError("Wrong misfire policy has been given for the repeating execution timer tasks.");
             }
         }
-        if (configuration[INITIAL_DELAY] == ()) {
+        if (configuration.intervalInMillis < 1) {
+            panic ListenerError("Timer scheduling interval should be a positive integer.");
+        }
+        if (initalDelay == ()) {
             configuration.initialDelayInMillis = configuration.intervalInMillis;
+        } else {
+            if (initalDelay is int && initalDelay < 0) {
+                panic ListenerError("Timer scheduling delay should be a non-negative integer.");
+            }
         }
     } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {
-        panic ListenerError("Wrong misfire policy has been given for the appointment task.");
-    }
-    if (threadConfiguration.threadCount < 1) {
-        panic ListenerError("Thread count must be greater than 0.");
-    }
-    if (threadConfiguration.threadPriority < 1 || threadConfiguration.threadPriority > 10) {
-        panic ListenerError("Thread priority must be an integer value between 1 and 10.");
+        panic ListenerError("Wrong misfire policy has given for the appointment task.");
     }
 }

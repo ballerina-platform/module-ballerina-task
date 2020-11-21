@@ -1,23 +1,21 @@
-[project]
-org-name = "ballerina"
+[package]
+org = "ballerina"
+name = "task"
 version = "@toml.version@"
 
-[dependencies]
-"ballerina/runtime" = "@stdlib.runtime.version@"
+[[dependency]]
+org = "ballerina"
+name = "runtime"
+version = "@stdlib.runtime.version@"
 
-[platform]
-target = "java11"
+[[platform.java11.dependency]]
+path = "../task-native/build/libs/task-native-@project.version@.jar"
+groupId = "ballerina"
+artifactId = "task"
+version = "@project.version@"
 
-    [[platform.libraries]]
-    artifactId = "task"
-    version = "@project.version@"
-    path = "../task-native/build/libs/task-native-@project.version@.jar"
-    groupId = "ballerina"
-    modules = ["task"]
-
-    [[platform.libraries]]
-    artifactId = "quartz"
-    version = "2.3.1"
-    path = "./lib/quartz-2.3.1.jar"
-    groupId = "org.quartz-scheduler"
-    modules = ["task"]
+[[platform.java11.dependency]]
+path = "./lib/quartz-2.3.1.jar"
+groupId = "org.quartz-scheduler"
+artifactId = "quartz"
+version = "2.3.1"

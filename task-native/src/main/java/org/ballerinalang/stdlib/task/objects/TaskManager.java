@@ -31,7 +31,6 @@ import java.util.Properties;
  */
 public class TaskManager {
     private Scheduler scheduler;
-    private static final Properties properties = new Properties();
 
     private static class TaskManagerHelper {
         private static final TaskManager INSTANCE = new TaskManager();
@@ -48,7 +47,7 @@ public class TaskManager {
             if (this.scheduler != null && this.scheduler.isStarted()) {
                 return this.scheduler;
             }
-            StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory(properties);
+            StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory(createSchedulerProperties());
             this.scheduler = stdSchedulerFactory.getScheduler();
             this.scheduler.start();
         } catch (SchedulerException e) {
@@ -57,9 +56,10 @@ public class TaskManager {
         return this.scheduler;
     }
 
-    public static void createSchedulerProperties(long thresholdInMillis, long threadCount, long threadPriority) {
-        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, String.valueOf(thresholdInMillis));
-        properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, String.valueOf(threadCount));
-        properties.setProperty(TaskConstants.QUARTZ_THREAD_PRIORITY, String.valueOf(threadPriority));
+    public static Properties createSchedulerProperties() {
+        Properties properties = new Properties();
+        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, TaskConstants.QUARTZ_THRESHOLD_VALUE);
+        properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, TaskConstants.QUARTZ_THREAD_COUNT_VALUE);
+        return properties;
     }
 }
