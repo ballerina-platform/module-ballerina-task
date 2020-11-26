@@ -19,7 +19,8 @@
 package org.ballerinalang.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.types.AttachedFunctionType;
+import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.types.ServiceType;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.Utils;
@@ -48,8 +49,8 @@ public class ServiceInformation {
         return Utils.getServiceName(service);
     }
 
-    public AttachedFunctionType getOnTriggerFunction() {
-        for (AttachedFunctionType resource : service.getType().getAttachedFunctions()) {
+    public MemberFunctionType getOnTriggerFunction() {
+        for (MemberFunctionType resource : ((ServiceType) (service.getType())).getResourceFunctions()) {
             if (TaskConstants.RESOURCE_ON_TRIGGER.equals(resource.getName())) {
                 return resource;
             }

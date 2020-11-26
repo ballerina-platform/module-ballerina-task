@@ -59,7 +59,7 @@ public class TaskConstants {
     public static final BString MISFIRE_POLICY = StringUtils.fromString("misfirePolicy");
 
     // Allowed resource function names.
-    public static final String RESOURCE_ON_TRIGGER = "onTrigger";
+    public static final String RESOURCE_ON_TRIGGER = "$get$onTrigger";
     public static final String SERVICE_INFORMATION = "serviceInfo";
 
     // Common field for TimerConfiguration and AppointmentConfiguration
