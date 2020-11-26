@@ -14,21 +14,20 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/test;
+# A `Job` class is used to execute the ballerina function pointer .
+class Job {
 
-isolated function job16() {
-}
+    private function () fun;
 
-@test:Config {}
-function testSchedulerStop() {
-    SimpleTriggerConfiguration configuration = {
-        intervalInMillis: 500,
-        initialDelayInMillis: 2000
-    };
-    Scheduler timer = scheduler();
-    var attachResult = timer.scheduleJob(job16, configuration);
-    var expectedResult =  timer.stop();
-    if (expectedResult is error) {
-        test:assertFail("Scheduler stop failed");
+    public isolated function init(function () func) {
+        self.fun = func;
+    }
+
+    public function executeFunctionPointer(function () func) {
+        var result = func();
+    }
+
+    public function onTrigger() {
+        self.executeFunctionPointer(self.fun);
     }
 }

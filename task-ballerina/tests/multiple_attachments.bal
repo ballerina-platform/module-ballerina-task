@@ -33,25 +33,23 @@ public type Person record {
     int age;
 };
 
-service multipleAttachService = service {
-    resource function onTrigger(Person p, Account a) {
-        name = <@untainted>p.name;
-        age = <@untainted>p.age;
-        acNumber = <@untainted>a.number;
-        balance = <@untainted>a.balance;
-        output = "Name: " + name + " Age: " + age.toString() + " A/C: " + acNumber.toString() + " Balance: " +
-        balance.toString();
-    }
-};
+Person sam = {name: "Sam", age: 29};
+Account acc = {number: 150590, balance: 11.35};
+
+function job() {
+    name = <@untainted>sam.name;
+    age = <@untainted>sam.age;
+    acNumber = <@untainted>acc.number;
+    balance = <@untainted>acc.balance;
+    output = "Name: " + name + " Age: " + age.toString() + " A/C: " + acNumber.toString() + " Balance: " +
+    balance.toString();
+}
 
 @test:Config {}
 function multipleAttachmentTest() returns error? {
-    Person sam = {name: "Sam", age: 29};
-    Account acc = {number: 150590, balance: 11.35};
-    TimerConfiguration timerConfiguration = {intervalInMillis: 1000};
-    Scheduler multipleAttachmentTimer = new (timerConfiguration);
-    check multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
-    check multipleAttachmentTimer.start();
+    SimpleTriggerConfiguration timerConfiguration = {intervalInMillis: 1000};
+    Scheduler multipleAttachmentTimer = scheduler();
+    var attachResult = multipleAttachmentTimer.scheduleJob(job, timerConfiguration);
     runtime:sleep(4000);
     check multipleAttachmentTimer.stop();
     test:assertEquals(output, "Name: Sam Age: 29 A/C: 150590 Balance: 11.35",

@@ -19,24 +19,21 @@ import ballerina/test;
 
 int triggeredCount6 = 0;
 
-service misfireService6 = service {
-    resource function onTrigger() {
-        triggeredCount6 = triggeredCount6 + 1;
-    }
-};
+function cronMisfire6() {
+    triggeredCount6 = triggeredCount6 + 1;
+}
 
 @test:Config {}
 function testFireAndProceedWithService6() returns error? {
-    Scheduler taskTimer = new ({ cronExpression: "* * * * * ? *", noOfRecurrences: 8,
-                                 misfirePolicy: "fireAndProceed"  });
-    check taskTimer.attach(misfireService6);
-    check taskTimer.start();
+    Scheduler taskTimer = scheduler();
+    var attachResult = taskTimer.scheduleJob(cronMisfire6, { cronExpression: "* * * * * ? *", noOfRecurrences: 8,
+    misfirePolicy: "fireAndProceed"  });
     runtime:sleep(1500);
     int count = triggeredCount6;
-    check taskTimer.pause();
+    check taskTimer.pauseAllJobs();
     runtime:sleep(1000);
     test:assertEquals(triggeredCount6, count, msg = "Expected count mismatched during the scheduler pause.");
-    check taskTimer.resume();
+    check taskTimer.resumeAllJobs();
     runtime:sleep(6000);
     test:assertEquals(triggeredCount6, 8, msg = "Expected count mismatched.");
     check taskTimer.stop();
@@ -44,23 +41,21 @@ function testFireAndProceedWithService6() returns error? {
 
 int triggeredCount7 = 0;
 
-service misfireService7 = service {
-    resource function onTrigger() {
-        triggeredCount7 = triggeredCount7 + 1;
-    }
-};
+function cronMisfire7() {
+    triggeredCount7 = triggeredCount7 + 1;
+}
 
 @test:Config {}
 function testdoNothingWithService7() returns error? {
-    Scheduler taskTimer = new ({ cronExpression: "* * * * * ? *", noOfRecurrences: 5, misfirePolicy: "doNothing" });
-    check taskTimer.attach(misfireService7);
-    check taskTimer.start();
+    Scheduler taskTimer = scheduler();
+    var attachResult = taskTimer.scheduleJob(cronMisfire7, { cronExpression: "* * * * * ? *", noOfRecurrences: 5,
+    misfirePolicy: "doNothing" });
     runtime:sleep(1500);
     int count = triggeredCount7;
-    check taskTimer.pause();
+    check taskTimer.pauseAllJobs();
     runtime:sleep(1000);
     test:assertEquals(triggeredCount7, count, msg = "Expected count mismatched during the scheduler pause.");
-    check taskTimer.resume();
+    check taskTimer.resumeAllJobs();
     runtime:sleep(6000);
     test:assertEquals(triggeredCount7, 5, msg = "Expected count mismatched");
     check taskTimer.stop();

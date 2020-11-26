@@ -19,7 +19,7 @@ package org.ballerinalang.stdlib.task.utils;
 
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.StrandMetadata;
-import io.ballerina.runtime.api.types.AttachedFunctionType;
+import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
 
 import static io.ballerina.runtime.api.constants.RuntimeConstants.BALLERINA_BUILTIN_PKG_PREFIX;
@@ -35,26 +35,14 @@ public class TaskExecutor {
                     TaskConstants.RESOURCE_ON_TRIGGER);
 
     public static void executeFunction(ServiceInformation serviceInformation) {
-        AttachedFunctionType onTriggerFunction = serviceInformation.getOnTriggerFunction();
-        Object[] onTriggerFunctionArgs = getParameterList(onTriggerFunction, serviceInformation);
 
         Runtime runtime = serviceInformation.getRuntime();
         runtime.invokeMethodAsync(serviceInformation.getService(), TaskConstants.RESOURCE_ON_TRIGGER, null,
-                TASK_METADATA, null, onTriggerFunctionArgs);
+                TASK_METADATA, null);
     }
 
-    private static Object[] getParameterList(AttachedFunctionType function, ServiceInformation serviceInformation) {
-        Object[] attachments = serviceInformation.getAttachment();
-        int numberOfParameters = function.getType().getParameterTypes().length;
-        Object[] parameters = null;
-        if (numberOfParameters == attachments.length) {
-            int i = 0;
-            parameters = new Object[attachments.length * 2];
-            for (Object attachment : attachments) {
-                parameters[i++] = attachment;
-                parameters[i++] = Boolean.TRUE;
-            }
-        }
-        return parameters;
+    public static void executeFunction(BObject job, Runtime runtime) {
+        runtime.invokeMethodAsync(job, TaskConstants.RESOURCE_ON_TRIGGER, null,
+                TASK_METADATA, null);
     }
 }

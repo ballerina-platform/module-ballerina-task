@@ -17,6 +17,7 @@
  */
 package org.ballerinalang.stdlib.task.utils;
 
+import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.AttachedFunctionType;
 import io.ballerina.runtime.api.types.Type;
@@ -30,6 +31,9 @@ import org.ballerinalang.stdlib.task.objects.ServiceInformation;
 import org.quartz.CronExpression;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -39,6 +43,7 @@ import org.quartz.spi.OperableTrigger;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -52,8 +57,12 @@ public class Utils {
     // an attached function.
     private static final int VALID_RESOURCE_COUNT = 1;
 
-    public static BError createTaskError(String message) {
+    public static BError createListenerError(String message) {
         return createTaskError(TaskConstants.LISTENER_ERROR, message);
+    }
+
+    public static BError createSchedulerError(String message) {
+        return createTaskError(TaskConstants.SCHEDULER_ERROR, message);
     }
 
     public static BError createTaskError(String reason, String message) {
@@ -75,11 +84,11 @@ public class Utils {
      *       When compiler plugins can be run for the resources without parameters, this will be redundant.
      *       Issue: https://github.com/ballerina-platform/ballerina-lang/issues/14148
      */
-    public static void validateService(ServiceInformation serviceInformation) throws SchedulingException {
-        AttachedFunctionType[] resources = serviceInformation.getService().getType().getAttachedFunctions();
+    public static void validateService(BObject service) throws SchedulingException {
+        AttachedFunctionType[] resources = service.getType().getAttachedFunctions();
         if (resources.length != VALID_RESOURCE_COUNT) {
             throw new SchedulingException("Invalid number of resources found in service \'" +
-                    serviceInformation.getServiceName() + "\'. Task service should include only one resource.");
+                    Utils.getServiceName(service) + "\'. Task service should include only one resource.");
         }
         AttachedFunctionType resource = resources[0];
 
@@ -87,7 +96,7 @@ public class Utils {
             validateOnTriggerResource(resource.getReturnParameterType());
         } else {
             throw new SchedulingException("Invalid resource function found: " + resource.getName()
-                                                  + ". Expected: \'" + TaskConstants.RESOURCE_ON_TRIGGER + "\'.");
+                    + ". Expected: \'" + TaskConstants.RESOURCE_ON_TRIGGER + "\'.");
         }
     }
 
@@ -207,7 +216,7 @@ public class Utils {
     public static Trigger getTrigger(BMap<BString, Object> configurations, String triggerID) {
         Trigger trigger;
         String configurationTypeName = configurations.getType().getName();
-        if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
+        if (TaskConstants.SIMPLE_TRIGGER_CONFIGURATION.equals(configurationTypeName)) {
             long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
             SimpleScheduleBuilder scheduleBuilder = Utils.createSchedulerBuilder(configurations);
             trigger = Utils.createTrigger(scheduleBuilder, delay, triggerID);
@@ -220,5 +229,28 @@ public class Utils {
             trigger = Utils.createCronTrigger(scheduleBuilder, maxRuns, triggerID);
         }
         return trigger;
+    }
+
+    public static ServiceInformation getServiceInformation(BObject service, Runtime runtime,
+                                                           Object... attachments) throws SchedulingException {
+        Utils.validateService(service);
+        ServiceInformation serviceInformation;
+        if (attachments == null) {
+            serviceInformation = new ServiceInformation(runtime, service);
+        } else {
+            serviceInformation = new ServiceInformation(runtime, service, attachments);
+        }
+        return serviceInformation;
+    }
+
+    public static JobDetail createJob(JobDataMap jobDataMap, String jobId) {
+        return JobBuilder.newJob(TaskJob.class).withIdentity(jobId).usingJobData(jobDataMap).build();
+    }
+
+    public static Properties createSchedulerProperties() {
+        Properties properties = new Properties();
+        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, TaskConstants.QUARTZ_THRESHOLD_VALUE);
+        properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, TaskConstants.QUARTZ_THREAD_COUNT_VALUE);
+        return properties;
     }
 }

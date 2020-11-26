@@ -15,17 +15,20 @@
 // under the License.
 
 import ballerina/test;
+import ballerina/stringutils;
 
 service noResourceService = service {};
 
-Person person = {name: "Sam", age: 29};
+listener Listener testListner = new({intervalInMillis: 1000});
 
 @test:Config {}
 public function testForNoResourceService() {
-    var attachResult = timerForNoResourceService.attach(noResourceService, person);
+    var attachResult = trap testListner.__attach(noResourceService);
+    checkpanic testListner.__start();
     test:assertTrue(attachResult is error);
     if (attachResult is error) {
-         test:assertEquals(attachResult.message(), "Failed to attach the service to the scheduler");
+        test:assertTrue(stringutils:contains(attachResult.message(), "Invalid number of resources found in service"));
+
     }
 }
 
@@ -37,9 +40,10 @@ service moreThanOneResourceService = service {
 
 @test:Config {}
 public function testForMoreThanOneResource() {
-    var attachResult = timerForNoResourceService.attach(moreThanOneResourceService, person);
+    var attachResult = trap testListner.__attach(moreThanOneResourceService);
+    checkpanic testListner.__start();
     test:assertTrue(attachResult is error);
     if (attachResult is error) {
-         test:assertEquals(attachResult.message(), "Failed to attach the service to the scheduler");
+         test:assertTrue(stringutils:contains(attachResult.message(), "Invalid number of resources found in service"));
     }
 }

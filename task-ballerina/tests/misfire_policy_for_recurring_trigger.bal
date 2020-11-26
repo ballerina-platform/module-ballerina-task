@@ -19,25 +19,22 @@ import ballerina/test;
 
 int triggeredCount2 = 0;
 
-service misfireService2 = service {
-    resource function onTrigger() {
-        triggeredCount2 = triggeredCount2 + 1;
-    }
-};
+function misfireJob2() {
+    triggeredCount2 = triggeredCount2 + 1;
+}
 
 @test:Config {}
 function testExistingRepeatCountWithService2() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 5 ,
-                                 misfirePolicy: "fireNowWithExistingCount" });
-    check taskTimer.attach(misfireService2);
-    check taskTimer.start();
+    Scheduler taskTimer = scheduler();
+    var attachResult = taskTimer.scheduleJob(misfireJob2, { intervalInMillis: 3000, noOfRecurrences: 5 ,
+    misfirePolicy: "fireNowWithExistingCount" });
      // Sleep for 8 seconds.
     runtime:sleep(8000);
     test:assertEquals(triggeredCount2, 2, msg = "Expected count mismatched before pausing the scheduler.");
-    check taskTimer.pause();
+    check taskTimer.pauseAllJobs();
     runtime:sleep(8000);
     test:assertEquals(triggeredCount2, 2, msg = "Expected count mismatched during the scheduler pause.");
-    check taskTimer.resume();
+    check taskTimer.resumeAllJobs();
     runtime:sleep(1000);
     test:assertEquals(triggeredCount2, 3, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(8000);
@@ -47,24 +44,21 @@ function testExistingRepeatCountWithService2() returns error? {
 
 int triggeredCount3 = 0;
 
-service misfireService3 = service {
-    resource function onTrigger() {
-        triggeredCount3 = triggeredCount3 + 1;
-    }
-};
+function misfireJob3() {
+    triggeredCount3 = triggeredCount3 + 1;
+}
 
 @test:Config {}
 function testNowWithRemainingRepeatCountWithService3() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7,
-                                 misfirePolicy: "fireNowWithRemainingCount"});
-    check taskTimer.attach(misfireService3);
-    check taskTimer.start();
+    Scheduler taskTimer = scheduler();
+    var attachResult = taskTimer.scheduleJob(misfireJob3, { intervalInMillis: 3000, noOfRecurrences: 7,
+    misfirePolicy: "fireNowWithRemainingCount"});
     runtime:sleep(8000);
     test:assertEquals(triggeredCount3, 2, msg = "Expected count mismatched before pausing the scheduler.");
-    check taskTimer.pause();
+    check taskTimer.pauseAllJobs();
     runtime:sleep(8000);
     test:assertEquals(triggeredCount3, 2, msg = "Expected count mismatched during the scheduler pause.");
-    check taskTimer.resume();
+    check taskTimer.resumeAllJobs();
     runtime:sleep(1000);
     test:assertEquals(triggeredCount3, 3, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(8000);
@@ -74,24 +68,21 @@ function testNowWithRemainingRepeatCountWithService3() returns error? {
 
 int triggeredCount4 = 0;
 
-service misfireService4 = service {
-    resource function onTrigger() {
-        triggeredCount4 = triggeredCount4 + 1;
-    }
-};
+function misfireJob4() {
+    triggeredCount4 = triggeredCount4 + 1;
+}
 
 @test:Config {}
 function testNextWithExistingCountWithService4() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7,
-                                 misfirePolicy: "fireNextWithExistingCount"});
-    check taskTimer.attach(misfireService4);
-    check taskTimer.start();
+    Scheduler taskTimer = scheduler();
+    var attachResult = taskTimer.scheduleJob(misfireJob4, { intervalInMillis: 3000, noOfRecurrences: 7,
+    misfirePolicy: "fireNextWithExistingCount"});
     runtime:sleep(7000);
     test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched before pausing the scheduler.");
-    check taskTimer.pause();
+    check taskTimer.pauseAllJobs();
     runtime:sleep(7000);
     test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched during the scheduler pause.");
-    check taskTimer.resume();
+    check taskTimer.resumeAllJobs();
     runtime:sleep(500);
     test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(10000);
@@ -101,23 +92,21 @@ function testNextWithExistingCountWithService4() returns error? {
 
 int triggeredCount5 = 0;
 
-service misfireService5 = service {
-    resource function onTrigger() {
-        triggeredCount5 = triggeredCount5 + 1;
-    }
-};
+function misfireJob5() {
+    triggeredCount5 = triggeredCount5 + 1;
+}
+
 @test:Config {}
 function testNextWithRemainigCountWithService5() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 ,
-                                 misfirePolicy: "fireNextWithExistingCount"});
-    check taskTimer.attach(misfireService5);
-    check taskTimer.start();
+    Scheduler taskTimer = scheduler();
+    var attachResult = taskTimer.scheduleJob(misfireJob5, { intervalInMillis: 3000, noOfRecurrences: 7 ,
+    misfirePolicy: "fireNextWithExistingCount"});
     runtime:sleep(7000);
     test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched before pausing the scheduler.");
-    check taskTimer.pause();
+    check taskTimer.pauseAllJobs();
     runtime:sleep(7000);
     test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched during the scheduler pause.");
-    check taskTimer.resume();
+    check taskTimer.resumeAllJobs();
     runtime:sleep(500);
     test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(10000);
@@ -127,23 +116,20 @@ function testNextWithRemainigCountWithService5() returns error? {
 
 int triggeredCount11 = 0;
 
-service misfireService11 = service {
-    resource function onTrigger() {
-        triggeredCount11 = triggeredCount11 + 1;
-    }
-};
+function misfireJob11() {
+    triggeredCount11 = triggeredCount11 + 1;
+}
 
 @test:Config {}
 function testSmartPolicyWithService11() returns error? {
-    Scheduler taskTimer = new ({intervalInMillis: 3000, noOfRecurrences: 5 });
-    check taskTimer.attach(misfireService11);
-    check taskTimer.start();
+    Scheduler taskTimer = scheduler();
+    var attachResult = taskTimer.scheduleJob(misfireJob11, {intervalInMillis: 3000, noOfRecurrences: 5 });
     runtime:sleep(8000);
     test:assertEquals(triggeredCount11, 2, msg = "Expected count mismatched before pausing the scheduler.");
-    check taskTimer.pause();
+    check taskTimer.pauseAllJobs();
     runtime:sleep(8000);
     test:assertEquals(triggeredCount11, 2, msg = "Expected count mismatched during the scheduler pause.");
-    check taskTimer.resume();
+    check taskTimer.resumeAllJobs();
     runtime:sleep(1000);
     test:assertEquals(triggeredCount11, 3, msg = "Expected count mismatched after resuming the scheduler.");
     runtime:sleep(10000);

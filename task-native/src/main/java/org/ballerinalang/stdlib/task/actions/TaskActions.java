@@ -17,12 +17,14 @@
  */
 package org.ballerinalang.stdlib.task.actions;
 
+import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
+import org.ballerinalang.stdlib.task.objects.TaskManager;
 import org.ballerinalang.stdlib.task.objects.TaskScheduler;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.Utils;
@@ -43,7 +45,7 @@ public class TaskActions {
         try {
             taskScheduler.pause(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
+            return Utils.createListenerError(e.getMessage());
         }
         return null;
     }
@@ -54,7 +56,7 @@ public class TaskActions {
         try {
             taskScheduler.resume(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
+            return Utils.createListenerError(e.getMessage());
         }
         return null;
     }
@@ -64,7 +66,7 @@ public class TaskActions {
         try {
             taskScheduler.removeService(service);
         } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
+            return Utils.createListenerError(e.getMessage());
         }
         return null;
     }
@@ -74,7 +76,7 @@ public class TaskActions {
         try {
             taskScheduler.start();
         } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
+            return Utils.createListenerError(e.getMessage());
         }
         return null;
     }
@@ -85,47 +87,44 @@ public class TaskActions {
         try {
             taskScheduler.stop(triggerID);
         } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
+            return Utils.createListenerError(e.getMessage());
         }
         return null;
     }
 
     @SuppressWarnings("unchecked") // It is used to ignore the unchecked generic types of operations warnings
     // from the `getMapValue` by the compilers.
-    public static Object attach(BObject taskListener, BObject service, Object... attachments) {
+    public static Object attach(BObject taskListener, BObject service) {
+        Runtime runtime = (Runtime) taskListener.getNativeData(TaskConstants.RUNTIME);
         String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
         TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
         ServiceInformation serviceInformation;
-        if (attachments == null) {
-            serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service);
-        } else {
-            serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service, attachments);
-        }
         try {
-            Utils.validateService(serviceInformation);
-            BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.
-                    MEMBER_LISTENER_CONFIGURATION);
+            serviceInformation = Utils.getServiceInformation(service, runtime);
+            BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.TRIGGER_CONFIGURATION);
             taskScheduler.addService(serviceInformation, configurations, triggerID);
         } catch (SchedulingException | SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
+            return Utils.createListenerError(e.getMessage());
         }
         return null;
     }
 
     @SuppressWarnings("unchecked") // It is used to ignore the unchecked generic types of operations warnings
     // from the `getMapValue` by the compilers.
-    public static Object init(BObject taskListener) {
-        BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
+    public static Object init(Environment env, BObject taskListener) {
+        Runtime runtime = env.getRuntime();
+        BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.TRIGGER_CONFIGURATION);
         try {
-            if (!TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurations.getType().getName())) {
+            if (!TaskConstants.SIMPLE_TRIGGER_CONFIGURATION.equals(configurations.getType().getName())) {
                 BString cronExpression = configurations.getStringValue(TaskConstants.MEMBER_CRON_EXPRESSION);
                 Utils.validateCronExpression(cronExpression);
             }
-            TaskScheduler taskScheduler = new TaskScheduler();
+            TaskScheduler taskScheduler = new TaskScheduler(TaskManager.getInstance().getScheduler());
             taskListener.addNativeData(TaskConstants.SCHEDULER, taskScheduler);
             taskListener.addNativeData(TaskConstants.TRIGGER_NAME, UUID.randomUUID().toString());
+            taskListener.addNativeData(TaskConstants.RUNTIME, runtime);
         } catch (SchedulingException e) {
-            return Utils.createTaskError(e.getMessage());
+            return Utils.createListenerError(e.getMessage());
         }
         return null;
     }

@@ -18,24 +18,24 @@ import ballerina/test;
 import ballerina/runtime;
 
 // Service for the appointment task
-AppointmentConfiguration appointmentConfiguration = { cronExpression: "0/2 * * * * ? *"};
+CronTriggerConfiguration configuration = { cronExpression: "0/2 * * * * ? *"};
 
 int count = 0;
 
-listener Listener appointment = new(appointmentConfiguration);
+listener Listener testList = new(configuration);
 
 function getCount() returns int {
     return count;
 }
 
-service appointmentService on appointment {
+service appointmentService on testList {
     resource function onTrigger() {
         count = count + 1;
     }
 }
 
 // Service for the timer task
-TimerConfiguration timerConfig = {
+SimpleTriggerConfiguration timerConfig = {
     intervalInMillis: 2000,
     initialDelayInMillis: 1000
 };
@@ -71,7 +71,7 @@ service inLineTimerService on inLineTimer {
 }
 
 // Service for the timer task with a limited no Of runs
-TimerConfiguration timerConfigForWithLimitedNumberOfRuns = {
+SimpleTriggerConfiguration timerConfigForWithLimitedNumberOfRuns = {
     intervalInMillis: 1000,
     noOfRecurrences: 3
 };
@@ -91,7 +91,7 @@ service timerServiceForWithLimitedNumberOfRuns on timerForWithLimitedNumberOfRun
 }
 
 // Service for the timer task with out delay
-TimerConfiguration configWithOutDelay = {
+SimpleTriggerConfiguration configWithOutDelay = {
     intervalInMillis: 2000
 };
 
