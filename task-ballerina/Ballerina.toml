@@ -1,18 +1,18 @@
 [package]
 org = "ballerina"
 name = "task"
-version = "1.1.2"
+version = "@toml.version@"
 
 [[dependency]]
 org = "ballerina"
 name = "runtime"
-version = "0.5.2"
+version = "@stdlib.runtime.version@"
 
 [[platform.java11.dependency]]
-path = "../task-native/build/libs/task-native-1.1.2-SNAPSHOT.jar"
+path = "../task-native/build/libs/task-native-@project.version@.jar"
 groupId = "ballerina"
 artifactId = "task"
-version = "1.1.2-SNAPSHOT"
+version = "@project.version@"
 
 [[platform.java11.dependency]]
 path = "./lib/quartz-2.3.1.jar"
