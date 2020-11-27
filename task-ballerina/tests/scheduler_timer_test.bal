@@ -100,9 +100,10 @@ service service4 = service {
 function testTaskTimerWithSameServices() {
     Scheduler timerWithMultipleServices = new ({intervalInMillis: 1000});
     checkpanic timerWithMultipleServices.attach(service4);
-    checkpanic timerWithMultipleServices.attach(service4);
     checkpanic timerWithMultipleServices.start();
-    runtime:sleep(2500);
+    runtime:sleep(1500);
+    checkpanic timerWithMultipleServices.attach(service4);
+    runtime:sleep(2700);
     checkpanic timerWithMultipleServices.stop();
     test:assertTrue(fourthTimerServiceTriggered, msg = "Expected value mismatched");
 }
