@@ -29,9 +29,9 @@ task:TimerConfiguration timerConfiguration = {
 listener task:Listener timer = new(timerConfiguration);
 
 // Creating a service on the `timer` task Listener.
-service timerService on timer {
+service /timerService on timer {
     // This resource triggers when the timer goes off.
-    resource function onTrigger() {
+    remote function onTrigger() {
     }
 }
 ```
@@ -55,9 +55,9 @@ task:AppointmentConfiguration appointmentConfiguration = {
 listener task:Listener appointment = new(appointmentConfiguration);
 
 // Creating a service on the `appointment` task Listener.
-service appointmentService on appointment {
+service /appointmentService on appointment {
     // This resource triggers when the appointment is due.
-    resource function onTrigger() {
+    remote function onTrigger() {
     }
 }
 ```
