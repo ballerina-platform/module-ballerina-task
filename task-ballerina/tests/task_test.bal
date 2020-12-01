@@ -28,7 +28,7 @@ function getCount() returns int {
     return count;
 }
 
-service /appointmentService on appointment {
+service on appointment {
     remote function onTrigger() {
         count = count + 1;
     }
@@ -49,7 +49,7 @@ function getTimerCount() returns int {
 
 }
 
-service /timerService on timer {
+service on timer {
     remote function onTrigger() {
         timerCount = timerCount + 1;
     }
@@ -64,7 +64,7 @@ function getInLineTimerCount() returns int {
     return inLineTimerConfigCount;
 }
 
-service /inLineTimerService on inLineTimer {
+service on inLineTimer {
     remote function onTrigger() {
         inLineTimerConfigCount = inLineTimerConfigCount + 1;
     }
@@ -84,7 +84,7 @@ function getCountForWithLimitedNumberOfRuns() returns int {
     return countForWithLimitedNumberOfRuns;
 }
 
-service /timerServiceForWithLimitedNumberOfRuns on timerForWithLimitedNumberOfRuns {
+service on timerForWithLimitedNumberOfRuns {
     remote function onTrigger() {
         countForWithLimitedNumberOfRuns = countForWithLimitedNumberOfRuns + 1;
     }
@@ -103,7 +103,7 @@ function getCountForConfigWithOutDelay() returns int {
     return countForConfigWithOutDelay;
 }
 
-service /timerServiceForConfigWithOutDelay on timerForConfigWithOutDelay {
+service on timerForConfigWithOutDelay {
     remote function onTrigger() {
         countForConfigWithOutDelay = countForConfigWithOutDelay + 1;
     }
