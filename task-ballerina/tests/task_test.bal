@@ -29,7 +29,7 @@ function getCount() returns int {
 }
 
 service /appointmentService on appointment {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         count = count + 1;
     }
 }
@@ -50,7 +50,7 @@ function getTimerCount() returns int {
 }
 
 service /timerService on timer {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         timerCount = timerCount + 1;
     }
 }
@@ -65,7 +65,7 @@ function getInLineTimerCount() returns int {
 }
 
 service /inLineTimerService on inLineTimer {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         inLineTimerConfigCount = inLineTimerConfigCount + 1;
     }
 }
@@ -85,7 +85,7 @@ function getCountForWithLimitedNumberOfRuns() returns int {
 }
 
 service /timerServiceForWithLimitedNumberOfRuns on timerForWithLimitedNumberOfRuns {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         countForWithLimitedNumberOfRuns = countForWithLimitedNumberOfRuns + 1;
     }
 }
@@ -104,7 +104,7 @@ function getCountForConfigWithOutDelay() returns int {
 }
 
 service /timerServiceForConfigWithOutDelay on timerForConfigWithOutDelay {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         countForConfigWithOutDelay = countForConfigWithOutDelay + 1;
     }
 }
@@ -114,7 +114,7 @@ service /timerServiceForConfigWithOutDelay on timerForConfigWithOutDelay {
 public function testAppointmentAndTimerConfig() {
     runtime:sleep(4000);
     test:assertEquals(getCountForWithLimitedNumberOfRuns(), 3);
-    test:assertTrue(getCount() > 0);
+    test:assertTrue(count > 0);
     test:assertTrue(getTimerCount() > 0);
     test:assertTrue(getInLineTimerCount() > 0);
     test:assertTrue(getCountForConfigWithOutDelay() > 0);

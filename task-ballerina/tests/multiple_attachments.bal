@@ -34,7 +34,7 @@ public type Person record {
 };
 
 service object {} multipleAttachService = service object {
-    resource function get onTrigger(Person p, Account a) {
+    remote function onTrigger(Person p, Account a) {
         name = <@untainted>p.name;
         age = <@untainted>p.age;
         acNumber = <@untainted>a.number;

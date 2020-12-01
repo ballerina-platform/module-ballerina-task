@@ -43,7 +43,7 @@ public class Listener {
     # + s - Service to attach to the listener
     # + name - Name of the service
     # + return - () or else a `task:ListenerError` upon failure to attach the service
-    public isolated function __attach(service object {} s, string? name = ()) returns error? {
+    public isolated function __attach(service object {} s, string[]? name = ()) returns error? {
         // ignore param 'name'
         var result = attachExternal(self, s);
         if (result is error) {

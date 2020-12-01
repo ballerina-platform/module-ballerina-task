@@ -25,7 +25,7 @@ int firstTimerServiceTriggeredCount = 0;
 int secondTimerServiceTriggeredCount = 0;
 
 service object {} service1 = service object {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         firstTimerServiceTriggeredCount = firstTimerServiceTriggeredCount + 1;
         if (firstTimerServiceTriggeredCount > 3) {
             firstTimerServiceTriggered = true;
@@ -34,7 +34,7 @@ service object {} service1 = service object {
 };
 
 service object {} service2 = service object {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         secondTimerServiceTriggeredCount = secondTimerServiceTriggeredCount + 1;
         if (secondTimerServiceTriggeredCount > 3) {
             secondTimerServiceTriggered = true;
@@ -43,7 +43,7 @@ service object {} service2 = service object {
 };
 
 service object {} timerService1 = service object {
-    resource function get onTrigger(Person person) {
+    remote function onTrigger(Person person) {
         person.age = person.age + 1;
         result = <@untainted string>(person.name + " is " + person.age.toString() + " years old");
     }
@@ -88,7 +88,7 @@ boolean fourthTimerServiceTriggered = false;
 int fourthTimerServiceTriggeredCount = 0;
 
 service object {} service4 = service object {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         fourthTimerServiceTriggeredCount = fourthTimerServiceTriggeredCount + 1;
         if (fourthTimerServiceTriggeredCount > 3) {
             fourthTimerServiceTriggered = true;

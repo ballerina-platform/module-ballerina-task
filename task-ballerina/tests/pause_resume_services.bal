@@ -26,13 +26,13 @@ int counter1 = 0;
 int counter2 = 0;
 
 service object {} pauseResumeTimerService1 = service object {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         counter1 = counter1 + 1;
     }
 };
 
 service object{} pauseResumeTimerService2 = service object {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         counter2 = counter2 + 1;
     }
 };

@@ -20,7 +20,7 @@ import ballerina/test;
 int triggeredCount1 = 0;
 
 service object{} misfireService1 = service object {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         triggeredCount1 = triggeredCount1 + 1;
     }
 };
@@ -41,7 +41,7 @@ function testFireNowWithService1() returns error? {
 
 int triggeredCount8 = 0;
 service object {} misfireService8 = service object {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         triggeredCount8 = triggeredCount8 + 1;
     }
 };
@@ -62,7 +62,7 @@ function testIgnoreMisfiresPoilcyWithService8() returns error? {
 int triggeredCount9 = 0;
 
 service object {} misfireService9 = service object {
-    resource function get onTrigger() {
+    remote function onTrigger() {
         triggeredCount9 = triggeredCount9 + 1;
     }
 };

@@ -30,9 +30,9 @@ public function testForNoResourceService() {
 }
 
 service object {} moreThanOneResourceService = service object {
-    resource isolated function get onTrigger() {}
+    remote isolated function onTrigger() {}
 
-    resource isolated function get onError(error e) {}
+    remote isolated function onError(error e) {}
 };
 
 @test:Config {}
