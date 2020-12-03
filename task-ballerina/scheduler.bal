@@ -32,9 +32,9 @@ public class Scheduler {
     # + serviceToAttach - Ballerina `service` object, which needs to be attached to the task
     # + attachments - Set of optional parameters, which need to be passed inside the resources
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
-    public isolated function attach(service object {} serviceToAttach, any... attachments) returns SchedulerError? {
+    public isolated function attach(service object {} serviceToAttach, any... attachments) returns error? {
         var result = attachExternal(self.taskListener, serviceToAttach, ...attachments);
-        if (result is ListenerError) {
+        if (result is error) {
             string message = "Failed to attach the service to the scheduler";
             return SchedulerError(message, result);
         }
