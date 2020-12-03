@@ -32,7 +32,7 @@ public class Listener {
         validateConfiguration(configuration);
         self.listenerConfiguration = configuration;
         var result = initExternal(self);
-        if (result is error) {
+        if (result is ListenerError) {
             panic result;
         }
     }
@@ -107,49 +107,51 @@ public class Listener {
     # Pauses the `task:Listener` and the attached services.
     #
     # + return - A `task:ListenerError` if an error occurred while pausing or else ()
-    public isolated function pause() returns error? {
+    public isolated function pause() returns ListenerError? {
         return pauseExternal(self);
     }
 
     # Resumes a paused `task:Listener`. Calling this on an already-running `task:Listener` will not cause any error.
     #
     # + return -  A `task:ListenerError` if an error occurred while resuming or else ()
-    public isolated function resume() returns error? {
+    public isolated function resume() returns ListenerError? {
         return resumeExternal(self);
     }
 }
 
-isolated function pauseExternal(Listener task) returns error? = @java:Method {
+isolated function pauseExternal(Listener task) returns ListenerError? = @java:Method {
     name: "pause",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function resumeExternal(Listener task) returns error? = @java:Method {
+isolated function resumeExternal(Listener task) returns ListenerError? = @java:Method {
     name: "resume",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function stopExternal(Listener task) returns error? = @java:Method {
+isolated function stopExternal(Listener task) returns ListenerError? = @java:Method {
     name: "stop",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function startExternal(Listener task) returns error? = @java:Method {
+isolated function startExternal(Listener task) returns ListenerError? = @java:Method {
     name: "start",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function initExternal(Listener task) returns error? = @java:Method {
+isolated function initExternal(Listener task) returns ListenerError? = @java:Method {
     name: "init",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function detachExternal(Listener task, service object {} attachedService) returns error? = @java:Method {
+isolated function detachExternal(Listener task, service object {} attachedService)
+                        returns ListenerError? = @java:Method {
     name: "detach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function attachExternal(Listener task, service object {} s, any... attachments) returns error? = @java:Method {
+isolated function attachExternal(Listener task, service object {} s, any... attachments)
+                        returns ListenerError? = @java:Method {
     name: "attach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
