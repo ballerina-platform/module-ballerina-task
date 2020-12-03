@@ -46,7 +46,7 @@ public class Scheduler {
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
     public isolated function detach(service object {} attachedService) returns SchedulerError? {
         var result = detachExternal(self.taskListener, attachedService);
-        if (result is ListenerError) {
+        if (result is error) {
             string message = "Scheduler failed to detach the service";
             return SchedulerError(message, result);
         }
@@ -57,7 +57,7 @@ public class Scheduler {
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
     public isolated function 'start() returns SchedulerError? {
         var result = startExternal(self.taskListener);
-        if (result is ListenerError) {
+        if (result is error) {
             string message = "Scheduler failed to start";
             return SchedulerError(message, result);
         }
@@ -68,7 +68,7 @@ public class Scheduler {
     # + return - A `task:SchedulerError` if the process failed due to any reason or else ()
     public isolated function stop() returns SchedulerError? {
         var result = stopExternal(self.taskListener);
-        if (result is ListenerError) {
+        if (result is error) {
             string message = "Scheduler failed to stop";
             return SchedulerError(message, result);
         }
@@ -79,7 +79,7 @@ public class Scheduler {
     # + return - A `task:SchedulerError` if an error is occurred while pausing or else ()
     public isolated function pause() returns SchedulerError? {
         var result = pauseExternal(self.taskListener);
-        if (result is ListenerError) {
+        if (result is error) {
             string message = "Scheduler failed to pause";
             return SchedulerError(message, result);
         }
@@ -90,7 +90,7 @@ public class Scheduler {
     # + return - A `task:SchedulerError` when an error occurred while resuming or else ()
     public isolated function resume() returns SchedulerError? {
         var result = resumeExternal(self.taskListener);
-        if (result is ListenerError) {
+        if (result is error) {
             string message = "Scheduler failed to resume";
             return SchedulerError(message, result);
         }
