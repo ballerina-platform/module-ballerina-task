@@ -170,7 +170,7 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
         } else {
             if (!(misfirePolicy is RecurringTaskPolicy)) {
                 panic ListenerError("Wrong misfire policy has been given for the repeating execution timer tasks.");
-            }g
+            }
         }
         if (configuration.intervalInMillis < 1) {
             panic ListenerError("Timer scheduling interval should be a positive integer.");
