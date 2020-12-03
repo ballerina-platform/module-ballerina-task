@@ -32,7 +32,7 @@ public class Listener {
         validateConfiguration(configuration);
         self.listenerConfiguration = configuration;
         var result = initExternal(self);
-        if (result is error) {
+        if (result is ListenerError) {
             panic result;
         }
     }
@@ -139,19 +139,19 @@ isolated function startExternal(Listener task) returns ListenerError? = @java:Me
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function initExternal(Listener task) returns error? = @java:Method {
+isolated function initExternal(Listener task) returns ListenerError? = @java:Method {
     name: "init",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function detachExternal(Listener task, service object {} attachedService)
-                                returns ListenerError? = @java:Method {
+                        returns ListenerError? = @java:Method {
     name: "detach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function attachExternal(Listener task, service object {} s, any... attachments)
-                                returns error? = @java:Method {
+                        returns ListenerError? = @java:Method {
     name: "attach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
