@@ -14,12 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/lang.'object;
 import ballerina/java;
 
 # Represents a ballerina task listener, which can be used to schedule and execute tasks periodically.
 public class Listener {
-    *'object:Listener;
+
     boolean started = false;
 
     private TimerConfiguration|AppointmentConfiguration listenerConfiguration;
@@ -33,7 +32,7 @@ public class Listener {
         validateConfiguration(configuration);
         self.listenerConfiguration = configuration;
         var result = initExternal(self);
-        if (result is ListenerError) {
+        if (result is error) {
             panic result;
         }
     }
@@ -43,7 +42,7 @@ public class Listener {
     # + s - Service to attach to the listener
     # + name - Name of the service
     # + return - () or else a `task:ListenerError` upon failure to attach the service
-    public isolated function __attach(service s, string? name = ()) returns error? {
+    public isolated function attach(service object {} s, string[]|string? name = ()) returns error? {
         // ignore param 'name'
         var result = attachExternal(self, s);
         if (result is error) {
@@ -55,7 +54,7 @@ public class Listener {
     #
     # + s - Service to be detached from the listener
     # + return - () or else a `task:ListenerError` upon failure to detach the service
-    public isolated function __detach(service s) returns error? {
+    public isolated function detach(service object {}  s) returns error? {
         return detachExternal(self, s);
     }
 
@@ -63,7 +62,7 @@ public class Listener {
     # any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to start the listener
-    public isolated function __start() returns error? {
+    public isolated function 'start() returns error? {
         var result = startExternal(self);
         if (result is error) {
             panic result;
@@ -77,7 +76,7 @@ public class Listener {
     # completed. This may panic if the stopping causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to stop the listener
-    public isolated function __gracefulStop() returns error? {
+    public isolated function gracefulStop() returns error? {
         var result = stopExternal(self);
         if (result is error) {
             panic result;
@@ -91,7 +90,7 @@ public class Listener {
     # panic if the stopping causes any error.
     #
     # + return - () or else a `task:ListenerError` upon failure to stop the listener
-    public isolated function __immediateStop() returns error? {
+    public isolated function immediateStop() returns error? {
         var result = stopExternal(self);
         if (result is error) {
             panic result;
@@ -140,17 +139,19 @@ isolated function startExternal(Listener task) returns ListenerError? = @java:Me
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function initExternal(Listener task) returns ListenerError? = @java:Method {
+isolated function initExternal(Listener task) returns error? = @java:Method {
     name: "init",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function detachExternal(Listener task, service attachedService) returns ListenerError? = @java:Method {
+isolated function detachExternal(Listener task, service object {} attachedService)
+                                returns ListenerError? = @java:Method {
     name: "detach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function attachExternal(Listener task, service s, any... attachments) returns ListenerError? = @java:Method {
+isolated function attachExternal(Listener task, service object {} s, any... attachments)
+                                returns error? = @java:Method {
     name: "attach",
     'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
 } external;

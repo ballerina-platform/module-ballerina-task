@@ -28,8 +28,8 @@ function getCount() returns int {
     return count;
 }
 
-service appointmentService on appointment {
-    resource function onTrigger() {
+service on appointment {
+    remote function onTrigger() {
         count = count + 1;
     }
 }
@@ -49,8 +49,8 @@ function getTimerCount() returns int {
 
 }
 
-service timerService on timer {
-    resource function onTrigger() {
+service on timer {
+    remote function onTrigger() {
         timerCount = timerCount + 1;
     }
 }
@@ -64,8 +64,8 @@ function getInLineTimerCount() returns int {
     return inLineTimerConfigCount;
 }
 
-service inLineTimerService on inLineTimer {
-    resource function onTrigger() {
+service on inLineTimer {
+    remote function onTrigger() {
         inLineTimerConfigCount = inLineTimerConfigCount + 1;
     }
 }
@@ -84,8 +84,8 @@ function getCountForWithLimitedNumberOfRuns() returns int {
     return countForWithLimitedNumberOfRuns;
 }
 
-service timerServiceForWithLimitedNumberOfRuns on timerForWithLimitedNumberOfRuns {
-    resource function onTrigger() {
+service on timerForWithLimitedNumberOfRuns {
+    remote function onTrigger() {
         countForWithLimitedNumberOfRuns = countForWithLimitedNumberOfRuns + 1;
     }
 }
@@ -103,8 +103,8 @@ function getCountForConfigWithOutDelay() returns int {
     return countForConfigWithOutDelay;
 }
 
-service timerServiceForConfigWithOutDelay on timerForConfigWithOutDelay {
-    resource function onTrigger() {
+service on timerForConfigWithOutDelay {
+    remote function onTrigger() {
         countForConfigWithOutDelay = countForConfigWithOutDelay + 1;
     }
 }
@@ -114,7 +114,7 @@ service timerServiceForConfigWithOutDelay on timerForConfigWithOutDelay {
 public function testAppointmentAndTimerConfig() {
     runtime:sleep(4000);
     test:assertEquals(getCountForWithLimitedNumberOfRuns(), 3);
-    test:assertTrue(getCount() > 0);
+    test:assertTrue(count > 0);
     test:assertTrue(getTimerCount() > 0);
     test:assertTrue(getInLineTimerCount() > 0);
     test:assertTrue(getCountForConfigWithOutDelay() > 0);
