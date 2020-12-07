@@ -24,8 +24,8 @@ string result = "";
 int firstTimerServiceTriggeredCount = 0;
 int secondTimerServiceTriggeredCount = 0;
 
-service service1 = service {
-    resource function onTrigger() {
+service object {} service1 = service object {
+    remote function onTrigger() {
         firstTimerServiceTriggeredCount = firstTimerServiceTriggeredCount + 1;
         if (firstTimerServiceTriggeredCount > 3) {
             firstTimerServiceTriggered = true;
@@ -33,8 +33,8 @@ service service1 = service {
     }
 };
 
-service service2 = service {
-    resource function onTrigger() {
+service object {} service2 = service object {
+    remote function onTrigger() {
         secondTimerServiceTriggeredCount = secondTimerServiceTriggeredCount + 1;
         if (secondTimerServiceTriggeredCount > 3) {
             secondTimerServiceTriggered = true;
@@ -42,8 +42,8 @@ service service2 = service {
     }
 };
 
-service timerService1 = service {
-    resource function onTrigger(Person person) {
+service object {} timerService1 = service object {
+    remote function onTrigger(Person person) {
         person.age = person.age + 1;
         result = <@untainted string>(person.name + " is " + person.age.toString() + " years old");
     }
@@ -87,8 +87,8 @@ function testTaskTimerWithMultipleServices() {
 boolean fourthTimerServiceTriggered = false;
 int fourthTimerServiceTriggeredCount = 0;
 
-service service4 = service {
-    resource function onTrigger() {
+service object {} service4 = service object {
+    remote function onTrigger() {
         fourthTimerServiceTriggeredCount = fourthTimerServiceTriggeredCount + 1;
         if (fourthTimerServiceTriggeredCount > 3) {
             fourthTimerServiceTriggered = true;

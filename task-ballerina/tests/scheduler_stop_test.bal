@@ -16,8 +16,8 @@
 
 import ballerina/test;
 
-service stopTimerService = service {
-    resource isolated function onTrigger() {
+service object {} stopTimerService = service object {
+    remote isolated function onTrigger() {
     }
 };
 

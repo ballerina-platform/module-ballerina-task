@@ -16,7 +16,7 @@
 
 import ballerina/test;
 
-service noResourceService = service {};
+service object {} noResourceService = service object {};
 
 Person person = {name: "Sam", age: 29};
 
@@ -29,10 +29,10 @@ public function testForNoResourceService() {
     }
 }
 
-service moreThanOneResourceService = service {
-    resource isolated function onTrigger() {}
+service object {} moreThanOneResourceService = service object {
+    remote isolated function onTrigger() {}
 
-    resource isolated function onError(error e) {}
+    remote isolated function onError(error e) {}
 };
 
 @test:Config {}

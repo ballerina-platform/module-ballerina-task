@@ -33,8 +33,8 @@ public type Person record {
     int age;
 };
 
-service multipleAttachService = service {
-    resource function onTrigger(Person p, Account a) {
+service object {} multipleAttachService = service object {
+    remote function onTrigger(Person p, Account a) {
         name = <@untainted>p.name;
         age = <@untainted>p.age;
         acNumber = <@untainted>a.number;

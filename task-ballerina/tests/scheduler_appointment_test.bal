@@ -27,8 +27,8 @@ int appoinmentTriggerCount1 = 0;
 int appoinmentTriggerCount2 = 0;
 int appoinmentTriggerCount3 = 0;
 
-service appointmentService1 = service {
-    resource function onTrigger() {
+service object {}appointmentService1 = service object {
+    remote function onTrigger() {
         appoinmentTriggerCount1 += 1;
         if (appoinmentTriggerCount1 > 3) {
             appoinmentFirstTriggered = true;
@@ -36,8 +36,8 @@ service appointmentService1 = service {
     }
 };
 
-service appointmentService2 = service {
-    resource function onTrigger() {
+service object {} appointmentService2 = service object {
+    remote function onTrigger() {
         appoinmentTriggerCount2 += 1;
         if (appoinmentTriggerCount2 > 3) {
             appoinmentSecondTriggered = true;
@@ -45,8 +45,8 @@ service appointmentService2 = service {
     }
 };
 
-service appointmentService3 = service {
-    resource function onTrigger() {
+service object {} appointmentService3 = service object {
+    remote function onTrigger() {
         appoinmentTriggerCount3 += 1;
     }
 };
