@@ -22,7 +22,7 @@ import io.ballerina.runtime.api.async.StrandMetadata;
 import io.ballerina.runtime.api.types.MemberFunctionType;
 import org.ballerinalang.stdlib.task.objects.ServiceInformation;
 
-import static io.ballerina.runtime.api.constants.RuntimeConstants.BALLERINA_BUILTIN_PKG_PREFIX;
+import static org.ballerinalang.stdlib.task.utils.ModuleUtils.getModule;
 
 /**
  * This class invokes the Ballerina onTrigger function, and if an error occurs while invoking that function, it invokes
@@ -31,7 +31,7 @@ import static io.ballerina.runtime.api.constants.RuntimeConstants.BALLERINA_BUIL
 public class TaskExecutor {
 
     private static final StrandMetadata TASK_METADATA =
-            new StrandMetadata(BALLERINA_BUILTIN_PKG_PREFIX, TaskConstants.PACKAGE_NAME, TaskConstants.PACKAGE_VERSION,
+            new StrandMetadata(getModule().getOrg(), getModule().getName(), getModule().getVersion(),
                     TaskConstants.RESOURCE_ON_TRIGGER);
 
     public static void executeFunction(ServiceInformation serviceInformation) {

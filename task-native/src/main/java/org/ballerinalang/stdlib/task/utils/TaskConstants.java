@@ -18,8 +18,6 @@
 
 package org.ballerinalang.stdlib.task.utils;
 
-import io.ballerina.runtime.api.Module;
-import io.ballerina.runtime.api.constants.RuntimeConstants;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;
 
@@ -27,12 +25,6 @@ import io.ballerina.runtime.api.values.BString;
  * Task related constants.
  */
 public class TaskConstants {
-
-    // Package related constants
-    public static final String PACKAGE_NAME = "task";
-    public static final String PACKAGE_VERSION = "1.1.4";
-    public static final Module TASK_PACKAGE_ID =
-            new Module(RuntimeConstants.BALLERINA_BUILTIN_PKG_PREFIX, PACKAGE_NAME, PACKAGE_VERSION);
 
     // Record types used
     public static final String RECORD_TIMER_CONFIGURATION = "TimerConfiguration";
