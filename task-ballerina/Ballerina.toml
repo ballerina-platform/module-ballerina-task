@@ -15,7 +15,7 @@ artifactId = "task"
 version = "@project.version@"
 
 [[platform.java11.dependency]]
-path = "./lib/quartz-2.3.1.jar"
+path = "./lib/quartz-@quartz.version@.jar"
 groupId = "org.quartz-scheduler"
 artifactId = "quartz"
-version = "2.3.1"
+version = "@quartz.version@"

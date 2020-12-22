@@ -26,7 +26,7 @@ ext.ballerinaLangVersion = project.ballerinaLangVersion
 ext.puppycrawlCheckstyleVersion = project.puppycrawlCheckstyleVersion
 ext.slf4jVersion = "1.7.30"
 ext.axiomVersion = "1.2.22"
-ext.quartzVersion = "2.3.1"
+ext.quartzVersion = project.quartzVersion
 ext.stdlibRuntimeVersion = project.stdlibRuntimeVersion
 
 allprojects {

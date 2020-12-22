@@ -41,6 +41,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
+import static org.ballerinalang.stdlib.task.utils.ModuleUtils.getModule;
+
 /**
  * Utility functions used in ballerina task module.
  *
@@ -57,8 +59,7 @@ public class Utils {
     }
 
     public static BError createTaskError(String reason, String message) {
-        return ErrorCreator.createDistinctError(reason, TaskConstants.TASK_PACKAGE_ID,
-                StringUtils.fromString(message));
+        return ErrorCreator.createDistinctError(reason, getModule(), StringUtils.fromString(message));
     }
 
     @SuppressWarnings("unchecked")
