@@ -19,7 +19,7 @@
 package org.ballerinalang.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.types.MemberFunctionType;
+import io.ballerina.runtime.api.types.MethodType;
 import io.ballerina.runtime.api.values.BObject;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.Utils;
@@ -48,8 +48,8 @@ public class ServiceInformation {
         return Utils.getServiceName(service);
     }
 
-    public MemberFunctionType getOnTriggerFunction() {
-        for (MemberFunctionType resource : service.getType().getAttachedFunctions()) {
+    public MethodType getOnTriggerFunction() {
+        for (MethodType resource : service.getType().getMethods()) {
             if (TaskConstants.RESOURCE_ON_TRIGGER.equals(resource.getName())) {
                 return resource;
             }
