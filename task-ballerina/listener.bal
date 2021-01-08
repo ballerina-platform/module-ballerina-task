@@ -162,27 +162,27 @@ isolated function validateConfiguration(TimerConfiguration|AppointmentConfigurat
     var misfirePolicy = configuration.misfirePolicy;
     if (configuration is TimerConfiguration) {
         if (noOfRecurrences < 0) {
-            panic ListenerError("Task noOfOccurrences should be a positive integer.");
+            panic error ListenerError("Task noOfOccurrences should be a positive integer.");
         } else if (noOfRecurrences == 1) {
             if (!(misfirePolicy is OneTimeTaskPolicy)) {
-                panic ListenerError("Wrong misfire policy has been given for the one-time execution timer tasks.");
+                panic error ListenerError("Wrong misfire policy has been given for the one-time execution timer tasks.");
             }
         } else {
             if (!(misfirePolicy is RecurringTaskPolicy)) {
-                panic ListenerError("Wrong misfire policy has been given for the repeating execution timer tasks.");
+                panic error ListenerError("Wrong misfire policy has been given for the repeating execution timer tasks.");
             }
         }
         if (configuration.intervalInMillis < 1) {
-            panic ListenerError("Timer scheduling interval should be a positive integer.");
+            panic error ListenerError("Timer scheduling interval should be a positive integer.");
         }
         if (initalDelay == ()) {
             configuration.initialDelayInMillis = configuration.intervalInMillis;
         } else {
             if (initalDelay is int && initalDelay < 0) {
-                panic ListenerError("Timer scheduling delay should be a non-negative integer.");
+                panic error ListenerError("Timer scheduling delay should be a non-negative integer.");
             }
         }
     } else if (!(misfirePolicy is AppointmentMisfirePolicy)) {
-        panic ListenerError("Wrong misfire policy has given for the appointment task.");
+        panic error ListenerError("Wrong misfire policy has given for the appointment task.");
     }
 }

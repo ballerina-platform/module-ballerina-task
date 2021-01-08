@@ -36,7 +36,7 @@ public class Scheduler {
         var result = attachExternal(self.taskListener, serviceToAttach, ...attachments);
         if (result is ListenerError) {
             string message = "Failed to attach the service to the scheduler";
-            return SchedulerError(message, result);
+            return error SchedulerError(message, result);
         }
     }
 
@@ -48,7 +48,7 @@ public class Scheduler {
         var result = detachExternal(self.taskListener, attachedService);
         if (result is ListenerError) {
             string message = "Scheduler failed to detach the service";
-            return SchedulerError(message, result);
+            return error SchedulerError(message, result);
         }
     }
 
@@ -59,7 +59,7 @@ public class Scheduler {
         var result = startExternal(self.taskListener);
         if (result is ListenerError) {
             string message = "Scheduler failed to start";
-            return SchedulerError(message, result);
+            return error SchedulerError(message, result);
         }
     }
 
@@ -70,7 +70,7 @@ public class Scheduler {
         var result = stopExternal(self.taskListener);
         if (result is ListenerError) {
             string message = "Scheduler failed to stop";
-            return SchedulerError(message, result);
+            return error SchedulerError(message, result);
         }
     }
 
@@ -81,7 +81,7 @@ public class Scheduler {
         var result = pauseExternal(self.taskListener);
         if (result is ListenerError) {
             string message = "Scheduler failed to pause";
-            return SchedulerError(message, result);
+            return error SchedulerError(message, result);
         }
     }
 
@@ -92,7 +92,7 @@ public class Scheduler {
         var result = resumeExternal(self.taskListener);
         if (result is ListenerError) {
             string message = "Scheduler failed to resume";
-            return SchedulerError(message, result);
+            return error SchedulerError(message, result);
         }
     }
 
