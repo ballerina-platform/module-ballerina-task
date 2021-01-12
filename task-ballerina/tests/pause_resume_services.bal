@@ -52,11 +52,12 @@ function testTaskPauseAndResume() {
     }
     runtime:sleep(4000);
     test:assertEquals(counter1, 3, msg = "Values are mismatched");
+    test:assertTrue(counter2 - counter1 >= 3, msg = "Test failed");
     result = timer1.resume();
     if (result is error) {
         return;
     }
     checkpanic timer1.stop();
     checkpanic timer2.stop();
-    test:assertTrue(counter2 - counter1 >= 3 , msg = "Test failred");
+    test:assertTrue((counter2 - counter1 >= 3 || counter2 - counter1 == 0), msg = "Expected value mismatched");
 }
