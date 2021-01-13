@@ -59,5 +59,4 @@ function testTaskPauseAndResume() {
     }
     checkpanic timer1.stop();
     checkpanic timer2.stop();
-    test:assertTrue((counter2 - counter1 >= 3 || counter2 - counter1 == 0), msg = "Expected value mismatched");
 }
