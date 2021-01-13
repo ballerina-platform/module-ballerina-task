@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 int triggeredCount6 = 0;
@@ -31,13 +31,13 @@ function testFireAndProceedWithService6() returns error? {
                                  misfirePolicy: "fireAndProceed"  });
     check taskTimer.attach(misfireService6);
     check taskTimer.start();
-    runtime:sleep(1500);
+    runtime:sleep(1.5);
     int count = triggeredCount6;
     check taskTimer.pause();
-    runtime:sleep(1000);
+    runtime:sleep(1);
     test:assertEquals(triggeredCount6, count, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(6000);
+    runtime:sleep(6);
     test:assertEquals(triggeredCount6, 8, msg = "Expected count mismatched.");
     check taskTimer.stop();
 }
@@ -55,13 +55,13 @@ function testdoNothingWithService7() returns error? {
     Scheduler taskTimer = new ({ cronExpression: "* * * * * ? *", noOfRecurrences: 5, misfirePolicy: "doNothing" });
     check taskTimer.attach(misfireService7);
     check taskTimer.start();
-    runtime:sleep(1500);
+    runtime:sleep(1.5);
     int count = triggeredCount7;
     check taskTimer.pause();
-    runtime:sleep(1000);
+    runtime:sleep(1);
     test:assertEquals(triggeredCount7, count, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(6000);
+    runtime:sleep(6);
     test:assertEquals(triggeredCount7, 5, msg = "Expected count mismatched");
     check taskTimer.stop();
 }

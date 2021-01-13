@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 int triggeredCount2 = 0;
@@ -32,15 +32,15 @@ function testExistingRepeatCountWithService2() returns error? {
     check taskTimer.attach(misfireService2);
     check taskTimer.start();
      // Sleep for 8 seconds.
-    runtime:sleep(8000);
+    runtime:sleep(8);
     test:assertEquals(triggeredCount2, 2, msg = "Expected count mismatched before pausing the scheduler.");
     check taskTimer.pause();
-    runtime:sleep(8000);
+    runtime:sleep(8);
     test:assertEquals(triggeredCount2, 2, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(1000);
+    runtime:sleep(1);
     test:assertEquals(triggeredCount2, 3, msg = "Expected count mismatched after resuming the scheduler.");
-    runtime:sleep(8000);
+    runtime:sleep(8);
     test:assertEquals(triggeredCount2, 5, msg = "Expected count mismatched.");
     check taskTimer.stop();
 }
@@ -59,15 +59,15 @@ function testNowWithRemainingRepeatCountWithService3() returns error? {
                                  misfirePolicy: "fireNowWithRemainingCount"});
     check taskTimer.attach(misfireService3);
     check taskTimer.start();
-    runtime:sleep(8000);
+    runtime:sleep(8);
     test:assertEquals(triggeredCount3, 2, msg = "Expected count mismatched before pausing the scheduler.");
     check taskTimer.pause();
-    runtime:sleep(8000);
+    runtime:sleep(8);
     test:assertEquals(triggeredCount3, 2, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(1000);
+    runtime:sleep(1);
     test:assertEquals(triggeredCount3, 3, msg = "Expected count mismatched after resuming the scheduler.");
-    runtime:sleep(8000);
+    runtime:sleep(8);
     test:assertEquals(triggeredCount3, 5, msg = "Expected count mismatched.");
     check taskTimer.stop();
 }
@@ -86,15 +86,15 @@ function testNextWithExistingCountWithService4() returns error? {
                                  misfirePolicy: "fireNextWithExistingCount"});
     check taskTimer.attach(misfireService4);
     check taskTimer.start();
-    runtime:sleep(7000);
+    runtime:sleep(7);
     test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched before pausing the scheduler.");
     check taskTimer.pause();
-    runtime:sleep(7000);
+    runtime:sleep(7);
     test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(500);
+    runtime:sleep(0.5);
     test:assertEquals(triggeredCount4, 2, msg = "Expected count mismatched after resuming the scheduler.");
-    runtime:sleep(10000);
+    runtime:sleep(10);
     test:assertEquals(triggeredCount4, 5, msg = "Expected count mismatched.");
     check taskTimer.stop();
 }
@@ -112,15 +112,15 @@ function testNextWithRemainigCountWithService5() returns error? {
                                  misfirePolicy: "fireNextWithExistingCount"});
     check taskTimer.attach(misfireService5);
     check taskTimer.start();
-    runtime:sleep(7000);
+    runtime:sleep(7);
     test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched before pausing the scheduler.");
     check taskTimer.pause();
-    runtime:sleep(7000);
+    runtime:sleep(7);
     test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(500);
+    runtime:sleep(0.5);
     test:assertEquals(triggeredCount5, 2, msg = "Expected count mismatched after resuming the scheduler.");
-    runtime:sleep(10000);
+    runtime:sleep(10);
     test:assertEquals(triggeredCount5, 5, msg = "Expected count mismatched.");
     check taskTimer.stop();
 }
@@ -138,15 +138,15 @@ function testSmartPolicyWithService11() returns error? {
     Scheduler taskTimer = new ({intervalInMillis: 3000, noOfRecurrences: 5 });
     check taskTimer.attach(misfireService11);
     check taskTimer.start();
-    runtime:sleep(8000);
+    runtime:sleep(8);
     test:assertEquals(triggeredCount11, 2, msg = "Expected count mismatched before pausing the scheduler.");
     check taskTimer.pause();
-    runtime:sleep(8000);
+    runtime:sleep(8);
     test:assertEquals(triggeredCount11, 2, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(1000);
+    runtime:sleep(1);
     test:assertEquals(triggeredCount11, 3, msg = "Expected count mismatched after resuming the scheduler.");
-    runtime:sleep(10000);
+    runtime:sleep(10);
     test:assertEquals(triggeredCount11, 5, msg = "Expected count mismatched.");
     check taskTimer.stop();
 }

@@ -3,11 +3,6 @@ org = "ballerina"
 name = "task"
 version = "@toml.version@"
 
-[[dependency]]
-org = "ballerina"
-name = "runtime"
-version = "@stdlib.runtime.version@"
-
 [[platform.java11.dependency]]
 path = "../task-native/build/libs/task-native-@project.version@.jar"
 groupId = "ballerina"

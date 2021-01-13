@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 string name = "John";
@@ -52,7 +52,7 @@ function multipleAttachmentTest() returns error? {
     Scheduler multipleAttachmentTimer = new (timerConfiguration);
     check multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
     check multipleAttachmentTimer.start();
-    runtime:sleep(4000);
+    runtime:sleep(4);
     check multipleAttachmentTimer.stop();
     test:assertEquals(output, "Name: Sam Age: 29 A/C: 150590 Balance: 11.35",
             msg = "Response payload mismatched");

@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 TimerConfiguration configuration = {
@@ -45,12 +45,12 @@ function testTaskPauseAndResume() {
     checkpanic timer2.attach(pauseResumeTimerService2);
     checkpanic timer1.start();
     checkpanic timer2.start();
-    runtime:sleep(3500);
+    runtime:sleep(3.5);
     var result = timer1.pause();
     if (result is error) {
         test:assertFail("An error occurred when pausing the scheduler");
     }
-    runtime:sleep(4000);
+    runtime:sleep(4);
     test:assertEquals(counter1, 3, msg = "Values are mismatched");
     test:assertTrue(counter2 - counter1 >= 3, msg = "Test failed");
     result = timer1.resume();
