@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 boolean firstTimerServiceTriggered = false;
@@ -67,7 +67,7 @@ function testTaskTimerWithAttachment() {
         panic startResult;
     }
     // Sleep for 8 seconds to check whether the task is running for more than 5 times.
-    runtime:sleep(8000);
+    runtime:sleep(8);
     checkpanic taskTimer.stop();
     test:assertEquals(result, "Sam is 5 years old", msg = "Expected value mismatched");
 }
@@ -78,7 +78,7 @@ function testTaskTimerWithMultipleServices() {
     checkpanic timerWithMultipleServices.attach(service1);
     checkpanic timerWithMultipleServices.attach(service2);
     checkpanic timerWithMultipleServices.start();
-    runtime:sleep(5000);
+    runtime:sleep(5);
     checkpanic timerWithMultipleServices.stop();
     test:assertTrue(firstTimerServiceTriggered, msg = "Expected value mismatched");
     test:assertTrue(secondTimerServiceTriggered, msg = "Expected value mismatched");
@@ -101,9 +101,9 @@ function testTaskTimerWithSameServices() {
     Scheduler timerWithMultipleServices = new ({intervalInMillis: 1000});
     checkpanic timerWithMultipleServices.attach(service4);
     checkpanic timerWithMultipleServices.start();
-    runtime:sleep(1500);
+    runtime:sleep(1.5);
     checkpanic timerWithMultipleServices.attach(service4);
-    runtime:sleep(2700);
+    runtime:sleep(2.7);
     checkpanic timerWithMultipleServices.stop();
     test:assertTrue(fourthTimerServiceTriggered, msg = "Expected value mismatched");
 }

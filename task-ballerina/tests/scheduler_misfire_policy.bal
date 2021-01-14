@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 int triggeredCount1 = 0;
@@ -31,10 +31,10 @@ function testFireNowWithService1() returns error? {
     check taskTimer.attach(misfireService1);
     check taskTimer.start();
     check taskTimer.pause();
-    runtime:sleep(5000);
+    runtime:sleep(5);
     test:assertEquals(triggeredCount1, 0, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(2000);
+    runtime:sleep(2);
     check taskTimer.stop();
     test:assertEquals(triggeredCount1, 1, msg = "Expected count mismatched.");
 }
@@ -51,10 +51,10 @@ function testIgnoreMisfiresPoilcyWithService8() returns error? {
     check taskTimer.attach(misfireService8);
     check taskTimer.start();
     check taskTimer.pause();
-    runtime:sleep(5000);
+    runtime:sleep(5);
     test:assertEquals(triggeredCount8, 0, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(2000);
+    runtime:sleep(2);
     check taskTimer.stop();
     test:assertEquals(triggeredCount8, 1, msg = "Expected count mismatched.");
 }
@@ -73,10 +73,10 @@ function testSmartPolicyWithService9() returns error? {
     check taskTimer.attach(misfireService9);
     check taskTimer.start();
     check taskTimer.pause();
-    runtime:sleep(5000);
+    runtime:sleep(5);
     test:assertEquals(triggeredCount9, 0, msg = "Expected count mismatched during the scheduler pause.");
     check taskTimer.resume();
-    runtime:sleep(2000);
+    runtime:sleep(2);
     check taskTimer.stop();
     test:assertEquals(triggeredCount9, 1, msg = "Expected count mismatched.");
 }

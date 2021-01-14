@@ -14,8 +14,8 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
-import ballerina/runtime;
 
 // Service for the appointment task
 AppointmentConfiguration appointmentConfiguration = { cronExpression: "0/2 * * * * ? *"};
@@ -112,7 +112,7 @@ service on timerForConfigWithOutDelay {
 @test:Config {
 }
 public function testAppointmentAndTimerConfig() {
-    runtime:sleep(4000);
+    runtime:sleep(4);
     test:assertEquals(getCountForWithLimitedNumberOfRuns(), 3);
     test:assertTrue(count > 0);
     test:assertTrue(getTimerCount() > 0);

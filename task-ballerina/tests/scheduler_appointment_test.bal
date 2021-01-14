@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/runtime;
+import ballerina/lang.runtime as runtime;
 import ballerina/test;
 
 const APPOINTMENT_MULTI_SERVICE_SUCCESS_RESPONSE = "Multiple services invoked";
@@ -58,7 +58,7 @@ function testSchedulerWithMultipleServices() {
     checkpanic appointment.attach(appointmentService1);
     checkpanic appointment.attach(appointmentService2);
     checkpanic appointment.start();
-    runtime:sleep(4000);
+    runtime:sleep(4);
     checkpanic appointment.stop();
     test:assertTrue(appoinmentFirstTriggered, msg = "Expected value mismatched");
     test:assertTrue(appoinmentSecondTriggered, msg = "Expected value mismatched");
@@ -74,7 +74,7 @@ function testLimitedNumberOfRuns() {
     Scheduler appointmentWithLimitedRuns = new (configuration);
     var result = appointmentWithLimitedRuns.attach(appointmentService3);
     checkpanic appointmentWithLimitedRuns.start();
-    runtime:sleep(5000);
+    runtime:sleep(5);
     checkpanic appointmentWithLimitedRuns.stop();
     test:assertEquals(appoinmentTriggerCount3, 3, msg = "Expected value mismatched");
 }
