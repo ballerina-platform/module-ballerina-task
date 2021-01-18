@@ -28,12 +28,12 @@ public class Listener {
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #                   `task:Listener` behavior
-    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) returns ListenerError? {
         validateConfiguration(configuration);
         self.listenerConfiguration = configuration;
         var result = initExternal(self);
         if (result is ListenerError) {
-            panic result;
+            return result;
         }
     }
 

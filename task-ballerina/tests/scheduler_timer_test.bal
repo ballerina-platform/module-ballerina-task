@@ -56,32 +56,40 @@ function testTaskTimerWithAttachment() {
         age: 0
     };
 
-    Scheduler taskTimer = new ({intervalInMillis: 1000, initialDelayInMillis: 1000, noOfRecurrences: 5});
-    var attachResult = taskTimer.attach(timerService1, person);
+    Scheduler|SchedulerError taskTimer = new ({intervalInMillis: 1000, initialDelayInMillis: 1000, noOfRecurrences: 5});
+    if (taskTimer is Scheduler) {
+        var attachResult = taskTimer.attach(timerService1, person);
 
-    if (attachResult is SchedulerError) {
-        panic attachResult;
+        if (attachResult is SchedulerError) {
+            panic attachResult;
+        }
+        var startResult = taskTimer.start();
+        if (startResult is SchedulerError) {
+            panic startResult;
+        }
+        // Sleep for 8 seconds to check whether the task is running for more than 5 times.
+        runtime:sleep(8);
+        var stopResult = taskTimer.stop();
+        test:assertEquals(result, "Sam is 5 years old", msg = "Expected value mismatched");
+    } else {
+        test:assertFail("Test failed due to an error in the creating of the scheduler.");
     }
-    var startResult = taskTimer.start();
-    if (startResult is SchedulerError) {
-        panic startResult;
-    }
-    // Sleep for 8 seconds to check whether the task is running for more than 5 times.
-    runtime:sleep(8);
-    checkpanic taskTimer.stop();
-    test:assertEquals(result, "Sam is 5 years old", msg = "Expected value mismatched");
 }
 
 @test:Config {}
 function testTaskTimerWithMultipleServices() {
-    Scheduler timerWithMultipleServices = new ({intervalInMillis: 1000});
-    checkpanic timerWithMultipleServices.attach(service1);
-    checkpanic timerWithMultipleServices.attach(service2);
-    checkpanic timerWithMultipleServices.start();
-    runtime:sleep(5);
-    checkpanic timerWithMultipleServices.stop();
-    test:assertTrue(firstTimerServiceTriggered, msg = "Expected value mismatched");
-    test:assertTrue(secondTimerServiceTriggered, msg = "Expected value mismatched");
+    Scheduler|SchedulerError timerWithMultipleServices = new ({intervalInMillis: 1000});
+    if (timerWithMultipleServices is Scheduler) {
+        var result = timerWithMultipleServices.attach(service1);
+        result = timerWithMultipleServices.attach(service2);
+        result =  timerWithMultipleServices.start();
+        runtime:sleep(5);
+        result = timerWithMultipleServices.stop();
+        test:assertTrue(firstTimerServiceTriggered, msg = "Expected value mismatched");
+        test:assertTrue(secondTimerServiceTriggered, msg = "Expected value mismatched");
+    } else {
+        test:assertFail("Test failed due to an error in the creating of the scheduler.");
+    }
 }
 
 boolean fourthTimerServiceTriggered = false;
@@ -98,12 +106,16 @@ service object {} service4 = service object {
 
 @test:Config {}
 function testTaskTimerWithSameServices() {
-    Scheduler timerWithMultipleServices = new ({intervalInMillis: 1000});
-    checkpanic timerWithMultipleServices.attach(service4);
-    checkpanic timerWithMultipleServices.start();
-    runtime:sleep(1.5);
-    checkpanic timerWithMultipleServices.attach(service4);
-    runtime:sleep(2.7);
-    checkpanic timerWithMultipleServices.stop();
-    test:assertTrue(fourthTimerServiceTriggered, msg = "Expected value mismatched");
+    Scheduler|SchedulerError timerWithMultipleServices = new ({intervalInMillis: 1000});
+    if (timerWithMultipleServices is Scheduler) {
+        var result = timerWithMultipleServices.attach(service4);
+        result = timerWithMultipleServices.start();
+        runtime:sleep(1.5);
+        result = timerWithMultipleServices.attach(service4);
+        runtime:sleep(2.7);
+        result = timerWithMultipleServices.stop();
+        test:assertTrue(fourthTimerServiceTriggered, msg = "Expected value mismatched");
+    } else {
+        test:assertFail("Test failed due to an error in the creating of the scheduler.");
+    }
 }

@@ -22,7 +22,7 @@ AppointmentConfiguration appointmentConfiguration = { cronExpression: "0/2 * * *
 
 int count = 0;
 
-listener Listener appointment = new(appointmentConfiguration);
+listener Listener appointment = check new(appointmentConfiguration);
 
 function getCount() returns int {
     return count;
@@ -42,7 +42,7 @@ TimerConfiguration timerConfig = {
 
 int timerCount = 0;
 
-listener Listener timer = new(timerConfig);
+listener Listener timer = check new(timerConfig);
 
 function getTimerCount() returns int {
     return timerCount;
@@ -56,7 +56,7 @@ service on timer {
 }
 
 // Service for the timer task with an inline config
-listener Listener inLineTimer = new({ intervalInMillis: 2000, initialDelayInMillis: 1000 });
+listener Listener inLineTimer = check new({ intervalInMillis: 2000, initialDelayInMillis: 1000 });
 
 int inLineTimerConfigCount = 0;
 
@@ -78,7 +78,7 @@ TimerConfiguration timerConfigForWithLimitedNumberOfRuns = {
 
 int countForWithLimitedNumberOfRuns = 0;
 
-listener Listener timerForWithLimitedNumberOfRuns = new(timerConfigForWithLimitedNumberOfRuns);
+listener Listener timerForWithLimitedNumberOfRuns = check new(timerConfigForWithLimitedNumberOfRuns);
 
 function getCountForWithLimitedNumberOfRuns() returns int {
     return countForWithLimitedNumberOfRuns;
@@ -97,7 +97,7 @@ TimerConfiguration configWithOutDelay = {
 
 int countForConfigWithOutDelay = 0;
 
-listener Listener timerForConfigWithOutDelay = new(configWithOutDelay);
+listener Listener timerForConfigWithOutDelay = check new(configWithOutDelay);
 
 function getCountForConfigWithOutDelay() returns int {
     return countForConfigWithOutDelay;

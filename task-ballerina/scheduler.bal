@@ -23,8 +23,13 @@ public class Scheduler {
     #
     # + configuration - The `task:TimerConfiguration` or `task:AppointmentConfiguration` record to define the
     #                   `task:Sceduler` behavior
-    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) {
-        self.taskListener = new(configuration);
+    public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) returns SchedulerError? {
+        Listener|error taskListener = new(configuration);
+        if (taskListener is error) {
+            return error SchedulerError(taskListener.message());
+        } else {
+            self.taskListener = taskListener;
+        }
     }
 
     # Attaches the provided `service` to the task.

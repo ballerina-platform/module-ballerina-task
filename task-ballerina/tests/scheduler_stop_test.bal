@@ -27,11 +27,15 @@ function testSchedulerStop() {
         intervalInMillis: 500,
         initialDelayInMillis: 2000
     };
-    Scheduler timer = new (configuration);
-    checkpanic timer.attach(stopTimerService);
-    checkpanic timer.start();
-    var expectedResult =  timer.stop();
-    if (expectedResult is error) {
-        test:assertFail("Scheduler stop failed");
+    Scheduler|SchedulerError timer = new (configuration);
+    if (timer is Scheduler) {
+        var result = timer.attach(stopTimerService);
+        result = timer.start();
+        var expectedResult =  timer.stop();
+        if (expectedResult is error) {
+            test:assertFail("Scheduler stop failed");
+        }
+    } else {
+        test:assertFail("Test failed due to an error in the creating of the scheduler.");
     }
 }

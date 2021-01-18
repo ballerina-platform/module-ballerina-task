@@ -27,7 +27,7 @@ service object {} misfireService2 = service object {
 
 @test:Config {}
 function testExistingRepeatCountWithService2() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 5 ,
+    Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 5 ,
                                  misfirePolicy: "fireNowWithExistingCount" });
     check taskTimer.attach(misfireService2);
     check taskTimer.start();
@@ -55,7 +55,7 @@ service object {} misfireService3 = service object {
 
 @test:Config {}
 function testNowWithRemainingRepeatCountWithService3() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7,
+    Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 7,
                                  misfirePolicy: "fireNowWithRemainingCount"});
     check taskTimer.attach(misfireService3);
     check taskTimer.start();
@@ -82,7 +82,7 @@ service object {} misfireService4 = service object {
 
 @test:Config {}
 function testNextWithExistingCountWithService4() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7,
+    Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 7,
                                  misfirePolicy: "fireNextWithExistingCount"});
     check taskTimer.attach(misfireService4);
     check taskTimer.start();
@@ -108,7 +108,7 @@ service object {} misfireService5 = service object {
 };
 @test:Config {}
 function testNextWithRemainigCountWithService5() returns error? {
-    Scheduler taskTimer = new ({ intervalInMillis: 3000, noOfRecurrences: 7 ,
+    Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 7 ,
                                  misfirePolicy: "fireNextWithExistingCount"});
     check taskTimer.attach(misfireService5);
     check taskTimer.start();
@@ -135,7 +135,7 @@ service object {} misfireService11 = service object {
 
 @test:Config {}
 function testSmartPolicyWithService11() returns error? {
-    Scheduler taskTimer = new ({intervalInMillis: 3000, noOfRecurrences: 5 });
+    Scheduler taskTimer = check new ({intervalInMillis: 3000, noOfRecurrences: 5 });
     check taskTimer.attach(misfireService11);
     check taskTimer.start();
     runtime:sleep(8);

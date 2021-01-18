@@ -16,7 +16,7 @@
 
 import ballerina/test;
 
-Scheduler timerForNoResourceService = new ({
+Scheduler timerForNoResourceService = check new ({
     intervalInMillis: 1
 });
 
