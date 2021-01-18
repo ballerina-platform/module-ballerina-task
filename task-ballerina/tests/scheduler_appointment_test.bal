@@ -52,37 +52,29 @@ service object {} appointmentService3 = service object {
 };
 
 @test:Config {}
-function testSchedulerWithMultipleServices() {
+function testSchedulerWithMultipleServices() returns error? {
     string cronExpression = "* * * * * ? *";
-    Scheduler|SchedulerError appointment = new ({cronExpression: cronExpression});
-    if (appointment is Scheduler) {
-        checkpanic appointment.attach(appointmentService1);
-        checkpanic appointment.attach(appointmentService2);
-        checkpanic appointment.start();
-        runtime:sleep(4);
-        checkpanic appointment.stop();
-        test:assertTrue(appoinmentFirstTriggered, msg = "Expected value mismatched");
-        test:assertTrue(appoinmentSecondTriggered, msg = "Expected value mismatched");
-    } else {
-        test:assertFail("Test failed due to an error in the creating of the scheduler.");
-    }
+    Scheduler appointment = check new ({cronExpression: cronExpression});
+    checkpanic appointment.attach(appointmentService1);
+    checkpanic appointment.attach(appointmentService2);
+    checkpanic appointment.start();
+    runtime:sleep(4000);
+    checkpanic appointment.stop();
+    test:assertTrue(appoinmentFirstTriggered, msg = "Expected value mismatched");
+    test:assertTrue(appoinmentSecondTriggered, msg = "Expected value mismatched");
 }
 
 @test:Config {}
-function testLimitedNumberOfRuns() {
+function testLimitedNumberOfRuns() returns error? {
     string cronExpression = "* * * * * ? *";
     AppointmentConfiguration configuration = {
         cronExpression: cronExpression,
         noOfRecurrences: 3
     };
-    Scheduler|SchedulerError appointmentWithLimitedRuns = new (configuration);
-    if (appointmentWithLimitedRuns is Scheduler) {
-        var result = appointmentWithLimitedRuns.attach(appointmentService3);
-        checkpanic appointmentWithLimitedRuns.start();
-        runtime:sleep(5);
-        checkpanic appointmentWithLimitedRuns.stop();
-        test:assertEquals(appoinmentTriggerCount3, 3, msg = "Expected value mismatched");
-    } else {
-        test:assertFail("Test failed due to an error in the creating of the scheduler.");
-    }
+    Scheduler appointmentWithLimitedRuns = check new (configuration);
+    var result = appointmentWithLimitedRuns.attach(appointmentService3);
+    checkpanic appointmentWithLimitedRuns.start();
+    runtime:sleep(5000);
+    checkpanic appointmentWithLimitedRuns.stop();
+    test:assertEquals(appoinmentTriggerCount3, 3, msg = "Expected value mismatched");
 }

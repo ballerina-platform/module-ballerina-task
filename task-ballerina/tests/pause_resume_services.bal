@@ -38,28 +38,25 @@ service object{} pauseResumeTimerService2 = service object {
 };
 
 @test:Config {}
-function testTaskPauseAndResume() {
-    Scheduler|SchedulerError timer1 = new (configuration);
-    Scheduler|SchedulerError timer2 = new (configuration);
-    if (timer1 is Scheduler && timer2 is Scheduler) {
-        checkpanic timer1.attach(pauseResumeTimerService1);
-        checkpanic timer2.attach(pauseResumeTimerService2);
-        checkpanic timer1.start();
-        checkpanic timer2.start();
-        runtime:sleep(3.5);
-        var result = timer1.pause();
-        if (result is error) {
-            test:assertFail("An error occurred when pausing the scheduler");
-        }
-        runtime:sleep(4);
-        test:assertEquals(counter1, 3, msg = "Values are mismatched");
-        test:assertTrue(counter2 - counter1 >= 3, msg = "Test failed");
-        result = timer1.resume();
-        runtime:sleep(1);
-        checkpanic timer1.stop();
-        checkpanic timer2.stop();
-        test:assertTrue(counter1 > 3, msg = "Expected value mismatched");
-    } else {
-        test:assertFail("Test failed due to an error in the creating of the scheduler.");
+function testTaskPauseAndResume() returns error? {
+    Scheduler timer1 = check new (configuration);
+    Scheduler timer2 = check new (configuration);
+    checkpanic timer1.attach(pauseResumeTimerService1);
+    checkpanic timer2.attach(pauseResumeTimerService2);
+    checkpanic timer1.start();
+    checkpanic timer2.start();
+    runtime:sleep(3500);
+    var result = timer1.pause();
+    if (result is error) {
+        test:assertFail("An error occurred when pausing the scheduler");
     }
+    runtime:sleep(4000);
+    test:assertEquals(counter1, 3, msg = "Values are mismatched");
+    result = timer1.resume();
+    if (result is error) {
+        return;
+    }
+    checkpanic timer1.stop();
+    checkpanic timer2.stop();
+    test:assertTrue(counter2 - counter1 >= 3 , msg = "Test failred");
 }
