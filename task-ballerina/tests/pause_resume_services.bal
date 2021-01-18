@@ -52,10 +52,9 @@ function testTaskPauseAndResume() returns error? {
     }
     runtime:sleep(4);
     test:assertEquals(counter1, 3, msg = "Values are mismatched");
+    test:assertTrue(counter2 - counter1 >= 3, msg = "Test failed");
     result = timer1.resume();
-    if (result is error) {
-        return;
-    }
+    runtime:sleep(1);
     checkpanic timer1.stop();
     checkpanic timer2.stop();
     test:assertTrue(counter1 > 3, msg = "Expected value mismatched");
