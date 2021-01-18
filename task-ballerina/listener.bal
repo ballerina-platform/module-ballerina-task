@@ -31,10 +31,7 @@ public class Listener {
     public isolated function init(TimerConfiguration|AppointmentConfiguration configuration) returns ListenerError? {
         validateConfiguration(configuration);
         self.listenerConfiguration = configuration;
-        var result = initExternal(self);
-        if (result is ListenerError) {
-            return result;
-        }
+        return initExternal(self);
     }
 
     # Attaches the given `service` to the `task:Listener`. This may panic if the service attachment is fails.
