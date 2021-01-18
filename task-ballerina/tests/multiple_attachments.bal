@@ -49,7 +49,7 @@ function multipleAttachmentTest() returns error? {
     Person sam = {name: "Sam", age: 29};
     Account acc = {number: 150590, balance: 11.35};
     TimerConfiguration timerConfiguration = {intervalInMillis: 1000};
-    Scheduler multipleAttachmentTimer = new (timerConfiguration);
+    Scheduler multipleAttachmentTimer = check new (timerConfiguration);
     check multipleAttachmentTimer.attach(multipleAttachService, sam, acc);
     check multipleAttachmentTimer.start();
     runtime:sleep(4);

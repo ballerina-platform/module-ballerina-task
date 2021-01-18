@@ -38,9 +38,9 @@ service object{} pauseResumeTimerService2 = service object {
 };
 
 @test:Config {}
-function testTaskPauseAndResume() {
-    Scheduler timer1 = new (configuration);
-    Scheduler timer2 = new (configuration);
+function testTaskPauseAndResume() returns error? {
+    Scheduler timer1 = check new (configuration);
+    Scheduler timer2 = check new (configuration);
     checkpanic timer1.attach(pauseResumeTimerService1);
     checkpanic timer2.attach(pauseResumeTimerService2);
     checkpanic timer1.start();
@@ -55,9 +55,6 @@ function testTaskPauseAndResume() {
     test:assertTrue(counter2 - counter1 >= 3, msg = "Test failed");
     result = timer1.resume();
     runtime:sleep(1);
-    if (result is error) {
-        return;
-    }
     checkpanic timer1.stop();
     checkpanic timer2.stop();
     test:assertTrue(counter1 > 3, msg = "Expected value mismatched");

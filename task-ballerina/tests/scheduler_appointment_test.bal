@@ -52,9 +52,9 @@ service object {} appointmentService3 = service object {
 };
 
 @test:Config {}
-function testSchedulerWithMultipleServices() {
+function testSchedulerWithMultipleServices() returns error? {
     string cronExpression = "* * * * * ? *";
-    Scheduler appointment = new ({cronExpression: cronExpression});
+    Scheduler appointment = check new ({cronExpression: cronExpression});
     checkpanic appointment.attach(appointmentService1);
     checkpanic appointment.attach(appointmentService2);
     checkpanic appointment.start();
@@ -65,13 +65,13 @@ function testSchedulerWithMultipleServices() {
 }
 
 @test:Config {}
-function testLimitedNumberOfRuns() {
+function testLimitedNumberOfRuns() returns error? {
     string cronExpression = "* * * * * ? *";
     AppointmentConfiguration configuration = {
         cronExpression: cronExpression,
         noOfRecurrences: 3
     };
-    Scheduler appointmentWithLimitedRuns = new (configuration);
+    Scheduler appointmentWithLimitedRuns = check new (configuration);
     var result = appointmentWithLimitedRuns.attach(appointmentService3);
     checkpanic appointmentWithLimitedRuns.start();
     runtime:sleep(5);

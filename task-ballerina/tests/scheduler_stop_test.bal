@@ -22,12 +22,12 @@ service object {} stopTimerService = service object {
 };
 
 @test:Config {}
-function testSchedulerStop() {
+function testSchedulerStop() returns error? {
     TimerConfiguration configuration = {
         intervalInMillis: 500,
         initialDelayInMillis: 2000
     };
-    Scheduler timer = new (configuration);
+    Scheduler timer = check new (configuration);
     checkpanic timer.attach(stopTimerService);
     checkpanic timer.start();
     var expectedResult =  timer.stop();

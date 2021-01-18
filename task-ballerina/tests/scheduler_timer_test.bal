@@ -50,13 +50,13 @@ service object {} timerService1 = service object {
 };
 
 @test:Config {}
-function testTaskTimerWithAttachment() {
+function testTaskTimerWithAttachment() returns error? {
     Person person = {
         name: "Sam",
         age: 0
     };
 
-    Scheduler taskTimer = new ({intervalInMillis: 1000, initialDelayInMillis: 1000, noOfRecurrences: 5});
+    Scheduler taskTimer = check new ({intervalInMillis: 1000, initialDelayInMillis: 1000, noOfRecurrences: 5});
     var attachResult = taskTimer.attach(timerService1, person);
 
     if (attachResult is SchedulerError) {
@@ -73,8 +73,8 @@ function testTaskTimerWithAttachment() {
 }
 
 @test:Config {}
-function testTaskTimerWithMultipleServices() {
-    Scheduler timerWithMultipleServices = new ({intervalInMillis: 1000});
+function testTaskTimerWithMultipleServices() returns error? {
+    Scheduler timerWithMultipleServices = check new ({intervalInMillis: 1000});
     checkpanic timerWithMultipleServices.attach(service1);
     checkpanic timerWithMultipleServices.attach(service2);
     checkpanic timerWithMultipleServices.start();
@@ -97,8 +97,8 @@ service object {} service4 = service object {
 };
 
 @test:Config {}
-function testTaskTimerWithSameServices() {
-    Scheduler timerWithMultipleServices = new ({intervalInMillis: 1000});
+function testTaskTimerWithSameServices() returns error? {
+    Scheduler timerWithMultipleServices = check new ({intervalInMillis: 1000});
     checkpanic timerWithMultipleServices.attach(service4);
     checkpanic timerWithMultipleServices.start();
     runtime:sleep(1.5);
