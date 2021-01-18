@@ -45,12 +45,12 @@ function testTaskPauseAndResume() returns error? {
     checkpanic timer2.attach(pauseResumeTimerService2);
     checkpanic timer1.start();
     checkpanic timer2.start();
-    runtime:sleep(3500);
+    runtime:sleep(3.5);
     var result = timer1.pause();
     if (result is error) {
         test:assertFail("An error occurred when pausing the scheduler");
     }
-    runtime:sleep(4000);
+    runtime:sleep(4);
     test:assertEquals(counter1, 3, msg = "Values are mismatched");
     result = timer1.resume();
     if (result is error) {
@@ -58,5 +58,5 @@ function testTaskPauseAndResume() returns error? {
     }
     checkpanic timer1.stop();
     checkpanic timer2.stop();
-    test:assertTrue(counter2 - counter1 >= 3 , msg = "Test failred");
+    test:assertTrue(counter1 > 3, msg = "Expected value mismatched");
 }
