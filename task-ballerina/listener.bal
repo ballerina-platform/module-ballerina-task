@@ -14,7 +14,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/java;
+import ballerina/jballerina.java;
 
 # Represents a ballerina task listener, which can be used to schedule and execute tasks periodically.
 public class Listener {
