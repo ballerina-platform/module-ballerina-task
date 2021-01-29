@@ -134,6 +134,7 @@ task initializeVariables {
 }
 
 task ballerinaTest {
+    dependsOn(":task-native:build")
     dependsOn(updateTomlVersions)
     dependsOn(initializeVariables)
     finalizedBy(revertTomlFile)
@@ -265,8 +266,5 @@ unpackJballerinaTools.dependsOn copyPackingJarsToLib
 unpackStdLibs.dependsOn unpackJballerinaTools
 copyStdlibs.dependsOn unpackStdLibs
 updateTomlVersions.dependsOn copyStdlibs
-ballerinaBuild.dependsOn updateTomlVersions
 ballerinaBuild.dependsOn ":task-native:build"
-ballerinaTest.dependsOn ":task-native:build"
-ballerinaBuild.dependsOn test
 build.dependsOn ballerinaBuild
