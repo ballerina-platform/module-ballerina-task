@@ -34,17 +34,30 @@ This repository only contains the source code for the module.
 
 Execute the commands below to build from source.
 
-1. To build the library,
+1. To build the library:
         
         ./gradlew clean build
+        
+2. To run the tests:
 
-2. To build the module without tests,
+        ./gradlew clean test
+        
+3. To build the module without tests:
 
-        ./gradlew clean build -PskipBallerinaTests
+        ./gradlew clean build -x test
 
-3. To debug the tests,
+4. To run a group of tests:
 
-        ./gradlew clean build -PdebugBallerina=<port>
+        ./gradlew clean test -Pgroups=<test_group_names>
+
+5. To debug module implementation:
+
+        ./gradlew clean build -Pdebug=<port>
+        
+6. To debug the module with Ballerina language:
+
+        ./gradlew clean build -PbalJavaDebug=<port>
+    
 
 ## Contributing to Ballerina
 

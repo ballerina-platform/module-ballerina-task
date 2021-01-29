@@ -110,6 +110,7 @@ service on timerForConfigWithOutDelay {
 }
 
 @test:Config {
+    groups: ["listener"]
 }
 public function testAppointmentAndTimerConfig() {
     runtime:sleep(4);

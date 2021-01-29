@@ -37,7 +37,9 @@ service object{} pauseResumeTimerService2 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "pause", "resume"]
+}
 function testTaskPauseAndResume() returns error? {
     Scheduler timer1 = check new (configuration);
     Scheduler timer2 = check new (configuration);

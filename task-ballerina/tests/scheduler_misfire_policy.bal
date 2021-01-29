@@ -25,7 +25,9 @@ service object{} misfireService1 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function testFireNowWithService1() returns error? {
     Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 1, misfirePolicy: "fireNow"});
     check taskTimer.attach(misfireService1);
@@ -45,7 +47,9 @@ service object {} misfireService8 = service object {
         triggeredCount8 = triggeredCount8 + 1;
     }
 };
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function testIgnoreMisfiresPoilcyWithService8() returns error? {
     Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 1 , misfirePolicy: "ignorePolicy"});
     check taskTimer.attach(misfireService8);
@@ -67,7 +71,9 @@ service object {} misfireService9 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function testSmartPolicyWithService9() returns error? {
     Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 1});
     check taskTimer.attach(misfireService9);

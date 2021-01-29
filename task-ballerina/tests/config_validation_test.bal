@@ -20,7 +20,9 @@ Scheduler timerForNoResourceService = check new ({
     intervalInMillis: 1
 });
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "negative"]
+}
 public isolated function testZeroInterval() {
     Scheduler|error timer = trap new ({
         intervalInMillis: 0
@@ -33,7 +35,9 @@ public isolated function testZeroInterval() {
 
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "negative"]
+}
 public isolated function testNegativeDelay() {
     Scheduler|error timer = trap new ({
         intervalInMillis: 500,
@@ -45,7 +49,9 @@ public isolated function testNegativeDelay() {
     }
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "negative"]
+}
 public isolated function testNegativeInteval() {
     Scheduler|error timer = trap new ({
         intervalInMillis: -500,
@@ -57,7 +63,9 @@ public isolated function testNegativeInteval() {
     }
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "negative"]
+}
 public isolated function testInvalidCronExpression() {
     AppointmentConfiguration configuration = {
         cronExpression: "invalid cron expression"
