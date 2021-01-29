@@ -23,7 +23,7 @@ jobs:
         if: failure()
         with:
           name: Ballerina Internal Log
-          path: xmlutils-ballerina/ballerina-internal.log
+          path: task-ballerina/ballerina-internal.log
           if-no-files-found: ignore
       - name: Archive Code Coverage JSON
         uses: actions/upload-artifact@v2
