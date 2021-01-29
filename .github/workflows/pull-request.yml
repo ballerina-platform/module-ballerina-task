@@ -29,7 +29,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Code Coverage JSON
-          path: xmlutils-ballerina/target/report/test_results.json
+          path: task-ballerina/target/report/test_results.json
           if-no-files-found: ignore
 
   windows-build:
