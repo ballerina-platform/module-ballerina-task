@@ -21,7 +21,9 @@ service object {} stopTimerService = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "stop"]
+}
 function testSchedulerStop() returns error? {
     TimerConfiguration configuration = {
         intervalInMillis: 500,

@@ -115,8 +115,16 @@ task revertTomlFile {
 
 def debugParams = ""
 def balJavaDebugParam = ""
+def groupParams = ""
+def disableGroups = ""
 
 task initializeVariables {
+    if (project.hasProperty("groups")) {
+        groupParams = "--groups ${project.findProperty("groups")}"
+    }
+    if (project.hasProperty("disable")) {
+        disableGroups = "--disable-groups ${project.findProperty("disable")}"
+    }
     if (project.hasProperty("debug")) {
         debugParams = "--debug ${project.findProperty("debug")}"
     }
@@ -135,9 +143,9 @@ task ballerinaTest {
             workingDir project.projectDir
             environment "JAVA_OPTS", "-DBALLERINA_DEV_COMPILE_BALLERINA_ORG=true"
             if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-                commandLine 'cmd', '/c', "$balJavaDebugParam $distributionBinPath/bal.bat test --code-coverage --includes=* ${debugParams} && exit %%ERRORLEVEL%%"
+                commandLine 'cmd', '/c', "$balJavaDebugParam $distributionBinPath/bal.bat test --code-coverage --includes=* ${groupParams} ${disableGroups} ${debugParams} && exit %%ERRORLEVEL%%"
             } else {
-                commandLine 'sh', '-c', "$balJavaDebugParam $distributionBinPath/bal test --code-coverage --includes=* ${debugParams}"
+                commandLine 'sh', '-c', "$balJavaDebugParam $distributionBinPath/bal test --code-coverage --includes=* ${groupParams} ${disableGroups} ${debugParams}"
             }
         }
     }
@@ -159,7 +167,7 @@ task ballerinaBuild {
             ballerinaTest.enabled = false
         }
         if (graph.hasTask(':task-ballerina:test')) {
-            testParams = "--code-coverage --includes=*"
+            testParams = "--code-coverage"
         }
     }
 
@@ -259,4 +267,6 @@ copyStdlibs.dependsOn unpackStdLibs
 updateTomlVersions.dependsOn copyStdlibs
 ballerinaBuild.dependsOn updateTomlVersions
 ballerinaBuild.dependsOn ":task-native:build"
+ballerinaTest.dependsOn ":task-native:build"
+ballerinaBuild.dependsOn test
 build.dependsOn ballerinaBuild

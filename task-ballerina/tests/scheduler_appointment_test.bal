@@ -51,7 +51,9 @@ service object {} appointmentService3 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "multiple service", "cron"]
+}
 function testSchedulerWithMultipleServices() returns error? {
     string cronExpression = "* * * * * ? *";
     Scheduler appointment = check new ({cronExpression: cronExpression});
@@ -64,7 +66,9 @@ function testSchedulerWithMultipleServices() returns error? {
     test:assertTrue(appoinmentSecondTriggered, msg = "Expected value mismatched");
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "count", "cron"]
+}
 function testLimitedNumberOfRuns() returns error? {
     string cronExpression = "* * * * * ? *";
     AppointmentConfiguration configuration = {

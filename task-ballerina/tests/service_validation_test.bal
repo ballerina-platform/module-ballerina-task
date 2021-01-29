@@ -20,7 +20,9 @@ service object {} noResourceService = service object {};
 
 Person person = {name: "Sam", age: 29};
 
-@test:Config {}
+@test:Config {
+    groups: ["negative", "scheduler", "attach"]
+}
 public function testForNoResourceService() {
     var attachResult = timerForNoResourceService.attach(noResourceService, person);
     test:assertTrue(attachResult is error);
@@ -35,7 +37,9 @@ service object {} moreThanOneResourceService = service object {
     remote isolated function onError(error e) {}
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["negative", "scheduler", "attach"]
+}
 public function testForMoreThanOneResource() {
     var attachResult = timerForNoResourceService.attach(moreThanOneResourceService, person);
     test:assertTrue(attachResult is error);

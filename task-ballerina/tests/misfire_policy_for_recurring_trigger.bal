@@ -25,7 +25,9 @@ service object {} misfireService2 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function testExistingRepeatCountWithService2() returns error? {
     Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 5 ,
                                  misfirePolicy: "fireNowWithExistingCount" });
@@ -53,7 +55,9 @@ service object {} misfireService3 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function testNowWithRemainingRepeatCountWithService3() returns error? {
     Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 7,
                                  misfirePolicy: "fireNowWithRemainingCount"});
@@ -80,7 +84,9 @@ service object {} misfireService4 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function testNextWithExistingCountWithService4() returns error? {
     Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 7,
                                  misfirePolicy: "fireNextWithExistingCount"});
@@ -106,7 +112,9 @@ service object {} misfireService5 = service object {
         triggeredCount5 = triggeredCount5 + 1;
     }
 };
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function testNextWithRemainigCountWithService5() returns error? {
     Scheduler taskTimer = check new ({ intervalInMillis: 3000, noOfRecurrences: 7 ,
                                  misfirePolicy: "fireNextWithExistingCount"});
@@ -133,7 +141,9 @@ service object {} misfireService11 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function testSmartPolicyWithService11() returns error? {
     Scheduler taskTimer = check new ({intervalInMillis: 3000, noOfRecurrences: 5 });
     check taskTimer.attach(misfireService11);

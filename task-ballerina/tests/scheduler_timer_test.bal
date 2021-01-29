@@ -49,7 +49,9 @@ service object {} timerService1 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "timer"]
+}
 function testTaskTimerWithAttachment() returns error? {
     Person person = {
         name: "Sam",
@@ -72,7 +74,9 @@ function testTaskTimerWithAttachment() returns error? {
     test:assertEquals(result, "Sam is 5 years old", msg = "Expected value mismatched");
 }
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "timer"]
+}
 function testTaskTimerWithMultipleServices() returns error? {
     Scheduler timerWithMultipleServices = check new ({intervalInMillis: 1000});
     checkpanic timerWithMultipleServices.attach(service1);
@@ -96,7 +100,9 @@ service object {} service4 = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "timer"]
+}
 function testTaskTimerWithSameServices() returns error? {
     Scheduler timerWithMultipleServices = check new ({intervalInMillis: 1000});
     checkpanic timerWithMultipleServices.attach(service4);

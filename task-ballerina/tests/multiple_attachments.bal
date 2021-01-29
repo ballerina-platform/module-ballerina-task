@@ -44,7 +44,9 @@ service object {} multipleAttachService = service object {
     }
 };
 
-@test:Config {}
+@test:Config {
+    groups: ["scheduler", "misfire"]
+}
 function multipleAttachmentTest() returns error? {
     Person sam = {name: "Sam", age: 29};
     Account acc = {number: 150590, balance: 11.35};
