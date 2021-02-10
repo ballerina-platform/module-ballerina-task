@@ -3,16 +3,16 @@ Ballerina Task Library
 
   [![Build](https://github.com/ballerina-platform/module-ballerina-task/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions?query=workflow%3ABuild) 
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-task.svg)](https://github.com/ballerina-platform/module-ballerina-task/commits/master)
-  [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/io.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Ftask)
+  [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/task.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Ftask)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This `task` library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
 
 This module provides the functionality to configure and manage periodically task by using Task Listeners and Task Schedulers.
 
-For more information on all the operations supported by the `task:Listener` and `task:Scheduler`, go to [The Task Module](https://ballerina.io/swan-lake/learn/api-docs/ballerina/task/).
+For more information on all the operations supported by the `task:Listener` and `task:Scheduler`, go to [The Task Module](https://ballerina.io/learn/api-docs/ballerina/task/).
 
-For a quick sample on demonstrating the usage see [Ballerina By Example](https://ballerina.io/swan-lake/learn/by-example/).
+For a quick sample on demonstrating the usage see [Ballerina By Example](https://ballerina.io/learn/by-example/).
 
 ## Issues and Projects 
 
