@@ -8,9 +8,9 @@ Ballerina Task Library
 
 This `task` library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
 
-This module provides the functionality to configure and manage periodically task by using Task Listeners and Task Schedulers.
+This package provides the functionality to configure and manage periodically task by using Task Listeners and Task Schedulers.
 
-For more information on all the operations supported by the `task:Listener` and `task:Scheduler`, go to [The Task Module](https://ballerina.io/learn/api-docs/ballerina/task/).
+For more information on all the operations supported by the `task:Listener` and `task:Scheduler`, go to [The Task Package](https://ballerina.io/learn/api-docs/ballerina/task/).
 
 For a quick sample on demonstrating the usage see [Ballerina By Example](https://ballerina.io/learn/by-example/).
 
@@ -18,7 +18,7 @@ For a quick sample on demonstrating the usage see [Ballerina By Example](https:/
 
 Issues and Project are disabled for this repository as this is part of the Ballerina Standard Library. To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library). 
 
-This repository only contains the source code for the module.
+This repository only contains the source code for the package.
 
 ## Building from the Source
 ### Setting Up the Prerequisites
@@ -42,7 +42,7 @@ Execute the commands below to build from source.
 
         ./gradlew clean test
         
-3. To build the module without tests:
+3. To build the package without tests:
 
         ./gradlew clean build -x test
 
@@ -50,11 +50,11 @@ Execute the commands below to build from source.
 
         ./gradlew clean test -Pgroups=<test_group_names>
 
-5. To debug module implementation:
+5. To debug package implementation:
 
         ./gradlew clean build -Pdebug=<port>
         
-6. To debug the module with Ballerina language:
+6. To debug the package with Ballerina language:
 
         ./gradlew clean build -PbalJavaDebug=<port>
     
