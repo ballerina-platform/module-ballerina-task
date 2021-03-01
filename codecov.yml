@@ -1,0 +1,6 @@
+fixes:
+  - "ballerina/task/*/::task-ballerina/"
+
+ignore:
+  - "**/tests"
+
