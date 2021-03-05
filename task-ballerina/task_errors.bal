@@ -14,12 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Error type specific to the `task:Scheduler` object functions.
-public type SchedulerError distinct error;
-
-# Error type specific to the `task:Listener` object functions.
-public type ListenerError distinct error;
-
-# Represents the Union error type of the ballerina/task module. This error type represents any error that can occur during the
+# Represents the error type of the ballerina/task module. This error type represents any error that can occur during the
 # execution of task APIs.
-public type Error SchedulerError|ListenerError;
+public type Error distinct error;

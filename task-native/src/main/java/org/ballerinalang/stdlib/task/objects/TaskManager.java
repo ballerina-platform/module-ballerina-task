@@ -18,19 +18,33 @@
 
 package org.ballerinalang.stdlib.task.objects;
 
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.Runtime;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
+import org.ballerinalang.stdlib.task.utils.Utils;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.Trigger;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Task manager to handle schedulers in ballerina tasks.
  */
 public class TaskManager {
     private Scheduler scheduler;
+    private Runtime runtime = null;
+    Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
+    Map<Integer, Trigger> triggerInfoMap = new ConcurrentHashMap<>();
+    Properties properties;
+    boolean isConfiguredSchFactory = false;
 
     private static class TaskManagerHelper {
         private static final TaskManager INSTANCE = new TaskManager();
@@ -42,24 +56,122 @@ public class TaskManager {
         return TaskManagerHelper.INSTANCE;
     }
 
-    public Scheduler getScheduler() throws SchedulingException {
-        try {
-            if (this.scheduler != null && this.scheduler.isStarted()) {
-                return this.scheduler;
-            }
-            StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory(createSchedulerProperties());
-            this.scheduler = stdSchedulerFactory.getScheduler();
-            this.scheduler.start();
-        } catch (SchedulerException e) {
-            throw new SchedulingException("Cannot start the Task Listener/Scheduler.", e);
+    public void initializeScheduler(Properties properties, Environment env) throws SchedulingException,
+            SchedulerException {
+        getAllRunningJobs();
+        if (!triggerInfoMap.isEmpty()) {
+            rescheduleJobs();
+            configureScheduler(properties, env);
+        } else {
+            this.properties = properties;
+            isConfiguredSchFactory = true;
         }
+    }
+
+    public void rescheduleJobs() throws SchedulerException {
+        startScheduler();
+        for (Map.Entry<Integer, Trigger> entry : triggerInfoMap.entrySet()) {
+            this.scheduler.scheduleJob(jobInfoMap.get(entry.getKey()), entry.getValue());
+        }
+    }
+
+    public Scheduler getScheduler(Properties properties, Environment env) throws SchedulingException {
+        if (isConfiguredSchFactory) {
+            this.scheduler = Utils.initializeScheduler(this.properties);
+            isConfiguredSchFactory = false;
+        }
+        if (this.scheduler == null) {
+            this.scheduler = Utils.initializeScheduler(properties);
+        }
+        setRuntime(env.getRuntime());
         return this.scheduler;
     }
 
-    public static Properties createSchedulerProperties() {
-        Properties properties = new Properties();
-        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, TaskConstants.QUARTZ_THRESHOLD_VALUE);
-        properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, TaskConstants.QUARTZ_THREAD_COUNT_VALUE);
-        return properties;
+    private void setRuntime(Runtime runtime) {
+        this.runtime = runtime;
+    }
+
+    public Runtime getRuntime() {
+        return this.runtime;
+    }
+
+    public Map<Integer, Trigger>  getTriggerInfoMap() {
+        return this.triggerInfoMap;
+    }
+
+    public Set<Integer> getAllRunningJobs() throws SchedulerException {
+        for (Map.Entry<Integer, Trigger> entry : triggerInfoMap.entrySet()) {
+            Trigger.TriggerState triggerState = scheduler.getTriggerState(entry.getValue().getKey());
+            if (triggerState != null && isTriggerCompleted(triggerState)) {
+                this.triggerInfoMap.remove(entry.getKey());
+            }
+        }
+        return this.triggerInfoMap.keySet();
+    }
+
+    public void scheduleOneTimeJob(JobDataMap jobDataMap, long time, Integer jobId) throws SchedulerException {
+        scheduleJob(Utils.createJob(jobDataMap, jobId.toString()),
+                Utils.getOneTimeTrigger(time, TaskConstants.TRIGGER_ID), jobId);
+    }
+
+    public void scheduleIntervalJob(JobDataMap jobDataMap, long interval, long maxCount, Object startTime,
+                                    Object endTime, String waitingPolicy, Integer jobId) throws SchedulerException {
+        JobDetail job = Utils.createJob(jobDataMap, jobId.toString());
+        Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
+                TaskConstants.TRIGGER_ID);
+        scheduleJob(job, trigger, jobId);
+    }
+
+    private void scheduleJob(JobDetail job, Trigger trigger, Integer jobId) throws SchedulerException {
+        this.scheduler.scheduleJob(job, trigger);
+        this.triggerInfoMap.put(jobId, trigger);
+        this.jobInfoMap.put(jobId, job);
+        startScheduler();
+    }
+
+    private void startScheduler () throws SchedulerException {
+        if (!this.scheduler.isStarted()) {
+            this.scheduler.start();
+        }
+    }
+
+    public void unScheduleJob(Integer jobId) throws SchedulerException {
+        this.scheduler.unscheduleJob(this.triggerInfoMap.get(jobId).getKey());
+        if (getAllRunningJobs().isEmpty()) {
+            this.scheduler.shutdown();
+        }
+    }
+
+    public void pause() throws SchedulerException {
+        this.scheduler.pauseAll();
+    }
+
+    public void resume() throws SchedulerException {
+        this.scheduler.resumeAll();
+    }
+
+    public void pauseJob(Integer jobId) throws SchedulerException {
+        this.scheduler.pauseJob(this.triggerInfoMap.get(jobId).getJobKey());
+    }
+
+    public void resumeJob(Integer jobId) throws SchedulerException {
+        this.scheduler.resumeJob(this.triggerInfoMap.get(jobId).getJobKey());
+    }
+
+    private boolean isTriggerCompleted(Trigger.TriggerState triggerState) {
+        return triggerState.equals(Trigger.TriggerState.COMPLETE) || triggerState.equals(Trigger.TriggerState.NONE);
+    }
+
+    private void configureScheduler(Properties properties, Environment env) throws SchedulerException,
+            SchedulingException {
+        if (!triggerInfoMap.isEmpty()) {
+            rescheduleJobs();
+        }
+        if (this.scheduler != null) {
+            this.scheduler.shutdown();
+        }
+        this.scheduler = Utils.initializeScheduler(properties);
+        setRuntime(env.getRuntime());
+
     }
 }
