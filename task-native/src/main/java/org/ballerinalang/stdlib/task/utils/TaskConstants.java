@@ -55,7 +55,6 @@ public class TaskConstants {
     public static final BString ERR_POLICY = StringUtils.fromString("errorPolicy");
     public static final BString WAITING_POLICY = StringUtils.fromString("waitingPolicy");
 
-
     private TaskConstants() {
 
     }

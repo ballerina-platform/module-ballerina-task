@@ -104,7 +104,7 @@ public isolated function pauseJob(JobId jobId) returns Error? {
 
 # Resumes the particular job.
 #
-# + jobId - The id of the job, which needs to be resumed
+# + jobId - The ID of the job, which needs to be resumed
 # + return - A `task:Error` when an error occurred while resuming a job or else ()
 public isolated function resumeJob(JobId jobId) returns Error? {
     return externResumeJob(jobId.id);
