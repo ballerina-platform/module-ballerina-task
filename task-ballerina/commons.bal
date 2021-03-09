@@ -16,22 +16,23 @@
 
 import ballerina/time;
 
-# Represent the read-only record, which has the unique identifier of the created job.
+# A read-only record consisting of a unique identifier for a created job.
 public type JobId readonly & record {|
    int id;
 |};
 
-# The Ballerina Job object provides the abstraction for job instance, which schedules to execute periodically.
+# The Ballerina Job object provides the abstraction for a job instance, which schedules to execute periodically.
 public type Job object {
 
-  # Executes by the Scheduler when the scheduled trigger fires
+  # Executes by the Scheduler when the scheduled trigger fires.
   public function execute();
 };
 
 # Policies related to a trigger.
 #
 # + errorPolicy - The policy to follow when there is an error in Job execution
-# + waitingPolicy - The policy to follow when a next task is triggering while the previous job is still processing
+# + waitingPolicy - The policy to follow when the next task is triggering while the previous job is still
+#                   being processing
 public type TaskPolicy record {|
    ErrorPolicy errorPolicy = LOG_AND_TERMINATE;
    WaitingPolicy waitingPolicy = WAIT;
@@ -57,11 +58,11 @@ public enum WaitingPolicy {
 # + time - The Ballerina `time:Civil`
 # + return - Time in milliseconds or else `task:Error` if the process failed due to any reason
 public isolated function getTimeInMillies(time:Civil time) returns int|Error {
-    time:Utc|time:FormatError utc = time:utcFromCivil(time);
+    time:Utc|time:Error utc = time:utcFromCivil(time);
     if (utc is time:Utc) {
         return <int> ((utc[0] + utc[1]) * 1000);
     } else {
-        string message = string `Couldn't convert given time to milli seconds:  ${utc.message()}.`;
+        string message = string `Couldn't convert given time to milli seconds: ${utc.message()}.`;
         return error Error(message);
     }
 }

@@ -14,6 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Represents the error type of the ballerina/task module. This error type represents any error that can occur during the
-# execution of task APIs.
+# Represents the error type of the `ballerina/task` module. This error type represents any error that can occur during
+# the execution of the task APIs.
 public type Error distinct error;

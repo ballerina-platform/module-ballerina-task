@@ -29,32 +29,35 @@ public isolated function configureWorkerPool(int workerCount = 5, time:Seconds w
     return configureThread(workerCount, <int>(waitingTime * 1000.0));
 }
 
-# Schedule the given `job` for the given time. Once scheduled it will return a jobid # which can be used to manage
+# Schedule the given `job` for the given time. Once scheduled, it will return a job ID, which can be used to manage
 # the job.
 #
-# + triggerTime - The specific Time in Ballerina `time:Civil` to trigger only one time
+# + triggerTime - The specific time in Ballerina `time:Civil` to trigger only one time
 # + job - Ballerina job, which is to be executed during the trigger.
-# + return - A job id or else `task:Error` if the process failed due to any reason
+# + return - A job ID or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) returns JobId|Error {
     int result = check scheduleJob(job, check getTimeInMillies(triggerTime));
     JobId jobId = {id: result};
     return jobId;
 }
 
-# Schedule the recurring `job` according to the given duration. Once scheduled it will return the job id which
+# Schedule the recurring `job` according to the given duration. Once scheduled it will return the job ID which
 # can be used to manage the job.
 #
 # + job - Ballerina job, which is to be executed by the scheduler.
-# + interval - The duration of the trigger in seconds, which is used to run the job frequently
-# + maxCount - The maximum number of trigger count, if
-# + startTime - The trigger starts time in Ballerina `time:Civil`. if it is not provided, a trigger will
+# + interval - The duration of the trigger (in seconds), which is used to run the job frequently
+# + maxCount - The maximum number of trigger counts
+# + startTime - The trigger start time in Ballerina `time:Civil`. If it is not provided, a trigger will
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
-# + taskPolicy -  The policy, which is used to handle the error and waiting during the trigger time
-# + return - A job id or else `task:Error` if the process failed due to any reason
+# + taskPolicy -  The policy, which is used to handle the error and will be waiting during the trigger time
+# + return - A job ID or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,  int maxCount = -1,
                                     time:Civil? startTime = (), time:Civil? endTime = (), TaskPolicy taskPolicy = {})
                                     returns JobId|Error {
+    if (maxCount != -1 && maxCount < 1) {
+        return error Error("The maxCount should be a positive integer.");
+    }
     int? sTime = ();
     int? eTime = ();
     if (startTime is time:Civil) {
@@ -68,10 +71,10 @@ public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,
     return jobId;
 }
 
-# Unschedule the `job`, which is associated with the given job id. If no job is running in the scheduler,
+# Unschedule the `job`, which is associated with the given job ID. If no job is running in the scheduler,
 # the scheduler will be shut down automatically.
 #
-# + jobId - The id of the job, which needs to unschedule
+# + jobId - The ID of the job, which needs to be unscheduled
 # + return - A `task:Error` if the process failed due to any reason or else ()
 public isolated function unscheduleJob(JobId jobId) returns Error? {
     return externUnscheduleJob(jobId.id);
@@ -79,7 +82,7 @@ public isolated function unscheduleJob(JobId jobId) returns Error? {
 
 # Pauses all the jobs.
 #
-# + return - A `task:Error` if an error is occurred while pausing or else ()
+# + return - A `task:Error` if an error occurred while pausing or else ()
 public isolated function pauseAllJobs() returns Error? {
     return externPauseAllJobs();
 }
@@ -93,14 +96,13 @@ public isolated function resumeAllJobs() returns Error? {
 
 # Pauses the particular job.
 #
-# + jobId - The id of the job, which needs to be a pause
-# + return - A `task:Error` if an error is occurred while pausing a job or else ()
+# + jobId - The ID of the job, which needs to be paused
+# + return - A `task:Error` if an error occurred while pausing a job or else ()
 public isolated function pauseJob(JobId jobId) returns Error? {
     return externPauseJob(jobId.id);
 }
 
-# Resumes the particular job. If any of the Jobs missed one or more # fire-times, then misfire instruction will
-# be applied to those jobs.
+# Resumes the particular job.
 #
 # + jobId - The id of the job, which needs to be resumed
 # + return - A `task:Error` when an error occurred while resuming a job or else ()
@@ -110,7 +112,7 @@ public isolated function resumeJob(JobId jobId) returns Error? {
 
 # Gets all the running jobs.
 #
-# + return - Returns all the running jobs' ids as an array
+# + return - Returns the IDs of all the running jobs as an array
 public isolated function getRunningJobs() returns JobId[] {
     JobId[] jobIds = [];
     int[] ids = externGetRunningJobs();
