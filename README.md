@@ -8,7 +8,7 @@ Ballerina Task Library
 
 This `task` library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
 
-This package provides the functionality to configure and manage either one-time or periodic jobs.
+This package provides the functionality to configure and manage one-time or periodic jobs.
 
 For more information on all the operations supported by this package, go to [The Task Package](https://ballerina.io/learn/api-docs/ballerina/task/).
 
