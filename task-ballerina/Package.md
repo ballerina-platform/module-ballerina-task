@@ -51,7 +51,7 @@ time:Civil time = {
 
 task:Error|task:JobId result = scheduleOneTimeJob(new Job("Hi"), time);
 ```
-For an example on the usage of the `scheduleOneTimeJob`, see the [Task Schedule One-time Job Execution Example](https://ballerina.io/learn/by-example/task-one-time-job-execution.html).
+For an example on the usage of the `scheduleOneTimeJob`, see the [Task One-time Job Execution Example](https://ballerina.io/learn/by-example/task-one-time-job-execution.html).
 
 ##### Frequency-based Job Execution
 
@@ -91,4 +91,4 @@ time:Civil time = {
 
 task:Error|task:JobId result = scheduleJobRecurByFrequency(new Job("Hi"), 2.5, maxCount = 10, startTime = time);
 ```
-For an example on the usage of the `scheduleOneTimeJob`, see the [Task Frequency Job Execution Example](https://ballerina.io/learn/by-example/task-frequncy-job-execution.html).
+For an example on the usage of the `scheduleJobRecurByFrequency`, see the [Task Frequency Job Execution Example](https://ballerina.io/learn/by-example/task-frequency-job-execution.html).
