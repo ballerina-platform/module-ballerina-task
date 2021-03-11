@@ -58,6 +58,10 @@ public enum WaitingPolicy {
 # + time - The Ballerina `time:Civil`
 # + return - Time in milliseconds or else `task:Error` if the process failed due to any reason
 public isolated function getTimeInMillies(time:Civil time) returns int|Error {
+    if (time[UTC_OFF_SET] == ()) {
+        time:ZoneOffset zoneOffset = {hours: 0, minutes: 0};
+        time.utcOffset = zoneOffset;
+    }
     time:Utc|time:Error utc = time:utcFromCivil(time);
     if (utc is time:Utc) {
         return <int> ((utc[0] + utc[1]) * 1000);
@@ -66,3 +70,5 @@ public isolated function getTimeInMillies(time:Civil time) returns int|Error {
         return error Error(message);
     }
 }
+
+const string UTC_OFF_SET = "utcOffset";

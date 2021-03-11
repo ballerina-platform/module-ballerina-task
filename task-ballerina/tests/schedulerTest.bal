@@ -69,13 +69,10 @@ class Job2 {
     groups: ["FrequencyJob"]
 }
 function testIntervalJob() returns error? {
-    time:ZoneOffset zoneOffset = {hours: 5, minutes: 30};
     time:Utc currentUtc = time:utcNow();
     time:Utc newTime = time:utcAddSeconds(currentUtc, 3);
     time:Civil startTime = time:utcToCivil(currentUtc);
     time:Civil endTime = time:utcToCivil(newTime);
-    startTime.utcOffset = zoneOffset;
-    endTime.utcOffset = zoneOffset;
 
     JobId result = check scheduleJobRecurByFrequency(new Job2(1), 1, startTime = startTime, endTime = endTime);
     runtime:sleep(10);
