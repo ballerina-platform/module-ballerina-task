@@ -9,9 +9,9 @@ Ballerina Task Library
 
 This `task` library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
 
-This package provides the functionality to configure and manage periodically task by using Task Listeners and Task Schedulers.
+This package provides the functionality to configure and manage one-time or periodic jobs.
 
-For more information on all the operations supported by the `task:Listener` and `task:Scheduler`, go to [The Task Package](https://ballerina.io/learn/api-docs/ballerina/task/).
+For more information on all the operations supported by this package, go to [The Task Package](https://ballerina.io/learn/api-docs/ballerina/task/).
 
 For a quick sample on demonstrating the usage see [Ballerina By Example](https://ballerina.io/learn/by-example/).
 
