@@ -64,10 +64,9 @@ public isolated function getTimeInMillies(time:Civil time) returns int|Error {
     }
     time:Utc|time:Error utc = time:utcFromCivil(time);
     if (utc is time:Utc) {
-        return <int> ((utc[0] + utc[1]) * 1000);
+        return <int> decimal:round(<decimal>(utc[0] + utc[1]) * 1000);
     } else {
-        string message = string `Couldn't convert given time to milli seconds: ${utc.message()}.`;
-        return error Error(message);
+        return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);
     }
 }
 

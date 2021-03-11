@@ -21,8 +21,8 @@ import ballerina/time;
 #
 # + workerCount - Specifies the number of workers that are available for the concurrent execution of jobs.
 #                 It should be a positive integer. The recommendation is to set a value less than 10. Default sets to 5.
-# + waitingTime - The number of seconds the scheduler will tolerate a trigger to pass its next-fire-time before being
-#                 considered as `ignored the trigger`.
+# + waitingTime - The number of seconds as a decimal the scheduler will tolerate a trigger to pass its next-fire-time
+#                 before being considered as `ignored the trigger`.
 # + return - A `task:Error` if the process failed due to any reason or else ()
 public isolated function configureWorkerPool(int workerCount = 5, time:Seconds waitingTime = 5)
                                 returns Error? {
