@@ -26,51 +26,33 @@ import io.ballerina.runtime.api.values.BString;
  */
 public class TaskConstants {
 
-    // Record types used
-    public static final String RECORD_TIMER_CONFIGURATION = "TimerConfiguration";
-    static final String RECORD_APPOINTMENT_DATA = "AppointmentData";
-    public static final String SCHEDULER = "scheduler";
-    public static final String TRIGGER_NAME = "triggerName";
-
-    // Member names used in records
-    public static final BString MEMBER_LISTENER_CONFIGURATION = StringUtils.fromString("listenerConfiguration");
-    public static final BString MEMBER_CRON_EXPRESSION = StringUtils.fromString("cronExpression");
-
-    // Misfire instructions
-    public static final String FIRE_NOW = "fireNow";
-    public static final String IGNORE_POLICY = "ignorePolicy";
-    public static final String NEXT_WITH_EXISTING_COUNT = "fireNextWithExistingCount";
-    public static final String NEXT_WITH_REMAINING_COUNT = "fireNextWithRemainingCount";
-    public static final String NOW_WITH_EXISTING_COUNT = "fireNowWithExistingCount";
-    public static final String NOW_WITH_REMAINING_COUNT = "fireNowWithRemainingCount";
-    public static final String DO_NOTHING = "doNothing";
-    public static final String FIRE_AND_PROCEED = "fireAndProceed";
-
-    // Fields used in the `MisfireConfiguration`.
-    public static final BString THRESHOLD_IN_MILLIS = StringUtils.fromString("thresholdInMillis");
-    public static final BString MISFIRE_POLICY = StringUtils.fromString("misfirePolicy");
-
-    // Allowed resource function names.
-    public static final String RESOURCE_ON_TRIGGER = "onTrigger";
-    public static final String SERVICE_INFORMATION = "serviceInfo";
-
-    // Common field for TimerConfiguration and AppointmentConfiguration
-    public static final BString FIELD_NO_OF_RUNS = StringUtils.fromString("noOfRecurrences");
-
-    // Fields used in TimerConfiguration
-    public static final BString FIELD_INTERVAL = StringUtils.fromString("intervalInMillis");
-    public static final BString FIELD_DELAY = StringUtils.fromString("initialDelayInMillis");
-
     // Fields related to TaskError record
-    static final String LISTENER_ERROR = "ListenerError";
+    public static final String ERROR = "Error";
 
     // Quarts property names
     public static final String QUARTZ_THREAD_COUNT = "org.quartz.threadPool.threadCount";
     public static final String QUARTZ_MISFIRE_THRESHOLD = "org.quartz.jobStore.misfireThreshold";
 
     // Quartz property values.
-    public static final String QUARTZ_THREAD_COUNT_VALUE = "10";
+    public static final String QUARTZ_THREAD_COUNT_VALUE = "5";
     public static final String QUARTZ_THRESHOLD_VALUE = "5000";
+
+    public static final String JOB = "job";
+    public static final String FORMAT = "logfmt";
+    public static final String JOB_ID = "jobId";
+    public static final String ERROR_POLICY = "errorPolicy";
+    public static final String TRIGGER_ID = "trigger";
+    public static final String LOG_AND_IGNORE = "LOG_AND_IGNORE";
+    public static final String EXECUTE = "execute";
+    public static final String LOG = "log";
+    public static final String LOG_AND_TERMINATE = "LOG_AND_TERMINATE";
+    public static final String LOG_AND_CONTINUE = "LOG_AND_CONTINUE";
+    public static final String TERMINATE = "TERMINATE";
+    public static final String WAIT = "WAIT";
+    public static final String PACKAGE_PATH = ".";
+
+    public static final BString ERR_POLICY = StringUtils.fromString("errorPolicy");
+    public static final BString WAITING_POLICY = StringUtils.fromString("waitingPolicy");
 
     private TaskConstants() {
 

@@ -23,11 +23,13 @@ def packageName = "task"
 def packageOrg = "ballerina"
 def platform = "java11"
 def tomlVersion = project.version.replace("-SNAPSHOT", "")
+def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
 def artifactBallerinaDocs = file("$project.projectDir/build/docs_parent/")
 def artifactCacheParent = file("$project.projectDir/build/cache_parent/")
 def artifactLibParent = file("$project.projectDir/build/lib_parent/")
 def ballerinaCentralAccessToken = System.getenv('BALLERINA_CENTRAL_ACCESS_TOKEN')
+def originalDependencies = ballerinaDependencyFile.text
 def originalConfig = ballerinaConfigFile.text
 def distributionBinPath =  project.projectDir.absolutePath + "/build/target/extracted-distributions/jballerina-tools-zip/jballerina-tools-${ballerinaLangVersion}/bin"
 
@@ -100,16 +102,20 @@ task copyStdlibs(type: Copy) {
 task updateTomlVersions {
     inputs.dir file(project.projectDir)
     doLast {
+        def stdlibDependentTimeVersion = project.stdlibTimeVersion.replace("-SNAPSHOT", "")
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@quartz.version@", quartzVersion)
         ballerinaConfigFile.text = newConfig
+        def newDependencyConfig = ballerinaDependencyFile.text.replace("@stdlib.time.version@", stdlibDependentTimeVersion)
+        ballerinaDependencyFile.text = newDependencyConfig
     }
 }
 
 task revertTomlFile {
     doLast {
         ballerinaConfigFile.text = originalConfig
+        ballerinaDependencyFile.text = originalDependencies
     }
 }
 
