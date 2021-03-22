@@ -107,7 +107,7 @@ public class TaskActions {
     public static Object unscheduleJob(Long jobId) {
         try {
             TaskManager.getInstance().unScheduleJob(Math.toIntExact(jobId));
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return null;
@@ -134,7 +134,7 @@ public class TaskActions {
     public static Object pauseJob(Long jobId) {
         try {
             TaskManager.getInstance().pauseJob(Math.toIntExact(jobId));
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return null;
@@ -143,7 +143,7 @@ public class TaskActions {
     public static Object resumeJob(Long jobId) {
         try {
             TaskManager.getInstance().resumeJob(Math.toIntExact(jobId));
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return null;

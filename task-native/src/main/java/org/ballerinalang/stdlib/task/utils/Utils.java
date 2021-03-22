@@ -35,7 +35,6 @@ import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 
-import java.io.PrintStream;
 import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
@@ -48,8 +47,6 @@ import java.util.UUID;
 public class Utils {
 
     public static BError createTaskError(String message) {
-        PrintStream asd = System.out;
-        asd.println(message);
         return ErrorCreator.createDistinctError(TaskConstants.ERROR, ModuleUtils.getModule(),
                 StringUtils.fromString(message));
     }

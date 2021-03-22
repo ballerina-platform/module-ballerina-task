@@ -532,7 +532,7 @@ class Job23 {
 @test:Config {
     groups: ["FrequencyJob", "negative"]
 }
-isolated function testConfiguration() returns error? {
+isolated function testConfigurationValidation() returns error? {
     JobId result = check scheduleJobRecurByFrequency(new Job23(), 1);
     Error? output = configureWorkerPool(-6, 7000);
     if(output is Error) {
@@ -543,12 +543,41 @@ isolated function testConfiguration() returns error? {
 }
 
 @test:Config {
-    groups: ["FrequencyJob"]
+    groups: ["FrequencyJob", "negative"]
 }
-isolated function testCmaxCountValidation() {
+isolated function testMaxCountValidation() {
     JobId|Error output = scheduleJobRecurByFrequency(new Job23(), 1, maxCount = -4);
     if(output is Error) {
         test:assertTrue(output.message().includes("The maxCount should be a positive integer."));
+    } else {
+        test:assertFail("Test failed.");
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob"]
+}
+isolated function testEmptyRunningJobs() {
+    JobId[] ids = getRunningJobs();
+    if (ids.length() > 0) {
+        foreach JobId i in ids {
+           var result = unscheduleJob(i);
+        }
+        ids = getRunningJobs();
+        test:assertTrue(ids.length() == 0);
+    } else {
+        test:assertTrue(ids.length() == 0);
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob", "negative"]
+}
+isolated function testUnscheduleJobs() returns error? {
+    JobId id = {id: 12};
+    Error? result = unscheduleJob(id);
+    if(result is Error) {
+        test:assertTrue(result.message().includes("Invalid job id"));
     } else {
         test:assertFail("Test failed.");
     }
