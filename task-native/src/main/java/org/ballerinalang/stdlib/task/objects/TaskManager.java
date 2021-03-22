@@ -60,7 +60,6 @@ public class TaskManager {
             SchedulerException {
         getAllRunningJobs();
         if (!triggerInfoMap.isEmpty()) {
-            rescheduleJobs();
             configureScheduler(properties, env);
         } else {
             this.properties = properties;
@@ -75,12 +74,13 @@ public class TaskManager {
         }
     }
 
-    public Scheduler getScheduler(Properties properties, Environment env) throws SchedulingException {
+    public Scheduler getScheduler(Properties properties, Environment env) throws SchedulingException,
+            SchedulerException {
         if (isConfiguredSchFactory) {
             this.scheduler = Utils.initializeScheduler(this.properties);
             isConfiguredSchFactory = false;
         }
-        if (this.scheduler == null) {
+        if (this.scheduler == null || this.scheduler.isShutdown()) {
             this.scheduler = Utils.initializeScheduler(properties);
         }
         setRuntime(env.getRuntime());
@@ -164,14 +164,13 @@ public class TaskManager {
 
     private void configureScheduler(Properties properties, Environment env) throws SchedulerException,
             SchedulingException {
-        if (!triggerInfoMap.isEmpty()) {
-            rescheduleJobs();
-        }
         if (this.scheduler != null) {
             this.scheduler.shutdown();
         }
         this.scheduler = Utils.initializeScheduler(properties);
         setRuntime(env.getRuntime());
-
+        if (!triggerInfoMap.isEmpty()) {
+            rescheduleJobs();
+        }
     }
 }

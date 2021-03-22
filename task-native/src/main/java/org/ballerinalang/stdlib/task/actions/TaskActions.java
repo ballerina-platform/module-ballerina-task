@@ -91,7 +91,7 @@ public class TaskActions {
         return jobId;
     }
 
-    private static Scheduler getScheduler(Environment env) throws SchedulingException {
+    private static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
         return TaskManager.getInstance().getScheduler(Utils.createSchedulerProperties(
                 TaskConstants.QUARTZ_THREAD_COUNT_VALUE, TaskConstants.QUARTZ_THRESHOLD_VALUE), env);
     }
