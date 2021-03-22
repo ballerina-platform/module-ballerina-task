@@ -520,3 +520,36 @@ function testIntervalJobWithEndTime() returns error? {
     runtime:sleep(7);
     test:assertTrue(count22 >= 4, msg = "Expected count mismatched.");
 }
+
+class Job23 {
+
+    *Job;
+
+    public isolated function execute() {
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob", "negative"]
+}
+isolated function testConfiguration() returns error? {
+    JobId result = check scheduleJobRecurByFrequency(new Job23(), 1);
+    Error? output = configureWorkerPool(-6, 7000);
+    if(output is Error) {
+        test:assertTrue(output.message().includes("Cannot create the Scheduler.Thread count must be > 0"));
+    } else {
+        test:assertFail("Test failed.");
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob"]
+}
+isolated function testCmaxCountValidation() {
+    JobId|Error output = scheduleJobRecurByFrequency(new Job23(), 1, maxCount = -4);
+    if(output is Error) {
+        test:assertTrue(output.message().includes("The maxCount should be a positive integer."));
+    } else {
+        test:assertFail("Test failed.");
+    }
+}
