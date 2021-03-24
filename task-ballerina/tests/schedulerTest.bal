@@ -557,7 +557,7 @@ isolated function testMaxCountValidation() {
 @test:Config {
     groups: ["FrequencyJob"]
 }
-isolated function testEmptyRunningJobs() {
+isolated function testEmptyRunningJobs() returns error? {
     JobId[] ids = getRunningJobs();
     if (ids.length() > 0) {
         foreach JobId i in ids {
@@ -568,6 +568,10 @@ isolated function testEmptyRunningJobs() {
     } else {
         test:assertTrue(ids.length() == 0);
     }
+    Error? output = configureWorkerPool(7, 7000);
+    JobId result = check scheduleJobRecurByFrequency(new Job23(), 1);
+    ids = getRunningJobs();
+    test:assertTrue(ids.length() == 1);
 }
 
 @test:Config {
