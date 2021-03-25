@@ -147,7 +147,8 @@ class Job6 {
 }
 
 @test:Config {
-    groups: ["FrequencyJob"]
+    groups: ["FrequencyJob"],
+    dependsOn: [testLogIgnore]
 }
 function testIgnoreTrigger() returns error? {
     JobId id = check scheduleJobRecurByFrequency(new Job6(), 5, maxCount = 10, taskPolicy = { waitingPolicy: IGNORE });
@@ -411,4 +412,179 @@ function testUnscheduleJob() returns error? {
     check unscheduleJob(id);
     runtime:sleep(4);
     test:assertEquals(count18, 3, msg = "Expected count mismatched.");
+}
+
+
+class Job19 {
+
+    *Job;
+
+    public isolated function execute() {
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob"]
+}
+isolated function testCivilRecordValidation() {
+    time:Utc currentUtc = time:utcNow();
+    time:Civil time = time:utcToCivil(currentUtc);
+    time:ZoneOffset zoneOffset = {hours: 30, minutes: 0};
+    time.utcOffset = zoneOffset;
+    JobId|Error result = scheduleOneTimeJob(new Job19(), time);
+    if(result is Error) {
+        test:assertTrue(result.message().includes("Couldn't convert given time to milli seconds"),
+                    msg = "Output mismatched.");
+    } else {
+        test:assertFail("Test failed.");
+    }
+}
+
+int count20 = 0;
+
+class Job20 {
+
+    *Job;
+
+    public function execute() {
+        count20 = count20 +1;
+    }
+}
+
+@test:Config {
+    groups: ["WorkerPool"],
+    dependsOn: [testIgnoreTrigger]
+}
+function testConfigureWorker() returns error? {
+    var output = configureWorkerPool(6, 7000);
+    JobId result = check scheduleJobRecurByFrequency(new Job20(), 1);
+    runtime:sleep(5);
+    test:assertTrue((4 < count20 && count20 <= 6), msg = "Expected count mismatched.");
+}
+
+int count21 = 0;
+
+class Job21 {
+
+    *Job;
+    int i = 1;
+
+    public function execute() {
+        count21 = count21 +1;
+    }
+
+    isolated function init(int i) {
+        self.i = i;
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob", "startTime"]
+}
+function testIntervalJobWithStattTime() returns error? {
+    time:Utc currentUtc = time:utcNow();
+    time:Utc newTime = time:utcAddSeconds(currentUtc, 3);
+    time:Civil startTime = time:utcToCivil(currentUtc);
+    time:Civil endTime = time:utcToCivil(newTime);
+
+    JobId result = check scheduleJobRecurByFrequency(new Job21(1), 1, startTime = startTime);
+    runtime:sleep(10);
+    test:assertTrue(count21 > 1, msg = "Expected count mismatched.");
+}
+
+int count22 = 0;
+
+class Job22 {
+
+    *Job;
+    int i = 1;
+
+    public function execute() {
+        count22 = count22 +1;
+    }
+
+    isolated function init(int i) {
+        self.i = i;
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob", "endTime"]
+}
+function testIntervalJobWithEndTime() returns error? {
+    time:Utc currentUtc = time:utcNow();
+    time:Utc newTime = time:utcAddSeconds(currentUtc, 5);
+    time:Civil startTime = time:utcToCivil(currentUtc);
+    time:Civil endTime = time:utcToCivil(newTime);
+
+    JobId result = check scheduleJobRecurByFrequency(new Job22(1), 1, endTime = endTime);
+    runtime:sleep(7);
+    test:assertTrue(count22 >= 4, msg = "Expected count mismatched.");
+}
+
+class Job23 {
+
+    *Job;
+
+    public isolated function execute() {
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob", "negative"]
+}
+isolated function testConfigurationValidation() returns error? {
+    JobId result = check scheduleJobRecurByFrequency(new Job23(), 1);
+    Error? output = configureWorkerPool(-6, 7000);
+    if(output is Error) {
+        test:assertTrue(output.message().includes("Cannot create the Scheduler.Thread count must be > 0"));
+    } else {
+        test:assertFail("Test failed.");
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob", "negative"]
+}
+isolated function testMaxCountValidation() {
+    JobId|Error output = scheduleJobRecurByFrequency(new Job23(), 1, maxCount = -4);
+    if(output is Error) {
+        test:assertTrue(output.message().includes("The maxCount should be a positive integer."));
+    } else {
+        test:assertFail("Test failed.");
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob"],
+    dependsOn: [testLogIgnore]
+}
+isolated function testEmptyRunningJobs() returns error? {
+    JobId[] ids = getRunningJobs();
+    if (ids.length() > 0) {
+        foreach JobId i in ids {
+           var result = unscheduleJob(i);
+        }
+        ids = getRunningJobs();
+        test:assertTrue(ids.length() == 0);
+    } else {
+        test:assertTrue(ids.length() == 0);
+    }
+    Error? output = configureWorkerPool(7, 7000);
+    JobId result = check scheduleJobRecurByFrequency(new Job23(), 1);
+    ids = getRunningJobs();
+    test:assertTrue(ids.length() == 1);
+}
+
+@test:Config {
+    groups: ["FrequencyJob", "negative"]
+}
+isolated function testUnscheduleJobs() returns error? {
+    JobId id = {id: 12};
+    Error? result = unscheduleJob(id);
+    if(result is Error) {
+        test:assertTrue(result.message().includes("Invalid job id"));
+    } else {
+        test:assertFail("Test failed.");
+    }
 }

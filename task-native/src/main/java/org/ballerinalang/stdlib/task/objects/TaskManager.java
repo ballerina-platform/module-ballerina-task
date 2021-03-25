@@ -59,8 +59,10 @@ public class TaskManager {
     public void initializeScheduler(Properties properties, Environment env) throws SchedulingException,
             SchedulerException {
         getAllRunningJobs();
+        if (this.scheduler != null) {
+            this.scheduler.shutdown();
+        }
         if (!triggerInfoMap.isEmpty()) {
-            rescheduleJobs();
             configureScheduler(properties, env);
         } else {
             this.properties = properties;
@@ -75,15 +77,18 @@ public class TaskManager {
         }
     }
 
-    public Scheduler getScheduler(Properties properties, Environment env) throws SchedulingException {
+    public Scheduler getScheduler(Properties properties, Environment env) throws SchedulingException,
+            SchedulerException {
         if (isConfiguredSchFactory) {
             this.scheduler = Utils.initializeScheduler(this.properties);
             isConfiguredSchFactory = false;
+            setRuntime(env.getRuntime());
+        } else {
+            if (this.scheduler == null || this.scheduler.isShutdown()) {
+                this.scheduler = Utils.initializeScheduler(properties);
+                setRuntime(env.getRuntime());
+            }
         }
-        if (this.scheduler == null) {
-            this.scheduler = Utils.initializeScheduler(properties);
-        }
-        setRuntime(env.getRuntime());
         return this.scheduler;
     }
 
@@ -135,8 +140,8 @@ public class TaskManager {
         }
     }
 
-    public void unScheduleJob(Integer jobId) throws SchedulerException {
-        this.scheduler.unscheduleJob(this.triggerInfoMap.get(jobId).getKey());
+    public void unScheduleJob(Integer jobId) throws SchedulerException, SchedulingException {
+        this.scheduler.unscheduleJob(getTrigger(jobId).getKey());
         if (getAllRunningJobs().isEmpty()) {
             this.scheduler.shutdown();
         }
@@ -150,12 +155,12 @@ public class TaskManager {
         this.scheduler.resumeAll();
     }
 
-    public void pauseJob(Integer jobId) throws SchedulerException {
-        this.scheduler.pauseJob(this.triggerInfoMap.get(jobId).getJobKey());
+    public void pauseJob(Integer jobId) throws SchedulerException, SchedulingException {
+        this.scheduler.pauseJob(getTrigger(jobId).getJobKey());
     }
 
-    public void resumeJob(Integer jobId) throws SchedulerException {
-        this.scheduler.resumeJob(this.triggerInfoMap.get(jobId).getJobKey());
+    public void resumeJob(Integer jobId) throws SchedulerException, SchedulingException {
+        this.scheduler.resumeJob(getTrigger(jobId).getJobKey());
     }
 
     private boolean isTriggerCompleted(Trigger.TriggerState triggerState) {
@@ -164,14 +169,18 @@ public class TaskManager {
 
     private void configureScheduler(Properties properties, Environment env) throws SchedulerException,
             SchedulingException {
+        this.scheduler = Utils.initializeScheduler(properties);
+        setRuntime(env.getRuntime());
         if (!triggerInfoMap.isEmpty()) {
             rescheduleJobs();
         }
-        if (this.scheduler != null) {
-            this.scheduler.shutdown();
-        }
-        this.scheduler = Utils.initializeScheduler(properties);
-        setRuntime(env.getRuntime());
+    }
 
+    private Trigger getTrigger(Integer jobId) throws SchedulingException {
+        if (this.triggerInfoMap.get(jobId) == null) {
+            throw new SchedulingException("Invalid job id: " + jobId);
+        } else {
+            return this.triggerInfoMap.get(jobId);
+        }
     }
 }
