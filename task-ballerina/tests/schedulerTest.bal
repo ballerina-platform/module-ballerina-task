@@ -147,7 +147,8 @@ class Job6 {
 }
 
 @test:Config {
-    groups: ["FrequencyJob"]
+    groups: ["FrequencyJob"],
+    dependsOn: [testLogIgnore]
 }
 function testIgnoreTrigger() returns error? {
     JobId id = check scheduleJobRecurByFrequency(new Job6(), 5, maxCount = 10, taskPolicy = { waitingPolicy: IGNORE });
@@ -555,7 +556,8 @@ isolated function testMaxCountValidation() {
 }
 
 @test:Config {
-    groups: ["FrequencyJob"]
+    groups: ["FrequencyJob"],
+    dependsOn: [testLogIgnore]
 }
 isolated function testEmptyRunningJobs() returns error? {
     JobId[] ids = getRunningJobs();
