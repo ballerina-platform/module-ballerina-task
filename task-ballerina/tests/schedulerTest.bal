@@ -44,7 +44,7 @@ function testOneTimeJob() returns error? {
     time:Civil time = time:utcToCivil(newTime);
     time.utcOffset = zoneOffset;
 
-    var result = scheduleOneTimeJob(new Job1(5), time);
+    JobId id = check scheduleOneTimeJob(new Job1(5), time);
     runtime:sleep(15);
     test:assertEquals(count, 5, msg = "Expected count mismatched.");
 }
@@ -109,7 +109,7 @@ function testConfigureWorkerPool() returns error? {
     runtime:sleep(5);
     test:assertTrue(count3 < 7, msg = "Expected count mismatched.");
     test:assertTrue(count4 < 7, msg = "Expected count mismatched.");
-    var output = configureWorkerPool(6, 7000);
+    check configureWorkerPool(6, 7000);
     runtime:sleep(5);
     test:assertTrue(count3 > 7, msg = "Expected count mismatched.");
     test:assertTrue(count4 > 7, msg = "Expected count mismatched.");
@@ -153,9 +153,9 @@ class Job6 {
 function testIgnoreTrigger() returns error? {
     JobId id = check scheduleJobRecurByFrequency(new Job6(), 5, maxCount = 10, taskPolicy = { waitingPolicy: IGNORE });
     runtime:sleep(3);
-    var result = pauseJob(id);
+    check pauseJob(id);
     runtime:sleep(10);
-    result = resumeJob(id);
+    check resumeJob(id);
     runtime:sleep(8);
     test:assertEquals(count6, 3, msg = "Expected count mismatched.");
 }
@@ -177,9 +177,9 @@ class Job7 {
 function testWaitInWaitingPolicy() returns error? {
     JobId id = check scheduleJobRecurByFrequency(new Job7(), 5, maxCount = 10, taskPolicy = { waitingPolicy: WAIT });
     runtime:sleep(3);
-    var result = pauseJob(id);
+    check pauseJob(id);
     runtime:sleep(10);
-    result = resumeJob(id);
+    check resumeJob(id);
     runtime:sleep(15);
     test:assertEquals(count7, 6, msg = "Expected count mismatched.");
 }
@@ -201,9 +201,9 @@ class Job8 {
 function testLogIgnore() returns error? {
     JobId id = check scheduleJobRecurByFrequency(new Job8(), 5, maxCount = 3, taskPolicy = { waitingPolicy: LOG_AND_IGNORE });
     runtime:sleep(3);
-    var result = pauseJob(id);
+    check pauseJob(id);
     runtime:sleep(10);
-    result = resumeJob(id);
+    check resumeJob(id);
     runtime:sleep(8);
     test:assertEquals(count8, 3, msg = "Expected count mismatched.");
 }
@@ -311,10 +311,10 @@ class Job13 {
 function testPauseAndResume() returns error? {
     JobId id = check scheduleJobRecurByFrequency(new Job13(), 5, maxCount = 5);
     runtime:sleep(3);
-    var result = pauseJob(id);
+    check pauseJob(id);
     runtime:sleep(10);
     test:assertEquals(count13, 1, msg = "Expected count mismatched.");
-    result = resumeJob(id);
+    check resumeJob(id);
     runtime:sleep(8);
     test:assertEquals(count13, 5, msg = "Expected count mismatched.");
 }
@@ -348,11 +348,11 @@ function testPauseAllJobsAndResumeAllJob() returns error? {
     JobId id = check scheduleJobRecurByFrequency(new Job15(), 5, maxCount = 5);
     id = check scheduleJobRecurByFrequency(new Job14(), 5, maxCount = 5);
     runtime:sleep(3);
-    var result = pauseAllJobs();
+    check pauseAllJobs();
     runtime:sleep(10);
     test:assertEquals(count14, 1, msg = "Expected count mismatched.");
     test:assertEquals(count15, 1, msg = "Expected count mismatched.");
-    result = resumeAllJobs();
+    check resumeAllJobs();
     runtime:sleep(8);
     test:assertEquals(count14, 5, msg = "Expected count mismatched.");
     test:assertEquals(count15, 5, msg = "Expected count mismatched.");
@@ -456,7 +456,7 @@ class Job20 {
     dependsOn: [testIgnoreTrigger]
 }
 function testConfigureWorker() returns error? {
-    var output = configureWorkerPool(6, 7000);
+    check configureWorkerPool(6, 7000);
     JobId result = check scheduleJobRecurByFrequency(new Job20(), 1);
     runtime:sleep(5);
     test:assertTrue((4 < count20 && count20 <= 6), msg = "Expected count mismatched.");
@@ -563,7 +563,7 @@ isolated function testEmptyRunningJobs() returns error? {
     JobId[] ids = getRunningJobs();
     if (ids.length() > 0) {
         foreach JobId i in ids {
-           var result = unscheduleJob(i);
+           check unscheduleJob(i);
         }
         ids = getRunningJobs();
         test:assertTrue(ids.length() == 0);
