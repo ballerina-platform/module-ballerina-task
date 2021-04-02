@@ -66,7 +66,7 @@ public class Utils {
                     GroupMatcher.triggerGroupEquals(TaskConstants.LOG));
             return scheduler;
         } catch (SchedulerException e) {
-            throw new SchedulingException("Cannot create the Scheduler.", e);
+            throw new SchedulingException("Cannot create the Scheduler." + e.getMessage());
         }
     }
 

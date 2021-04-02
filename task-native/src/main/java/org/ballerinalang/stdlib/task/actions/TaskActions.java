@@ -28,13 +28,10 @@ import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
 import org.ballerinalang.stdlib.task.objects.TaskManager;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
-import org.ballerinalang.stdlib.task.utils.TaskListener;
 import org.ballerinalang.stdlib.task.utils.Utils;
 import org.quartz.JobDataMap;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.Random;
@@ -51,7 +48,6 @@ public class TaskActions {
 
     private static int bound = 1000000;
     private static String value = "1000";
-    private static final Logger LOG = LoggerFactory.getLogger(TaskListener.class);
 
     public static Object configureThread(Environment env, long workerCount, long waitingTimeInMillis) {
         try {
@@ -91,7 +87,7 @@ public class TaskActions {
         return jobId;
     }
 
-    private static Scheduler getScheduler(Environment env) throws SchedulingException {
+    private static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
         return TaskManager.getInstance().getScheduler(Utils.createSchedulerProperties(
                 TaskConstants.QUARTZ_THREAD_COUNT_VALUE, TaskConstants.QUARTZ_THRESHOLD_VALUE), env);
     }
@@ -107,7 +103,7 @@ public class TaskActions {
     public static Object unscheduleJob(Long jobId) {
         try {
             TaskManager.getInstance().unScheduleJob(Math.toIntExact(jobId));
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return null;
@@ -134,7 +130,7 @@ public class TaskActions {
     public static Object pauseJob(Long jobId) {
         try {
             TaskManager.getInstance().pauseJob(Math.toIntExact(jobId));
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return null;
@@ -143,7 +139,7 @@ public class TaskActions {
     public static Object resumeJob(Long jobId) {
         try {
             TaskManager.getInstance().resumeJob(Math.toIntExact(jobId));
-        } catch (SchedulerException e) {
+        } catch (SchedulerException | SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return null;

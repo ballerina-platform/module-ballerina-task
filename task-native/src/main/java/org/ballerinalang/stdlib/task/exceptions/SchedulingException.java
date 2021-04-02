@@ -21,15 +21,8 @@ package org.ballerinalang.stdlib.task.exceptions;
  * This exception is thrown when scheduling fails.
  */
 public class SchedulingException extends Exception {
-    public SchedulingException() {
-        super();
-    }
 
     public SchedulingException(String message) {
         super(message);
-    }
-
-    public SchedulingException(String message, Throwable cause) {
-        super(message, cause);
     }
 }
