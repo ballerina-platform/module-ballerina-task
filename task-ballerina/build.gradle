@@ -271,8 +271,8 @@ publishing {
             credentials {
                 username = System.getenv("packageUser")
                 password = System.getenv("packagePAT")
-                publishUser: ${{ secrets.BALLERINA_BOT_USERNAME }}
-                publishPAT: ${{ secrets.BALLERINA_BOT_TOKEN }}
+                username = System.getenv("publishUser")
+                password = System.getenv("publishPAT")
             }
         }
     }
