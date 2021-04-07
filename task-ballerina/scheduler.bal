@@ -37,7 +37,7 @@ public isolated function configureWorkerPool(int workerCount = 5, time:Seconds w
 # ```ballerina
 # time:Utc newTime = time:utcAddSeconds(time:utcNow(), 3);
 # time:Civil time = time:utcToCivil(newTime);
-# task:JobId|task:Error result = task:scheduleOneTimeJob(new Job(), time);
+# task:JobId|task:Error jobId = task:scheduleOneTimeJob(new Job(), time);
 # ```
 #
 # + triggerTime - The specific time in Ballerina `time:Civil` to trigger only one time
@@ -52,7 +52,7 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 # Schedule the recurring `job` according to the given duration. Once scheduled it will return the job ID which
 # can be used to manage the job.
 # ```ballerina
-# task:JobId|task:Error result = task:scheduleJobRecurByFrequency(new Job(), 3);
+# task:JobId|task:Error jobId = task:scheduleJobRecurByFrequency(new Job(), 3);
 # ```
 #
 # + job - Ballerina job, which is to be executed by the scheduler.
@@ -85,7 +85,7 @@ public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,
 # Unschedule the `job`, which is associated with the given job ID. If no job is running in the scheduler,
 # the scheduler will be shut down automatically.
 # ```ballerina
-# Error? result = unscheduleJob(jobId);
+# task:Error? result = task:unscheduleJob(jobId);
 # ```
 #
 # + jobId - The ID of the job, which needs to be unscheduled
