@@ -152,11 +152,11 @@ task initializeVariables {
             testParams = "--skip-tests"
         }
 
-//        if (graph.hasTask(":${packageName}-ballerina:publish")) {
-//            ballerinaPublish.enabled = true
-//        } else {
-//            ballerinaPublish.enabled = false
-//        }
+        if (graph.hasTask(":${packageName}-ballerina:publish")) {
+            ballerinaPublish.enabled = true
+        } else {
+            ballerinaPublish.enabled = false
+        }
     }
 }
 
@@ -221,7 +221,7 @@ task ballerinaBuild {
             from file("$project.projectDir/target/apidocs/${packageName}")
             into file("$project.projectDir/build/docs_parent/docs/${packageName}")
         }
-//        ballerinaConfigFile.text = originalConfig
+        ballerinaConfigFile.text = originalConfig
     }
 
     outputs.dir artifactCacheParent
