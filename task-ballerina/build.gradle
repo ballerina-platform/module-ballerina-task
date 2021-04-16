@@ -100,7 +100,6 @@ task copyStdlibs(type: Copy) {
 }
 
 task updateTomlVersions {
-    inputs.dir file(project.projectDir)
     doLast {
         def stdlibDependentTimeVersion = project.stdlibTimeVersion.replace("-SNAPSHOT", "")
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
@@ -221,8 +220,7 @@ task ballerinaBuild {
             }
         }
         if (needPublishToCentral) {
-            if (project.version.endsWith('-SNAPSHOT') ||
-                    project.version.matches(timestampedVersionRegex)) {
+            if (project.version.endsWith('-SNAPSHOT')) {
                 return
             }
             if (ballerinaCentralAccessToken != null) {
