@@ -29,7 +29,7 @@ import ballerina/time;
 # + return - A `task:Error` if the process failed due to any reason or else ()
 public isolated function configureWorkerPool(int workerCount = 5, time:Seconds waitingTime = 5)
                                 returns Error? {
-    return configureThread(workerCount, <int>(waitingTime * 1000.0));
+    return configureThread(workerCount, <int>(waitingTime * <decimal>1000.0));
 }
 
 # Schedule the given `job` for the given time. Once scheduled, it will return a job ID, which can be used to manage
