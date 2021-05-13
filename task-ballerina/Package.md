@@ -4,8 +4,6 @@ This `task` library is one of the standard libraries of <a target="_blank" href=
 
 This package provides the functionality to configure and manage one-time or periodic jobs.
 
-For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
-
 ### Report Issues
 
 To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library).
