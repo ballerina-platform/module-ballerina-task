@@ -49,7 +49,7 @@ time:Civil time = {
     utcOffset: zoneOffset
 };
 
-task:Error|task:JobId result = task:scheduleOneTimeJob(new Job("Hi"), time);
+task:JobId result = check task:scheduleOneTimeJob(new Job("Hi"), time);
 ```
 
 ##### Frequency-based Job Execution
@@ -88,7 +88,7 @@ time:Civil time = {
     utcOffset: zoneOffset
 };
 
-task:Error|task:JobId result = task:scheduleJobRecurByFrequency(new Job("Hi"), 2.5, maxCount = 10, startTime = time);
+task:JobId result = check task:scheduleJobRecurByFrequency(new Job("Hi"), 2.5, maxCount = 10, startTime = time);
 ```
 
 For information on the operations, which you can perform with the regex module, see the below **Functions**.
