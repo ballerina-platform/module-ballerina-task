@@ -71,7 +71,6 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'java'
 
     configurations {
         ballerinaStdLibs
