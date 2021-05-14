@@ -1,10 +1,10 @@
-## Module Overview
+## Overview
 
 This module provides the functionality to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
 ### Jobs and Scheduling
 
-Every scheduling job in Ballerina needs to be represented by a Job object. Therefore, You need to create a jobs class with your custom logic to execute it when the task is triggered.
+Every scheduling job in Ballerina needs to be represented by a Job object. Therefore, a job class with your custom logic needs to be created to execute it when the task is triggered.
 
 The Task package has the following two scheduling systems to schedule the job:
 
@@ -13,10 +13,9 @@ The Task package has the following two scheduling systems to schedule the job:
 
 #### One-time Job Execution
 
-This API provides the functionality to schedule a job at a specified date.
+This API provides the functionality to schedule a job at a specified time.
 
 The following code snippet shows how to schedule a one-time job.
-
 
 ```ballerina
 class Job {
@@ -56,7 +55,7 @@ task:JobId result = check task:scheduleOneTimeJob(new Job("Hi"), time);
 
 This API provides the functionality to schedule jobs on a specific interval either once or periodically by configuring the configuration such as start time, end time, and maximum count.
 
-The following code snippet shows how to schedule a recurrence job by using this API.
+The following code snippet shows how to schedule a recurring job by using this API.
 
 ```ballerina
 class Job {
