@@ -1,6 +1,6 @@
 ## Package Overview
 
-The Task library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
+The `task` library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
 
 This package provides the functionality to configure and manage one-time or periodic jobs.
 

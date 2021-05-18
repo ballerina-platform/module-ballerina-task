@@ -49,7 +49,7 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
     return jobId;
 }
 
-# Schedule the recurring `task:Job` according to the given duration. Once scheduled it will return the job ID which
+# Schedule the recurring `task:Job` according to the given duration. Once scheduled, it will return the job ID, which
 # can be used to manage the job.
 # ```ballerina
 # task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), 3);

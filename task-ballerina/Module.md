@@ -4,12 +4,12 @@ This module provides the functionality to schedule a Ballerina job either once o
 
 ### Jobs and Scheduling
 
-Every scheduling job in Ballerina needs to be represented by a Job object. Therefore, a job class with your custom logic needs to be created to execute it when the task is triggered.
+Every scheduling job in Ballerina needs to be represented by a `Job` object. Therefore, a `job` class with your custom logic needs to be created to execute it when the task is triggered.
 
-The Task package has the following two scheduling systems to schedule the job:
+The `task` package has the following two scheduling systems to schedule the job:
 
-- One-time Job Execution
-- Frequency-based Job Execution 
+- One-time job execution
+- Frequency-based job execution 
 
 #### One-time Job Execution
 
