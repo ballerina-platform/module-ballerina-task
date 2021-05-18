@@ -53,30 +53,26 @@ def stripBallerinaExtensionVersion(String extVersion) {
     }
 }
 
-configurations {
-    packingJars
-}
-
-dependencies {
-    packingJars(group: 'org.quartz-scheduler', name: "quartz", version: "${quartzVersion}") {
-        transitive = false
-    }
-}
-
 apply plugin: 'io.ballerina.plugin'
 
 ballerina {
+    packageOrganization = packageOrg
     module = packageName
     langVersion = ballerinaLangVersion
     testCoverageParam = "--code-coverage --jacoco-xml --includes=org.ballerinalang.stdlib.task.*:ballerina.task.*"
 }
 
-task copyPackingJarsToLib(type: Copy) {
-    into "$project.projectDir/lib"
-    from configurations.packingJars
+configurations {
+    externalJars
 }
 
-task updateTomlVersions {
+dependencies {
+    externalJars(group: 'org.quartz-scheduler', name: "quartz", version: "${quartzVersion}") {
+        transitive = false
+    }
+}
+
+task updateTomlFiles {
     doLast {
         def stdlibDependentTimeVersion = stripBallerinaExtensionVersion(project.stdlibTimeVersion)
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
@@ -88,7 +84,7 @@ task updateTomlVersions {
     }
 }
 
-task revertTomlFile {
+task revertTomlFiles {
     doLast {
         ballerinaConfigFile.text = originalConfig
         ballerinaDependencyFile.text = originalDependencies
@@ -114,8 +110,7 @@ publishing {
     }
 }
 
-unpackJballerinaTools.dependsOn copyPackingJarsToLib
-updateTomlVersions.dependsOn copyStdlibs
+updateTomlFiles.dependsOn copyStdlibs
 
 build.dependsOn ":${packageName}-native:build"
 test.dependsOn ":${packageName}-native:build"
