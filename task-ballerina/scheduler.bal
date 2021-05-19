@@ -19,7 +19,7 @@ import ballerina/time;
 
 # Configure the scheduler worker pool.
 # ```ballerina
-# task:Error? result = task:configureWorkerPool(4, 7);
+# check task:configureWorkerPool(4, 7);
 # ```
 #
 # + workerCount - Specifies the number of workers that are available for the concurrent execution of jobs.
@@ -32,27 +32,27 @@ public isolated function configureWorkerPool(int workerCount = 5, time:Seconds w
     return configureThread(workerCount, <int>(waitingTime * <decimal>1000.0));
 }
 
-# Schedule the given `job` for the given time. Once scheduled, it will return a job ID, which can be used to manage
+# Schedule the given `task:Job` for the given time. Once scheduled, it will return a job ID, which can be used to manage
 # the job.
 # ```ballerina
 # time:Utc newTime = time:utcAddSeconds(time:utcNow(), 3);
 # time:Civil time = time:utcToCivil(newTime);
-# task:JobId|task:Error jobId = task:scheduleOneTimeJob(new Job(), time);
+# task:JobId jobId = check task:scheduleOneTimeJob(new Job(), time);
 # ```
 #
 # + triggerTime - The specific time in Ballerina `time:Civil` to trigger only one time
 # + job - Ballerina job, which is to be executed during the trigger.
-# + return - A job ID or else a `task:Error` if the process failed due to any reason
+# + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) returns JobId|Error {
     int result = check scheduleJob(job, check getTimeInMillies(triggerTime));
     JobId jobId = {id: result};
     return jobId;
 }
 
-# Schedule the recurring `job` according to the given duration. Once scheduled it will return the job ID which
+# Schedule the recurring `task:Job` according to the given duration. Once scheduled, it will return the job ID, which
 # can be used to manage the job.
 # ```ballerina
-# task:JobId|task:Error jobId = task:scheduleJobRecurByFrequency(new Job(), 3);
+# task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), 3);
 # ```
 #
 # + job - Ballerina job, which is to be executed by the scheduler.
@@ -62,7 +62,7 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy -  The policy, which is used to handle the error and will be waiting during the trigger time
-# + return - A job ID or else a `task:Error` if the process failed due to any reason
+# + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,  int maxCount = -1,
                                     time:Civil? startTime = (), time:Civil? endTime = (), TaskPolicy taskPolicy = {})
                                     returns JobId|Error {
@@ -82,13 +82,13 @@ public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,
     return jobId;
 }
 
-# Unschedule the `job`, which is associated with the given job ID. If no job is running in the scheduler,
+# Unschedule the `task:Job`, which is associated with the given job ID. If no job is running in the scheduler,
 # the scheduler will be shut down automatically.
 # ```ballerina
-# task:Error? result = task:unscheduleJob(jobId);
+# check task:unscheduleJob(jobId);
 # ```
 #
-# + jobId - The ID of the job, which needs to be unscheduled
+# + jobId - The ID of the job as a `task:JobId`, which needs to be unscheduled
 # + return - A `task:Error` if the process failed due to any reason or else ()
 public isolated function unscheduleJob(JobId jobId) returns Error? {
     return externUnscheduleJob(jobId.id);
@@ -96,7 +96,7 @@ public isolated function unscheduleJob(JobId jobId) returns Error? {
 
 # Pauses all the jobs.
 # ```ballerina
-# task:Error? result = task:pauseAllJobs();
+# check task:pauseAllJobs();
 # ```
 #
 # + return - A `task:Error` if an error occurred while pausing or else ()
@@ -106,7 +106,7 @@ public isolated function pauseAllJobs() returns Error? {
 
 # Resumes all the jobs.
 # ```ballerina
-# task:Error? result = task:resumeAllJobs();
+# check task:resumeAllJobs();
 # ```
 #
 # + return - A `task:Error` when an error occurred while resuming or else ()
@@ -116,10 +116,10 @@ public isolated function resumeAllJobs() returns Error? {
 
 # Pauses the particular job.
 # ```ballerina
-# task:Error? result = task:pauseJob(jobId);
+# check task:pauseJob(jobId);
 # ```
 #
-# + jobId - The ID of the job, which needs to be paused
+# + jobId - The ID of the job as a `task:JobId`, which needs to be paused
 # + return - A `task:Error` if an error occurred while pausing a job or else ()
 public isolated function pauseJob(JobId jobId) returns Error? {
     return externPauseJob(jobId.id);
@@ -127,10 +127,10 @@ public isolated function pauseJob(JobId jobId) returns Error? {
 
 # Resumes the particular job.
 # ```ballerina
-# task:Error? result = task:resumeJob(jobId);
+# check task:resumeJob(jobId);
 # ```
 #
-# + jobId - The ID of the job, which needs to be resumed
+# + jobId - The ID of the job as a `task:JobId`, which needs to be resumed
 # + return - A `task:Error` when an error occurred while resuming a job or else ()
 public isolated function resumeJob(JobId jobId) returns Error? {
     return externResumeJob(jobId.id);
