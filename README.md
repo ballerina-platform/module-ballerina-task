@@ -1,24 +1,25 @@
 Ballerina Task Library
 ===================
 
-  [![Build](https://github.com/ballerina-platform/module-ballerina-task/workflows/Build/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions?query=workflow%3ABuild) 
+  [![Build](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml) 
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-task.svg)](https://github.com/ballerina-platform/module-ballerina-task/commits/master)
-  [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/io.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Ftask)
+  [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/task.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Ftask)
   [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+  [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-task/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-task)
 
 This `task` library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
 
-This module provides the functionality to configure and manage periodically task by using Task Listeners and Task Schedulers.
+This package provides the functionality to configure and manage one-time or periodic jobs.
 
-For more information on all the operations supported by the `task:Listener` and `task:Scheduler`, go to [The Task Module](https://ballerina.io/swan-lake/learn/api-docs/ballerina/task/).
+For more information on all the operations supported by this package, go to the [`task` package](https://docs.central.ballerina.io/ballerina/task/latest).
 
-For a quick sample on demonstrating the usage see [Ballerina By Example](https://ballerina.io/swan-lake/learn/by-example/).
+For a quick sample on demonstrating the usage, see [Ballerina By Example](https://ballerina.io/learn/by-example/).
 
 ## Issues and Projects 
 
 Issues and Project are disabled for this repository as this is part of the Ballerina Standard Library. To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library). 
 
-This repository only contains the source code for the module.
+This repository only contains the source code for the package.
 
 ## Building from the Source
 ### Setting Up the Prerequisites
@@ -42,7 +43,7 @@ Execute the commands below to build from source.
 
         ./gradlew clean test
         
-3. To build the module without tests:
+3. To build the package without tests:
 
         ./gradlew clean build -x test
 
@@ -50,14 +51,26 @@ Execute the commands below to build from source.
 
         ./gradlew clean test -Pgroups=<test_group_names>
 
-5. To debug module implementation:
+5. To debug package implementation:
 
         ./gradlew clean build -Pdebug=<port>
         
-6. To debug the module with Ballerina language:
+6. To debug the package with Ballerina language:
 
         ./gradlew clean build -PbalJavaDebug=<port>
-    
+        
+7. Publish ZIP artifact to the local `.m2` repository:
+
+        ./gradlew clean build publishToMavenLocal
+
+8. Publish the generated artifacts to the local Ballerina central repository:
+   
+        ./gradlew clean build -PpublishToLocalCentral=true
+
+9. Publish the generated artifacts to the Ballerina central repository:
+
+        ./gradlew clean build -PpublishToCentral=true
+
 
 ## Contributing to Ballerina
 

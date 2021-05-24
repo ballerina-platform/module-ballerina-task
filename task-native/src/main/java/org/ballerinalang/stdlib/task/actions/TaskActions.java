@@ -17,18 +17,27 @@
  */
 package org.ballerinalang.stdlib.task.actions;
 
-import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BArray;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
-import org.ballerinalang.stdlib.task.objects.ServiceInformation;
-import org.ballerinalang.stdlib.task.objects.TaskScheduler;
+import org.ballerinalang.stdlib.task.objects.TaskManager;
 import org.ballerinalang.stdlib.task.utils.TaskConstants;
 import org.ballerinalang.stdlib.task.utils.Utils;
+import org.quartz.JobDataMap;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 
-import java.util.UUID;
+import java.math.BigDecimal;
+import java.util.Random;
+import java.util.Set;
+
+import static io.ballerina.runtime.api.creators.ValueCreator.createArrayValue;
 
 /**
  * Class to handle ballerina external functions in Task library.
@@ -37,96 +46,118 @@ import java.util.UUID;
  */
 public class TaskActions {
 
-    public static Object pause(BObject taskListener) {
-        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
-        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
-        try {
-            taskScheduler.pause(triggerID);
-        } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
-        }
-        return null;
-    }
+    private static int bound = 1000000;
+    private static String value = "1000";
 
-    public static Object resume(BObject taskListener) {
-        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
-        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
+    public static Object configureThread(Environment env, long workerCount, long waitingTimeInMillis) {
         try {
-            taskScheduler.resume(triggerID);
-        } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
-        }
-        return null;
-    }
-
-    public static Object detach(BObject taskListener, BObject service) {
-        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
-        try {
-            taskScheduler.removeService(service);
-        } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
-        }
-        return null;
-    }
-
-    public static Object start(BObject taskListener) {
-        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
-        try {
-            taskScheduler.start();
-        } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
-        }
-        return null;
-    }
-
-    public static Object stop(BObject taskListener) {
-        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
-        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
-        try {
-            taskScheduler.stop(triggerID);
-        } catch (SchedulerException e) {
-            return Utils.createTaskError(e.getMessage());
-        }
-        return null;
-    }
-
-    @SuppressWarnings("unchecked") // It is used to ignore the unchecked generic types of operations warnings
-    // from the `getMapValue` by the compilers.
-    public static Object attach(BObject taskListener, BObject service, Object... attachments) {
-        String triggerID = (String) taskListener.getNativeData(TaskConstants.TRIGGER_NAME);
-        TaskScheduler taskScheduler = (TaskScheduler) taskListener.getNativeData(TaskConstants.SCHEDULER);
-        ServiceInformation serviceInformation;
-        if (attachments == null) {
-            serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service);
-        } else {
-            serviceInformation = new ServiceInformation(Runtime.getCurrentRuntime(), service, attachments);
-        }
-        try {
-            Utils.validateService(serviceInformation);
-            BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.
-                    MEMBER_LISTENER_CONFIGURATION);
-            taskScheduler.addService(serviceInformation, configurations, triggerID);
+            TaskManager.getInstance().initializeScheduler(Utils.createSchedulerProperties(
+                    String.valueOf(workerCount), String.valueOf(waitingTimeInMillis)), env);
+            return null;
         } catch (SchedulingException | SchedulerException e) {
             return Utils.createTaskError(e.getMessage());
         }
-        return null;
     }
 
-    @SuppressWarnings("unchecked") // It is used to ignore the unchecked generic types of operations warnings
-    // from the `getMapValue` by the compilers.
-    public static Object init(BObject taskListener) {
-        BMap<BString, Object> configurations = taskListener.getMapValue(TaskConstants.MEMBER_LISTENER_CONFIGURATION);
+    public static Object scheduleJob(Environment env, BObject job, long time) {
+        Integer jobId = new Random().nextInt(bound);
+        JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, String.valueOf(jobId));
         try {
-            if (!TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurations.getType().getName())) {
-                BString cronExpression = configurations.getStringValue(TaskConstants.MEMBER_CRON_EXPRESSION);
-                Utils.validateCronExpression(cronExpression);
-            }
-            TaskScheduler taskScheduler = new TaskScheduler();
-            taskListener.addNativeData(TaskConstants.SCHEDULER, taskScheduler);
-            taskListener.addNativeData(TaskConstants.TRIGGER_NAME, UUID.randomUUID().toString());
-        } catch (SchedulingException e) {
+            getScheduler(env);
+            TaskManager.getInstance().scheduleOneTimeJob(jobDataMap, time, jobId);
+        } catch (SchedulerException | SchedulingException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+        return jobId;
+    }
+
+    public static Object scheduleIntervalJob(Environment env, BObject job, BDecimal interval, long maxCount,
+                                             Object startTime, Object endTime, BMap<BString, Object> policy) {
+        int jobId = new Random().nextInt(bound);
+        JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
+                String.valueOf(jobId));
+        try {
+            getScheduler(env);
+            TaskManager.getInstance().scheduleIntervalJob(jobDataMap,
+                    (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
+                    endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), jobId);
+        } catch (SchedulerException | SchedulingException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+        return jobId;
+    }
+
+    private static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
+        return TaskManager.getInstance().getScheduler(Utils.createSchedulerProperties(
+                TaskConstants.QUARTZ_THREAD_COUNT_VALUE, TaskConstants.QUARTZ_THRESHOLD_VALUE), env);
+    }
+
+    private static JobDataMap getJobDataMap(BObject job, String errorPolicy, String jobId) {
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put(TaskConstants.JOB, job);
+        jobDataMap.put(TaskConstants.ERROR_POLICY, errorPolicy);
+        jobDataMap.put(TaskConstants.JOB_ID, jobId);
+        return jobDataMap;
+    }
+
+    public static Object unscheduleJob(Long jobId) {
+        try {
+            TaskManager.getInstance().unScheduleJob(Math.toIntExact(jobId));
+        } catch (SchedulerException | SchedulingException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return null;
+    }
+
+    public static Object pauseAllJobs() {
+        try {
+            TaskManager.getInstance().pause();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+        return null;
+    }
+
+    public static Object resumeAllJobs() {
+        try {
+            TaskManager.getInstance().resume();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+        return null;
+    }
+
+    public static Object pauseJob(Long jobId) {
+        try {
+            TaskManager.getInstance().pauseJob(Math.toIntExact(jobId));
+        } catch (SchedulerException | SchedulingException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+        return null;
+    }
+
+    public static Object resumeJob(Long jobId) {
+        try {
+            TaskManager.getInstance().resumeJob(Math.toIntExact(jobId));
+        } catch (SchedulerException | SchedulingException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+        return null;
+    }
+
+    public static BArray getRunningJobs() {
+        try {
+            int i = 0;
+            Set<Integer> jobIds = TaskManager.getInstance().getAllRunningJobs();
+            long[] results = new long[jobIds.size()];
+            for (int value : jobIds) {
+                results[i] = value;
+                i++;
+            }
+            return ValueCreator.createArrayValue(results);
+        } catch (SchedulerException e) {
+            Utils.logError(StringUtils.fromString(e.toString()));
+        }
+        return createArrayValue(new long[0]);
     }
 }

@@ -14,118 +14,60 @@
 // specific language governing permissions and limitations
 // under the License.
 
-# Configurations related to a timer, which are used to define the behavior of a timer when initializing the
-# `task:Listener`.
-#
-# + intervalInMillis - Timer interval (in milliseconds), which triggers the `onTrigger` resource
-# + initialDelayInMillis - Delay (in milliseconds) after which the timer will run
-# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It is zero,
-#                     the task will be triggered forever.
-# + misfirePolicy - The policy, which is used to inform what it should do when a misfire occurs. The following are the
-#            scenarios in which the policy can be used:
-#               One-time task (the task will be run once):
-#                   smartPolicy - This is the default policy, which will act as `firenow`
-#                   fireNow - fireNow - Instructs the scheduler if the Trigger misfires. Then, the trigger wants
-#                             to be fired now by the scheduler.
-#                   ignorePolicy - If the Trigger misfires, this instructs the scheduler that the trigger will
-#                                  never be evaluated for a misfire situation and that the scheduler will
-#                                  simply try to fire it as soon as it can and then update the trigger as
-#                                  if it had fired at the proper time.
-#               Recurrinng task(the task will be run repeatedly):
-#                   smartPolicy - This is the default policy. If the repeat count is indefinite, this will act
-#                                 as the `rescheduleNextWithRemainigCount`. Else, it will act as the
-#                                 `rescheduleNowWithExistingRepeatCount`.
-#                   fireNextWithExistingCount - Instructs the scheduler if the trigger misfires. Then,
-#                                               the trigger wants to be re-scheduled to the next
-#                                               scheduled time after 'now' and with the repeat count
-#                                               left unchanged.
-#                   fireNextWithRemainingCount - Instructs the scheduler if the trigger misfires. Then,
-#                                                the trigger wants to be re-scheduled to the next scheduled time
-#                                                after 'now' and with the repeat count set to what it would be
-#                                                if it had not missed any firings.
-#                   fireNowWithExistingCount - Instructs the scheduler if the trigger misfires. Then,
-#                                              the trigger wants to be re-scheduled to 'now' with the
-#                                              repeat count left as it is. If 'now' is after the end-time
-#                                              the Trigger will not fire again as this does obey
-#                                              the Trigger end-time.
-#                   fireNowWithRemainingCount - Instructs the scheduler if the trigger misfires. Then,
-#                                               the trigger wants to be re-scheduled to
-#                                               'now' with the repeat count set to what it
-#                                               would be if it had not missed any firings.
-#                   ignorePolicy - If the trigger misfires, this instructs the scheduler that the trigger will
-#                                  never be evaluated for a misfire situation and that the scheduler will
-#                                  simply try to fire it as soon as it can and then update the Trigger
-#                                  as if it had fired at the proper time.
-public type TimerConfiguration record {|
-    int intervalInMillis;
-    int initialDelayInMillis?;
-    int noOfRecurrences = 0;
-    TimerMisfirePolicy misfirePolicy = "smartPolicy";
+import ballerina/time;
+
+# A read-only record consisting of a unique identifier for a created job.
+public type JobId readonly & record {|
+   int id;
 |};
 
-# Configurations related to an appointment, which are used to define the behavior of an appointment when initializing
-# the `task:Listener`.
+# The Ballerina Job object provides the abstraction for a job instance, which schedules to execute periodically.
+public type Job object {
+
+  # Executes by the Scheduler when the scheduled trigger fires.
+  public function execute();
+};
+
+# Policies related to a trigger.
 #
-# + cronExpression - A CRON expression (eg: `* * * * ? *`) as a string for scheduling an appointment that is made up
-#                    of six or seven sub-expressions that describe individual details of the schedule. This
-#                    sub-expression is separated with white-space, and represent:
-#                       Seconds
-#                       Minutes
-#                       Hours
-#                       Day-of-Month
-#                       Month
-#                       Day-of-Week
-#                       Year (optional field)
-# + noOfRecurrences - Number of times to trigger the task after which the task stops running. If It is zero,
-#                     the task will be triggered forever.
-# + misfirePolicy - The policy, which is used to inform what it should do when a misfire occurs. The following are the
-#                   scenarios in which the policy can be used:
-#                       smartPolicy - This is the default policy, which will act as the `FireAndProceed`
-#                       ignorePolicy - If the Trigger misfires, this instructs the scheduler that the trigger will
-#                                      never be evaluated for a misfire situation and that the scheduler will
-#                                      simply try to fire it as soon as it can and then update the trigger as
-#                                      if it had fired at the proper time.
-#                       doNothing - Instructs the scheduler if the trigger misfires. Then, the trigger wants to have
-#                                   it's next-fire-time updated to the next time in the schedule after the current time.
-#                       fireAndProceed - Instructs the scheduler if the trigger misfires. Then, the trigger wants
-#                                        to be fired now by the scheduler.
-public type AppointmentConfiguration record {|
-    string cronExpression;
-    int noOfRecurrences = 0;
-    AppointmentMisfirePolicy misfirePolicy = "smartPolicy";
+# + errorPolicy - The policy to follow when there is an error in Job execution
+# + waitingPolicy - The policy to follow when the next task is triggering while the previous job is still
+#                   being processing
+public type TaskPolicy record {|
+   ErrorPolicy errorPolicy = LOG_AND_TERMINATE;
+   WaitingPolicy waitingPolicy = WAIT;
 |};
 
-# Possible types of parameters that can be passed into the `TimerTaskPolicy`.
-public type TimerMisfirePolicy RecurringTaskPolicy|OneTimeTaskPolicy;
+# Possible options for the `ErrorPolicy`.
+public enum ErrorPolicy {
+  LOG_AND_TERMINATE,
+  LOG_AND_CONTINUE,
+  TERMINATE,
+  CONTINUE
+}
 
-# Possible types of parameters that can be passed into the `AppointmentTaskPolicy`.
-public type AppointmentMisfirePolicy SMART_POLICY|DO_NOTHING|FIRE_AND_PROCEED|IGNORE_POLICY;
+# Possible options for the `WaitingPolicy`.
+public enum WaitingPolicy {
+  WAIT,
+  IGNORE,
+  LOG_AND_IGNORE
+}
 
-# Possible types of parameters that can be passed into the `RecurringTaskPolicy`.
-public type RecurringTaskPolicy SMART_POLICY|IGNORE_POLICY|FIRE_NEXT_WITH_EXISTING_COUNT|
-FIRE_NEXT_WITH_REMAINING_COUNT|FIRE_NOW_WITH_EXISTING_COUNT|FIRE_NOW_WITH_REMAINING_COUNT;
+# Gets time in milliseconds of the given `time:Civil`.
+#
+# + time - The Ballerina `time:Civil`
+# + return - Time in milliseconds or else `task:Error` if the process failed due to any reason
+public isolated function getTimeInMillies(time:Civil time) returns int|Error {
+    if (time[UTC_OFF_SET] == ()) {
+        time:ZoneOffset zoneOffset = {hours: 0, minutes: 0};
+        time.utcOffset = zoneOffset;
+    }
+    time:Utc|time:Error utc = time:utcFromCivil(time);
+    if (utc is time:Utc) {
+        return <int> decimal:round((<decimal>utc[0] + utc[1]) * 1000);
+    } else {
+        return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);
+    }
+}
 
-# Possible types of parameters that can be passed into the `OneTimeTaskPolicy`.
-public type OneTimeTaskPolicy SMART_POLICY|IGNORE_POLICY|FIRE_NOW;
-
-# The value of this constant is `smartPolicy`.
-public const string SMART_POLICY = "smartPolicy";
-# The value of this constant is `doNothing`.
-public const string DO_NOTHING = "doNothing";
-# The value of this constant is `fireAndProceed`.
-public const string FIRE_AND_PROCEED = "fireAndProceed";
-# The value of this constant is `fireNextWithExistingCount`.
-public const string FIRE_NEXT_WITH_EXISTING_COUNT = "fireNextWithExistingCount";
-# The value of this constant is `fireNextWithRemainingCount`.
-public const string FIRE_NEXT_WITH_REMAINING_COUNT = "fireNextWithRemainingCount";
-# The value of this constant is `fireNowWithExistingCount`.
-public const string FIRE_NOW_WITH_EXISTING_COUNT = "fireNowWithExistingCount";
-# The value of this constant is `fireNowWithRemainingCount`.
-public const string FIRE_NOW_WITH_REMAINING_COUNT = "fireNowWithRemainingCount";
-# The value of this constant is `fireNow`.
-public const string FIRE_NOW = "fireNow";
-# The value of this constant is `ignorePolicy`.
-public const string IGNORE_POLICY = "ignorePolicy";
-
-const string NO_OF_RECURRENCE = "noOfRecurrences";
-const string INITIAL_DELAY = "initialDelayInMillis";
+const string UTC_OFF_SET = "utcOffset";

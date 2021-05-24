@@ -17,31 +17,27 @@
  */
 package org.ballerinalang.stdlib.task.utils;
 
+import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
-import io.ballerina.runtime.api.types.MethodType;
-import io.ballerina.runtime.api.types.Type;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
-import io.ballerina.runtime.api.values.BMap;
-import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
-import org.ballerinalang.stdlib.task.objects.ServiceInformation;
-import org.quartz.CronExpression;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.CronTrigger;
+import org.quartz.JobBuilder;
+import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.quartz.TriggerUtils;
-import org.quartz.impl.calendar.BaseCalendar;
-import org.quartz.spi.OperableTrigger;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 
-import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 import java.util.UUID;
-
-import static org.ballerinalang.stdlib.task.utils.ModuleUtils.getModule;
 
 /**
  * Utility functions used in ballerina task module.
@@ -50,177 +46,102 @@ import static org.ballerinalang.stdlib.task.utils.ModuleUtils.getModule;
  */
 public class Utils {
 
-    // valid resource count is set to to because the init function is also received as
-    // an attached function.
-    private static final int VALID_RESOURCE_COUNT = 1;
-
     public static BError createTaskError(String message) {
-        return createTaskError(TaskConstants.LISTENER_ERROR, message);
+        return ErrorCreator.createDistinctError(TaskConstants.ERROR, ModuleUtils.getModule(),
+                StringUtils.fromString(message));
     }
 
-    public static BError createTaskError(String reason, String message) {
-        return ErrorCreator.createDistinctError(reason, getModule(), StringUtils.fromString(message));
+    public static Properties createSchedulerProperties(String threadCount, String thresholdInMillis) {
+        Properties properties = new Properties();
+        properties.setProperty(TaskConstants.QUARTZ_MISFIRE_THRESHOLD, thresholdInMillis);
+        properties.setProperty(TaskConstants.QUARTZ_THREAD_COUNT, threadCount);
+        return properties;
     }
 
-    @SuppressWarnings("unchecked")
-    public static String validateCronExpression(BString expression) throws SchedulingException {
-        String cronExpression = String.valueOf(expression);
-        if (!CronExpression.isValidExpression(cronExpression)) {
-            throw new SchedulingException("Cron Expression \"" + cronExpression + "\" is invalid.");
-        }
-        return cronExpression;
-    }
-
-    /*
-     * TODO: Runtime validation is done as compiler plugin does not work right now.
-     *       When compiler plugins can be run for the resources without parameters, this will be redundant.
-     *       Issue: https://github.com/ballerina-platform/ballerina-lang/issues/14148
-     */
-    public static void validateService(ServiceInformation serviceInformation) throws SchedulingException {
-        MethodType[] resources =  serviceInformation.getService().getType().getMethods();
-        if (resources.length != VALID_RESOURCE_COUNT) {
-            throw new SchedulingException("Invalid number of resources found in service \'" +
-                    serviceInformation.getServiceName() + "\'. Task service should include only one resource.");
-        }
-        MethodType resource = resources[0];
-
-        if (TaskConstants.RESOURCE_ON_TRIGGER.equals(resource.getName())) {
-            validateOnTriggerResource(resource.getReturnParameterType());
-        } else {
-            throw new SchedulingException("Invalid resource function found: " + resource.getName()
-                                                  + ". Expected: \'" + TaskConstants.RESOURCE_ON_TRIGGER + "\'.");
+    public static Scheduler initializeScheduler(Properties properties) throws SchedulingException {
+        try {
+            StdSchedulerFactory stdSchedulerFactory = new StdSchedulerFactory(properties);
+            Scheduler scheduler = stdSchedulerFactory.getScheduler();
+            scheduler.getListenerManager().addTriggerListener(new TaskListener(),
+                    GroupMatcher.triggerGroupEquals(TaskConstants.LOG));
+            return scheduler;
+        } catch (SchedulerException e) {
+            throw new SchedulingException("Cannot create the Scheduler." + e.getMessage());
         }
     }
 
-    private static void validateOnTriggerResource(Type returnParameterType) throws SchedulingException {
-        if (returnParameterType != io.ballerina.runtime.api.PredefinedTypes.TYPE_NULL) {
-            throw new SchedulingException("Invalid resource function signature: \'" +
-                    TaskConstants.RESOURCE_ON_TRIGGER + "\' should not return a value.");
-        }
+    public static JobDetail createJob(JobDataMap jobDataMap, String jobId) {
+        return JobBuilder.newJob(TaskJob.class).withIdentity(jobId).usingJobData(jobDataMap).build();
     }
 
-    public static String getServiceName(BObject service) {
-        return service.getType().getName().split("\\$\\$")[0];
-    }
-
-    public static Trigger createTrigger(SimpleScheduleBuilder scheduleBuilder, long delay, String triggerId) {
-        Trigger trigger;
+    public static Trigger getOneTimeTrigger(long time, String triggerID) {
         String triggerKey = UUID.randomUUID().toString();
-        if (delay > 0) {
-            Date startTime = new Date(System.currentTimeMillis() + delay);
-            trigger = TriggerBuilder.newTrigger()
-                    .withIdentity(triggerKey, triggerId)
-                    .startAt(startTime)
-                    .withSchedule(scheduleBuilder)
-                    .build();
-        } else {
-            trigger = TriggerBuilder.newTrigger()
-                    .withIdentity(triggerKey, triggerId)
-                    .startNow()
-                    .withSchedule(scheduleBuilder)
-                    .build();
-        }
-        return trigger;
+        Date startTime = new Date(time);
+        return TriggerBuilder.newTrigger().withIdentity(triggerKey, triggerID).startAt(startTime).build();
     }
 
-    public static SimpleScheduleBuilder createSchedulerBuilder(BMap<BString, Object> configurations) {
-        long interval = configurations.getIntValue(TaskConstants.FIELD_INTERVAL).intValue();
-        long maxRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS).intValue();;
-        String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
-        SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder.simpleSchedule()
-                .withIntervalInMilliseconds(interval);
-        if (maxRuns > 0) {
-            // Quartz uses the number of repeats but the total number of runs is counted here.
-            // Hence, `maxRuns` is subtracted by 1 to get the repeat count.
-            simpleScheduleBuilder.withRepeatCount((int) (maxRuns - 1));
-            if (maxRuns == 1) {
-                if (policy.equals(TaskConstants.FIRE_NOW)) {
-                    simpleScheduleBuilder.withMisfireHandlingInstructionFireNow();
-                } else if (policy.equals(TaskConstants.IGNORE_POLICY)) {
-                    simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-                }
-            } else {
-                setMisfirePolicyForRecurringAction(simpleScheduleBuilder, policy);
-            }
+    public static Trigger getIntervalTrigger(long interval, long maxCount, Object startTime, Object endTime,
+                                             String waitingPolicy, String triggerID) {
+        SimpleScheduleBuilder simpleScheduleBuilder = SimpleScheduleBuilder.simpleSchedule().
+                withIntervalInMilliseconds(interval);
+        setMaxCount(simpleScheduleBuilder, maxCount);
+        setMisfire(simpleScheduleBuilder, waitingPolicy);
+        if (waitingPolicy.equalsIgnoreCase(TaskConstants.LOG_AND_IGNORE)) {
+            triggerID = TaskConstants.LOG;
+        }
+        return getTrigger(simpleScheduleBuilder, startTime, endTime, triggerID);
+    }
+
+    public static void setMisfire(SimpleScheduleBuilder simpleScheduleBuilder, String waitingPolicy) {
+        if (TaskConstants.WAIT.equalsIgnoreCase(waitingPolicy)) {
+            simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
+        }
+    }
+
+    public static void setMaxCount(SimpleScheduleBuilder simpleScheduleBuilder, long maxCount) {
+        if (maxCount > 0) {
+            simpleScheduleBuilder.withRepeatCount((int) (maxCount - 1));
         } else {
             simpleScheduleBuilder.repeatForever();
-            setMisfirePolicyForRecurringAction(simpleScheduleBuilder, policy);
-        }
-        return simpleScheduleBuilder;
-    }
-
-    private static void setMisfirePolicyForRecurringAction(SimpleScheduleBuilder simpleScheduleBuilder,
-                                                           String policy) {
-        switch (policy) {
-            case TaskConstants.NEXT_WITH_EXISTING_COUNT:
-                simpleScheduleBuilder.withMisfireHandlingInstructionNextWithExistingCount();
-                break;
-            case TaskConstants.IGNORE_POLICY:
-                simpleScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-                break;
-            case TaskConstants.NEXT_WITH_REMAINING_COUNT:
-                simpleScheduleBuilder.withMisfireHandlingInstructionNextWithRemainingCount();
-                break;
-            case TaskConstants.NOW_WITH_EXISTING_COUNT:
-                simpleScheduleBuilder.withMisfireHandlingInstructionNowWithExistingCount();
-                break;
-            case TaskConstants.NOW_WITH_REMAINING_COUNT:
-                simpleScheduleBuilder.withMisfireHandlingInstructionNowWithRemainingCount();
-                break;
-            default:
-                break;
         }
     }
 
-    public static CronTrigger createCronTrigger(CronScheduleBuilder scheduleBuilder, long maxRuns,
-                                                String triggerID) {
-        String triggerKey = UUID.randomUUID().toString();
-        CronTrigger trigger = TriggerBuilder.newTrigger()
-                .withIdentity(triggerKey, triggerID)
-                .withSchedule(scheduleBuilder)
-                .build();
-        if (maxRuns > 0) {
-            int repeatCount = (int) (maxRuns - 1);
-            Date endDate = TriggerUtils.computeEndTimeToAllowParticularNumberOfFirings((OperableTrigger) trigger,
-                    new BaseCalendar(Calendar.getInstance().getTimeZone()), repeatCount);
-
-            trigger = trigger.getTriggerBuilder().endAt(endDate).build();
-        }
-        return trigger;
-    }
-
-    public static CronScheduleBuilder createCronScheduleBuilder(String cronExpression, String policy) {
-        CronScheduleBuilder cronScheduleBuilder = CronScheduleBuilder.cronSchedule(cronExpression);
-        switch (policy) {
-            case TaskConstants.DO_NOTHING:
-                cronScheduleBuilder.withMisfireHandlingInstructionDoNothing();
-                break;
-            case TaskConstants.IGNORE_POLICY:
-                cronScheduleBuilder.withMisfireHandlingInstructionIgnoreMisfires();
-                break;
-            case TaskConstants.FIRE_AND_PROCEED:
-                cronScheduleBuilder.withMisfireHandlingInstructionFireAndProceed();
-                break;
-            default:
-        }
-        return cronScheduleBuilder;
-    }
-
-    public static Trigger getTrigger(BMap<BString, Object> configurations, String triggerID) {
+    public static Trigger getTrigger(SimpleScheduleBuilder simpleScheduleBuilder, Object startTime, Object endTime,
+                                     String triggerID) {
+        Date startDate;
+        Date endDate;
         Trigger trigger;
-        String configurationTypeName = configurations.getType().getName();
-        if (TaskConstants.RECORD_TIMER_CONFIGURATION.equals(configurationTypeName)) {
-            long delay = configurations.getIntValue(TaskConstants.FIELD_DELAY).intValue();
-            SimpleScheduleBuilder scheduleBuilder = Utils.createSchedulerBuilder(configurations);
-            trigger = Utils.createTrigger(scheduleBuilder, delay, triggerID);
+        String triggerKey = UUID.randomUUID().toString();
+
+        if (isInt(startTime) && isInt(endTime)) {
+            startDate = new Date((Long) startTime);
+            endDate = new Date((Long) endTime);
+            trigger = TriggerBuilder.newTrigger().withIdentity(triggerKey, triggerID).startAt(startDate).endAt(endDate).
+                    withSchedule(simpleScheduleBuilder).build();
+        } else if (isInt(startTime)) {
+            startDate = new Date((Long) startTime);
+            trigger = TriggerBuilder.newTrigger().withIdentity(triggerKey, triggerID).startAt(startDate).
+                    withSchedule(simpleScheduleBuilder).build();
+        } else if (isInt(endTime)) {
+            endDate = new Date((Long) endTime);
+            trigger = TriggerBuilder.newTrigger().withIdentity(triggerKey, triggerID).endAt(endDate).
+                    withSchedule(simpleScheduleBuilder).build();
         } else {
-            Object cronExpression = configurations.get(TaskConstants.MEMBER_CRON_EXPRESSION);
-            String policy = String.valueOf(configurations.getStringValue(TaskConstants.MISFIRE_POLICY));
-            CronScheduleBuilder scheduleBuilder = Utils.createCronScheduleBuilder(cronExpression.toString(),
-                    policy);
-            long maxRuns = configurations.getIntValue(TaskConstants.FIELD_NO_OF_RUNS).intValue();;
-            trigger = Utils.createCronTrigger(scheduleBuilder, maxRuns, triggerID);
+            trigger = TriggerBuilder.newTrigger().withIdentity(triggerKey, triggerID).
+                    withSchedule(simpleScheduleBuilder).build();
         }
         return trigger;
+    }
+
+    public static void logError(BString msg) {
+        AbstractLogFunction.logMessage(msg, TaskConstants.PACKAGE_PATH,
+                (pkg, message) -> {
+                    AbstractLogFunction.getLogger(pkg).error(message);
+                },
+                TaskConstants.FORMAT);
+    }
+
+    public static boolean isInt(Object time) {
+        return TypeUtils.getType(time).getTag() == TypeTags.INT_TAG;
     }
 }

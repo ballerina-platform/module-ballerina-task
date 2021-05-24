@@ -17,7 +17,10 @@
  */
 package org.ballerinalang.stdlib.task.utils;
 
-import org.ballerinalang.stdlib.task.objects.ServiceInformation;
+import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.values.BObject;
+import org.ballerinalang.stdlib.task.objects.TaskManager;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
@@ -34,7 +37,9 @@ public class TaskJob implements Job {
      */
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
-        TaskExecutor.executeFunction((ServiceInformation) jobExecutionContext.getMergedJobDataMap().
-                get(TaskConstants.SERVICE_INFORMATION));
+        Runtime runtime = TaskManager.getInstance().getRuntime();
+        BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
+        Callback callback = new TaskCallBack(jobExecutionContext);
+        runtime.invokeMethodAsync(job, TaskConstants.EXECUTE, null, null, callback);
     }
 }
