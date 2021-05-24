@@ -1,6 +1,6 @@
 ## Overview
 
-This module provides the functionality to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
+This module provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
 ### Jobs and Scheduling
 
