@@ -54,7 +54,7 @@ public class TaskActions {
             TaskManager.getInstance().initializeScheduler(Utils.createSchedulerProperties(
                     String.valueOf(workerCount), String.valueOf(waitingTimeInMillis)), env);
             return null;
-        } catch (SchedulingException | SchedulerException e) {
+        } catch (SchedulingException | SchedulerException | IllegalArgumentException e) {
             return Utils.createTaskError(e.getMessage());
         }
     }
@@ -65,7 +65,7 @@ public class TaskActions {
         try {
             getScheduler(env);
             TaskManager.getInstance().scheduleOneTimeJob(jobDataMap, time, jobId);
-        } catch (SchedulerException | SchedulingException e) {
+        } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return jobId;
@@ -81,7 +81,7 @@ public class TaskActions {
             TaskManager.getInstance().scheduleIntervalJob(jobDataMap,
                     (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
                     endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), jobId);
-        } catch (SchedulerException | SchedulingException e) {
+        } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
             return Utils.createTaskError(e.getMessage());
         }
         return jobId;

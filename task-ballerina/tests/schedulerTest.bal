@@ -588,3 +588,15 @@ isolated function testUnscheduleJobs() returns error? {
         test:assertFail("Test failed.");
     }
 }
+
+@test:Config {
+    groups: ["FrequencyJob", "negative"]
+}
+isolated function testScheduleJobsWithNegativeInterval() returns error? {
+    JobId|Error output = scheduleJobRecurByFrequency(new Job23(), -1d);
+    if(output is Error) {
+        test:assertTrue(output.message().includes("Repeat interval must be >= 0"));
+    } else {
+        test:assertFail("Test failed.");
+    }
+}
