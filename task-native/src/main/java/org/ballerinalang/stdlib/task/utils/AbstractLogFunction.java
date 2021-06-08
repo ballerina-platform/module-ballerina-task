@@ -19,7 +19,6 @@
 package org.ballerinalang.stdlib.task.utils;
 
 import io.ballerina.runtime.api.values.BString;
-import org.ballerinalang.logging.BLogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,6 @@ public class AbstractLogFunction {
      */
     static void logMessage(BString message, String pckg,
                            BiConsumer<String, String> consumer, String outputFormat) {
-        BLogManager.setLogOutputFormat(outputFormat);
         // Create a new log message supplier
         Supplier<String> logMessage = new Supplier<>() {
             private String msg = null;

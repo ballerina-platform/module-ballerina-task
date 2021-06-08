@@ -18,7 +18,6 @@
 
 module io.ballerina.stdlib.task {
     requires io.ballerina.runtime;
-    requires io.ballerina.logging;
     requires quartz;
     requires java.logging;
     requires org.slf4j;
