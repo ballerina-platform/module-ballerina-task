@@ -13,7 +13,8 @@ plugins {
 
 rootProject.name = 'task'
 include(':build-config:checkstyle')
-include ':task-native', ':task-ballerina'
+include ':task-native'
+include ':task-ballerina'
 
 gradleEnterprise {
     buildScan {
