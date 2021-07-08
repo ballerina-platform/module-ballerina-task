@@ -16,7 +16,7 @@
  *  under the License.
 */
 
-package org.ballerinalang.stdlib.task.utils;
+package io.ballerina.stdlib.task.utils;
 
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BString;

@@ -16,13 +16,13 @@
  * under the License.
  */
 
-package org.ballerinalang.stdlib.task.objects;
+package io.ballerina.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
-import org.ballerinalang.stdlib.task.exceptions.SchedulingException;
-import org.ballerinalang.stdlib.task.utils.TaskConstants;
-import org.ballerinalang.stdlib.task.utils.Utils;
+import io.ballerina.stdlib.task.exceptions.SchedulingException;
+import io.ballerina.stdlib.task.utils.TaskConstants;
+import io.ballerina.stdlib.task.utils.Utils;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;

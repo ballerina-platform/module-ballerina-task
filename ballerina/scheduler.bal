@@ -154,45 +154,45 @@ public isolated function getRunningJobs() returns JobId[] {
 }
 
 isolated function scheduleJob(Job job, int triggerTime) returns int|Error = @java:Method {
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function configureThread(int workerCount, int waitingTime) returns Error? =
 @java:Method {
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function scheduleIntervalJob(Job job, decimal interval, int maxcount, int? startTime, int? endTime,
 TaskPolicy taskPolicy) returns int|Error = @java:Method {
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function externUnscheduleJob(int id) returns Error? = @java:Method {
     name: "unscheduleJob",
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function externPauseAllJobs() returns Error? = @java:Method {
     name: "pauseAllJobs",
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function externResumeAllJobs() returns Error? = @java:Method {
     name: "resumeAllJobs",
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function externPauseJob(int id) returns Error? = @java:Method {
     name: "pauseJob",
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function externResumeJob(int id) returns Error? = @java:Method {
     name: "resumeJob",
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
 isolated function externGetRunningJobs() returns int[] = @java:Method {
     name: "getRunningJobs",
-    'class: "org.ballerinalang.stdlib.task.actions.TaskActions"
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;

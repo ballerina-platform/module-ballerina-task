@@ -16,14 +16,14 @@
  */
 
 plugins {
-    id "com.github.spotbugs" version "4.0.5"
-    id "com.github.johnrengelman.shadow" version "5.2.0"
-    id "de.undercouch.download" version "4.0.4"
-    id "net.researchgate.release" version "2.8.0"
+    id "com.github.spotbugs" version "${githubSpotbugsVersion}"
+    id "com.github.johnrengelman.shadow" version "${githubJohnrengelmanShadowVersion}"
+    id "de.undercouch.download" version "${underCouchDownloadVersion}"
+    id "net.researchgate.release" version "${researchgateReleaseVersion}"
 }
 
 allprojects {
-    group = 'org.ballerinalang'
+    group = project.group
     version = project.version
 
     apply plugin: 'jacoco'
@@ -70,7 +70,7 @@ subprojects {
 
     dependencies {
         /* Standard libraries */
-        ballerinaStdLibs "org.ballerinalang:time-ballerina:${stdlibTimeVersion}"
+        ballerinaStdLibs "io.ballerinalang:time-ballerina:${stdlibTimeVersion}"
     }
 }
 
