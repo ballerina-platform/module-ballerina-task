@@ -1,0 +1,10 @@
+[package]
+org = "ballerina"
+name = "task"
+version = "@toml.version@"
+
+[[platform.java11.dependency]]
+path = "../native/build/libs/task-native-@project.version@.jar"
+
+[[platform.java11.dependency]]
+path = "./lib/quartz-@quartz.version@.jar"

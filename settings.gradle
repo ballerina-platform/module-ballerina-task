@@ -12,9 +12,13 @@ plugins {
 }
 
 rootProject.name = 'task'
-include(':build-config:checkstyle')
+include(':checkstyle')
 include ':task-native'
 include ':task-ballerina'
+
+project(':checkstyle').projectDir = file("build-config${File.separator}checkstyle")
+project(':task-native').projectDir = file('native')
+project(':task-ballerina').projectDir = file('ballerina')
 
 gradleEnterprise {
     buildScan {

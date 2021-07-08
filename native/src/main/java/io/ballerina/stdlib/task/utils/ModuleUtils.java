@@ -14,15 +14,30 @@
  *  KIND, either express or implied.  See the License for the
  *  specific language governing permissions and limitations
  *  under the License.
-*/
-package org.ballerinalang.stdlib.task.exceptions;
+ */
+
+package io.ballerina.stdlib.task.utils;
+
+import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.Module;
 
 /**
- * This exception is thrown when scheduling fails.
+ * This module includes utility functions for the Ballerina Task module.
+ *
+ * @since 1.1.5
  */
-public class SchedulingException extends Exception {
+public class ModuleUtils {
 
-    public SchedulingException(String message) {
-        super(message);
+    private static Module module = null;
+
+    private ModuleUtils() {
+    }
+
+    public static void setModule(Environment environment) {
+        module = environment.getCurrentModule();
+    }
+
+    public static Module getModule() {
+        return module;
     }
 }

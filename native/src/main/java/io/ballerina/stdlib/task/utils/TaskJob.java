@@ -15,12 +15,12 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
-package org.ballerinalang.stdlib.task.utils;
+package io.ballerina.stdlib.task.utils;
 
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.async.Callback;
 import io.ballerina.runtime.api.values.BObject;
-import org.ballerinalang.stdlib.task.objects.TaskManager;
+import io.ballerina.stdlib.task.objects.TaskManager;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
