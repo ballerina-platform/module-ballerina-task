@@ -70,7 +70,7 @@ subprojects {
 
     dependencies {
         /* Standard libraries */
-        ballerinaStdLibs "io.ballerinalang:time-ballerina:${stdlibTimeVersion}"
+        ballerinaStdLibs "io.ballerina.stdlib:time-ballerina:${stdlibTimeVersion}"
     }
 }
 
