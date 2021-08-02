@@ -133,7 +133,7 @@ public class Utils {
     }
 
     public static void logError(String msg) {
-        AbstractLogFunction.getTaskLogger().warn(msg);
+        AbstractLogFunction.getTaskLogger().error(msg);
     }
 
     public static boolean isInt(Object time) {
