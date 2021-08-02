@@ -46,7 +46,7 @@ public class AbstractLogFunction {
         try (FileInputStream fileStream = new FileInputStream(file)) {
             LogManager.getLogManager().readConfiguration(fileStream);
         } catch (IOException e) {
-            PrintStream console = System.out;
+            PrintStream console = System.err;
             console.println(e.getMessage());
         }
         return LoggerFactory.getLogger("Task");
