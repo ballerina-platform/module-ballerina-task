@@ -18,7 +18,6 @@
 package io.ballerina.stdlib.task.utils;
 
 import io.ballerina.runtime.api.async.Callback;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import org.quartz.JobExecutionContext;
 import org.quartz.Scheduler;
@@ -47,14 +46,14 @@ public class TaskCallBack implements Callback {
         String errorPolicy = (String) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.ERROR_POLICY);
         String jobId = (String) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB_ID);
         if (isLogged(errorPolicy)) {
-            Utils.logError(StringUtils.fromString("message = Unable to execute the job[" + jobId + "]: " + bError));
+            Utils.logError("message = Unable to execute the job[" + jobId + "]. " + bError.getMessage());
         }
         if (isTerminated(errorPolicy)) {
             try {
                 scheduler.unscheduleJob(this.jobExecutionContext.getTrigger().getKey());
             } catch (SchedulerException e) {
                 if (errorPolicy.equalsIgnoreCase(TaskConstants.LOG_AND_TERMINATE)) {
-                    Utils.logError(StringUtils.fromString(e.toString()));
+                    Utils.logError(e.toString());
                 }
             }
         }

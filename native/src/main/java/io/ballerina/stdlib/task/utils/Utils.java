@@ -22,7 +22,6 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
-import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -133,12 +132,8 @@ public class Utils {
         return trigger;
     }
 
-    public static void logError(BString msg) {
-        AbstractLogFunction.logMessage(msg, TaskConstants.PACKAGE_PATH,
-                (pkg, message) -> {
-                    AbstractLogFunction.getLogger(pkg).error(message);
-                },
-                TaskConstants.FORMAT);
+    public static void logError(String msg) {
+        AbstractLogFunction.getTaskLogger().warn(msg);
     }
 
     public static boolean isInt(Object time) {

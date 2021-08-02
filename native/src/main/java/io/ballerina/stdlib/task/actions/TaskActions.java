@@ -19,7 +19,6 @@ package io.ballerina.stdlib.task.actions;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
@@ -27,6 +26,7 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.objects.TaskManager;
+import io.ballerina.stdlib.task.utils.AbstractLogFunction;
 import io.ballerina.stdlib.task.utils.TaskConstants;
 import io.ballerina.stdlib.task.utils.Utils;
 import org.quartz.JobDataMap;
@@ -50,6 +50,7 @@ public class TaskActions {
     private static String value = "1000";
 
     public static Object configureThread(Environment env, long workerCount, long waitingTimeInMillis) {
+        AbstractLogFunction.clearLogger();
         try {
             TaskManager.getInstance().initializeScheduler(Utils.createSchedulerProperties(
                     String.valueOf(workerCount), String.valueOf(waitingTimeInMillis)), env);
@@ -60,39 +61,45 @@ public class TaskActions {
     }
 
     public static Object scheduleJob(Environment env, BObject job, long time) {
+        AbstractLogFunction.clearLogger();
         Integer jobId = new Random().nextInt(bound);
         JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, String.valueOf(jobId));
         try {
             getScheduler(env);
             TaskManager.getInstance().scheduleOneTimeJob(jobDataMap, time, jobId);
+            return jobId;
         } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
             return Utils.createTaskError(e.getMessage());
         }
-        return jobId;
     }
 
     public static Object scheduleIntervalJob(Environment env, BObject job, BDecimal interval, long maxCount,
                                              Object startTime, Object endTime, BMap<BString, Object> policy) {
+        AbstractLogFunction.clearLogger();
         int jobId = new Random().nextInt(bound);
+//        jobId = SecureRandom.getInstanceStrong().nextInt(bound);
         JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
                 String.valueOf(jobId));
+//        int jobId = 0;
         try {
             getScheduler(env);
             TaskManager.getInstance().scheduleIntervalJob(jobDataMap,
                     (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
                     endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), jobId);
+            return jobId;
         } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
             return Utils.createTaskError(e.getMessage());
         }
-        return jobId;
     }
 
     private static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
+        AbstractLogFunction.clearLogger();
         return TaskManager.getInstance().getScheduler(Utils.createSchedulerProperties(
                 TaskConstants.QUARTZ_THREAD_COUNT_VALUE, TaskConstants.QUARTZ_THRESHOLD_VALUE), env);
     }
 
     private static JobDataMap getJobDataMap(BObject job, String errorPolicy, String jobId) {
+        AbstractLogFunction.clearLogger();
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(TaskConstants.JOB, job);
         jobDataMap.put(TaskConstants.ERROR_POLICY, errorPolicy);
@@ -101,6 +108,7 @@ public class TaskActions {
     }
 
     public static Object unscheduleJob(Long jobId) {
+        AbstractLogFunction.clearLogger();
         try {
             TaskManager.getInstance().unScheduleJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
@@ -110,6 +118,7 @@ public class TaskActions {
     }
 
     public static Object pauseAllJobs() {
+        AbstractLogFunction.clearLogger();
         try {
             TaskManager.getInstance().pause();
         } catch (SchedulerException e) {
@@ -119,6 +128,7 @@ public class TaskActions {
     }
 
     public static Object resumeAllJobs() {
+        AbstractLogFunction.clearLogger();
         try {
             TaskManager.getInstance().resume();
         } catch (SchedulerException e) {
@@ -128,6 +138,7 @@ public class TaskActions {
     }
 
     public static Object pauseJob(Long jobId) {
+        AbstractLogFunction.clearLogger();
         try {
             TaskManager.getInstance().pauseJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
@@ -137,6 +148,7 @@ public class TaskActions {
     }
 
     public static Object resumeJob(Long jobId) {
+        AbstractLogFunction.clearLogger();
         try {
             TaskManager.getInstance().resumeJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
@@ -146,6 +158,7 @@ public class TaskActions {
     }
 
     public static BArray getRunningJobs() {
+        AbstractLogFunction.clearLogger();
         try {
             int i = 0;
             Set<Integer> jobIds = TaskManager.getInstance().getAllRunningJobs();
@@ -156,7 +169,7 @@ public class TaskActions {
             }
             return ValueCreator.createArrayValue(results);
         } catch (SchedulerException e) {
-            Utils.logError(StringUtils.fromString(e.toString()));
+            Utils.logError(e.getMessage());
         }
         return createArrayValue(new long[0]);
     }

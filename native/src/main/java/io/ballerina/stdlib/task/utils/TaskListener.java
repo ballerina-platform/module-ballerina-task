@@ -17,8 +17,6 @@
  */
 package io.ballerina.stdlib.task.utils;
 
-import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
@@ -60,13 +58,9 @@ public class TaskListener implements TriggerListener {
                 break;
             }
         }
-        BString msg = StringUtils.fromString("message = Ignore the trigger as couldn't get the resource to " +
-                "execute the job[" + jobId +   "] at " + trigger.getStartTime());
-        AbstractLogFunction.logMessage(msg, TaskConstants.PACKAGE_PATH,
-                (pkg, message) -> {
-                    AbstractLogFunction.getLogger(pkg).info(message);
-                },
-                TaskConstants.FORMAT);
+        AbstractLogFunction.getTaskLogger().info("message = The trigger for time[" + trigger.getStartTime() +
+                "] has ignored as couldn't get the resources to execute the job[" + jobId + "]");
+
     }
 
     @Override

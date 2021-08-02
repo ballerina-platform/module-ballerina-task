@@ -18,12 +18,16 @@
 
 package io.ballerina.stdlib.task.utils;
 
-import io.ballerina.runtime.api.values.BString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.LogManager;
 
 /**
  * Base class for the other log functions, containing a getter to retrieve the correct logger, given a package name.
@@ -32,40 +36,19 @@ import java.util.function.Supplier;
  */
 public class AbstractLogFunction {
 
-    private static final String BALLERINA_ROOT_LOGGER_NAME = "ballerina";
-    private static final Logger ballerinaRootLogger = LoggerFactory.getLogger(BALLERINA_ROOT_LOGGER_NAME);
-
-    protected static Logger getLogger(String pkg) {
-        if (".".equals(pkg) || pkg == null) {
-            return ballerinaRootLogger;
-        } else {
-            // TODO: Refactor this later
-            return LoggerFactory.getLogger(ballerinaRootLogger.getName() + "." + pkg);
-        }
+    public static void clearLogger() {
+        LogManager.getLogManager().reset();
     }
 
-    /**
-     * Execute logging provided message.
-     *
-     * @param message  log message
-     * @param pckg     package
-     * @param consumer log message consumer
-     */
-    static void logMessage(BString message, String pckg,
-                           BiConsumer<String, String> consumer, String outputFormat) {
-        // Create a new log message supplier
-        Supplier<String> logMessage = new Supplier<>() {
-            private String msg = null;
-
-            @Override
-            public String get() {
-                // We should invoke the lambda only once, thus caching return value
-                if (msg == null) {
-                    msg = message.toString();
-                }
-                return msg;
-            }
-        };
-        consumer.accept(pckg, logMessage.get());
+    public static Logger getTaskLogger() {
+        Path path = Paths.get(TaskConstants.LOG_FILE_PATH).toAbsolutePath();
+        File file = new File(path.toString());
+        try (FileInputStream fileStream = new FileInputStream(file)) {
+            LogManager.getLogManager().readConfiguration(fileStream);
+        } catch (IOException e) {
+            PrintStream console = System.out;
+            console.println(e.getMessage());
+        }
+        return LoggerFactory.getLogger("Task");
     }
 }
