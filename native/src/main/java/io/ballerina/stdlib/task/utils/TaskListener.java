@@ -58,7 +58,7 @@ public class TaskListener implements TriggerListener {
                 break;
             }
         }
-        AbstractLogFunction.getTaskLogger().info("message = The trigger for time[" + trigger.getStartTime() +
+        TaskLogger.getTaskLogger().info("message = The trigger for time[" + trigger.getStartTime() +
                 "] has ignored as couldn't get the resources to execute the job[" + jobId + "]");
 
     }

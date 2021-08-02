@@ -34,9 +34,9 @@ import java.util.logging.LogManager;
  *
  * @since 2.0.0
  */
-public class AbstractLogFunction {
+public class TaskLogger {
 
-    public static void clearLogger() {
+    public static void clearGlobalLogger() {
         LogManager.getLogManager().reset();
     }
 

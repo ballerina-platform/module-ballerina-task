@@ -26,8 +26,8 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.objects.TaskManager;
-import io.ballerina.stdlib.task.utils.AbstractLogFunction;
 import io.ballerina.stdlib.task.utils.TaskConstants;
+import io.ballerina.stdlib.task.utils.TaskLogger;
 import io.ballerina.stdlib.task.utils.Utils;
 import org.quartz.JobDataMap;
 import org.quartz.Scheduler;
@@ -50,7 +50,7 @@ public class TaskActions {
     private static String value = "1000";
 
     public static Object configureThread(Environment env, long workerCount, long waitingTimeInMillis) {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         try {
             TaskManager.getInstance().initializeScheduler(Utils.createSchedulerProperties(
                     String.valueOf(workerCount), String.valueOf(waitingTimeInMillis)), env);
@@ -61,7 +61,7 @@ public class TaskActions {
     }
 
     public static Object scheduleJob(Environment env, BObject job, long time) {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         Integer jobId = new Random().nextInt(bound);
         JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, String.valueOf(jobId));
         try {
@@ -75,7 +75,7 @@ public class TaskActions {
 
     public static Object scheduleIntervalJob(Environment env, BObject job, BDecimal interval, long maxCount,
                                              Object startTime, Object endTime, BMap<BString, Object> policy) {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         int jobId = new Random().nextInt(bound);
         JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
                 String.valueOf(jobId));
@@ -91,13 +91,13 @@ public class TaskActions {
     }
 
     private static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         return TaskManager.getInstance().getScheduler(Utils.createSchedulerProperties(
                 TaskConstants.QUARTZ_THREAD_COUNT_VALUE, TaskConstants.QUARTZ_THRESHOLD_VALUE), env);
     }
 
     private static JobDataMap getJobDataMap(BObject job, String errorPolicy, String jobId) {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(TaskConstants.JOB, job);
         jobDataMap.put(TaskConstants.ERROR_POLICY, errorPolicy);
@@ -106,7 +106,7 @@ public class TaskActions {
     }
 
     public static Object unscheduleJob(Long jobId) {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         try {
             TaskManager.getInstance().unScheduleJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
@@ -116,7 +116,7 @@ public class TaskActions {
     }
 
     public static Object pauseAllJobs() {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         try {
             TaskManager.getInstance().pause();
         } catch (SchedulerException e) {
@@ -126,7 +126,7 @@ public class TaskActions {
     }
 
     public static Object resumeAllJobs() {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         try {
             TaskManager.getInstance().resume();
         } catch (SchedulerException e) {
@@ -136,7 +136,7 @@ public class TaskActions {
     }
 
     public static Object pauseJob(Long jobId) {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         try {
             TaskManager.getInstance().pauseJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
@@ -146,7 +146,7 @@ public class TaskActions {
     }
 
     public static Object resumeJob(Long jobId) {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         try {
             TaskManager.getInstance().resumeJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
@@ -156,7 +156,7 @@ public class TaskActions {
     }
 
     public static BArray getRunningJobs() {
-        AbstractLogFunction.clearLogger();
+        TaskLogger.clearGlobalLogger();
         try {
             int i = 0;
             Set<Integer> jobIds = TaskManager.getInstance().getAllRunningJobs();
