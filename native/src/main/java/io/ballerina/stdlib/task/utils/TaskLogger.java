@@ -36,19 +36,31 @@ import java.util.logging.LogManager;
  */
 public class TaskLogger {
 
+    private static boolean isExistingLoggerCleared = false;
+    private static boolean isTaskLoggerCreated = false;
+    private static Logger logger;
+
     public static void clearGlobalLogger() {
-        LogManager.getLogManager().reset();
+        if (!isExistingLoggerCleared || isTaskLoggerCreated) {
+            LogManager.getLogManager().reset();
+            isExistingLoggerCleared = true;
+            isTaskLoggerCreated = false;
+        }
     }
 
     public static Logger getTaskLogger() {
-        Path path = Paths.get(TaskConstants.LOG_FILE_PATH).toAbsolutePath();
-        File file = new File(path.toString());
-        try (FileInputStream fileStream = new FileInputStream(file)) {
-            LogManager.getLogManager().readConfiguration(fileStream);
-        } catch (IOException e) {
-            PrintStream console = System.err;
-            console.println(e.getMessage());
+        if (!isTaskLoggerCreated) {
+            Path path = Paths.get(TaskConstants.LOG_FILE_PATH).toAbsolutePath();
+            File file = new File(path.toString());
+            try (FileInputStream fileStream = new FileInputStream(file)) {
+                LogManager.getLogManager().readConfiguration(fileStream);
+            } catch (IOException e) {
+                PrintStream console = System.err;
+                console.println(e.getMessage());
+            }
+            logger = LoggerFactory.getLogger("Task");
+            isTaskLoggerCreated = true;
         }
-        return LoggerFactory.getLogger("Task");
+        return logger;
     }
 }
