@@ -38,7 +38,6 @@ public class TaskConstants {
     public static final String QUARTZ_THRESHOLD_VALUE = "5000";
 
     public static final String JOB = "job";
-    public static final String FORMAT = "logfmt";
     public static final String JOB_ID = "jobId";
     public static final String ERROR_POLICY = "errorPolicy";
     public static final String TRIGGER_ID = "trigger";
@@ -49,8 +48,6 @@ public class TaskConstants {
     public static final String LOG_AND_CONTINUE = "LOG_AND_CONTINUE";
     public static final String TERMINATE = "TERMINATE";
     public static final String WAIT = "WAIT";
-    public static final String PACKAGE_PATH = ".";
-    public static final String LOG_FILE_PATH = "../native/src/main/resources/log4j2.properties";
 
     public static final BString ERR_POLICY = StringUtils.fromString("errorPolicy");
     public static final BString WAITING_POLICY = StringUtils.fromString("waitingPolicy");
