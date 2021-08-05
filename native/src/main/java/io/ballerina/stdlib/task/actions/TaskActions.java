@@ -19,7 +19,6 @@ package io.ballerina.stdlib.task.actions;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BArray;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
@@ -33,9 +32,11 @@ import org.quartz.JobDataMap;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.util.Random;
 import java.util.Set;
+import java.util.logging.LogManager;
 
 import static io.ballerina.runtime.api.creators.ValueCreator.createArrayValue;
 
@@ -48,6 +49,11 @@ public class TaskActions {
 
     private static int bound = 1000000;
     private static String value = "1000";
+    private static PrintStream console = System.err;
+
+    static {
+        LogManager.getLogManager().reset();
+    }
 
     public static Object configureThread(Environment env, long workerCount, long waitingTimeInMillis) {
         try {
@@ -156,7 +162,7 @@ public class TaskActions {
             }
             return ValueCreator.createArrayValue(results);
         } catch (SchedulerException e) {
-            Utils.logError(StringUtils.fromString(e.toString()));
+            Utils.printMessage(e.getMessage(), console);
         }
         return createArrayValue(new long[0]);
     }

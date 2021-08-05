@@ -22,7 +22,6 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
-import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -35,6 +34,10 @@ import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 
+import java.io.PrintStream;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
@@ -45,6 +48,8 @@ import java.util.UUID;
  * @since 0.995.0
  */
 public class Utils {
+
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     public static BError createTaskError(String message) {
         return ErrorCreator.createDistinctError(TaskConstants.ERROR, ModuleUtils.getModule(),
@@ -133,12 +138,9 @@ public class Utils {
         return trigger;
     }
 
-    public static void logError(BString msg) {
-        AbstractLogFunction.logMessage(msg, TaskConstants.PACKAGE_PATH,
-                (pkg, message) -> {
-                    AbstractLogFunction.getLogger(pkg).error(message);
-                },
-                TaskConstants.FORMAT);
+    public static void printMessage(String msg, PrintStream console) {
+        OffsetDateTime utcNow = OffsetDateTime.now(ZoneOffset.UTC);
+        console.println("time = " + formatter.format(utcNow) + " message = " + msg);
     }
 
     public static boolean isInt(Object time) {
