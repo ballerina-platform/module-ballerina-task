@@ -34,6 +34,10 @@ import org.quartz.TriggerBuilder;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 
+import java.io.PrintStream;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
@@ -44,6 +48,8 @@ import java.util.UUID;
  * @since 0.995.0
  */
 public class Utils {
+
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     public static BError createTaskError(String message) {
         return ErrorCreator.createDistinctError(TaskConstants.ERROR, ModuleUtils.getModule(),
@@ -132,8 +138,9 @@ public class Utils {
         return trigger;
     }
 
-    public static void logError(String msg) {
-        TaskLogger.getTaskLogger().error(msg);
+    public static void printMessage(String msg, PrintStream console) {
+        OffsetDateTime utcNow = OffsetDateTime.now(ZoneOffset.UTC);
+        console.println("time = " + formatter.format(utcNow) + " message = " + msg);
     }
 
     public static boolean isInt(Object time) {

@@ -23,6 +23,8 @@ import org.quartz.JobExecutionContext;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 
+import java.io.PrintStream;
+
 /**
  * The class handles the output of job execution by the trigger.
  *
@@ -31,6 +33,7 @@ import org.quartz.SchedulerException;
 public class TaskCallBack implements Callback {
 
     JobExecutionContext jobExecutionContext;
+    private static PrintStream console = System.out;
 
     public TaskCallBack(JobExecutionContext jobExecutionContext) {
         this.jobExecutionContext = jobExecutionContext;
@@ -46,14 +49,14 @@ public class TaskCallBack implements Callback {
         String errorPolicy = (String) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.ERROR_POLICY);
         String jobId = (String) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB_ID);
         if (isLogged(errorPolicy)) {
-            Utils.logError("message = Unable to execute the job[" + jobId + "]. " + bError.getMessage());
+            Utils.printMessage("Unable to execute the job[" + jobId + "]. " + bError.getMessage(), console);
         }
         if (isTerminated(errorPolicy)) {
             try {
                 scheduler.unscheduleJob(this.jobExecutionContext.getTrigger().getKey());
             } catch (SchedulerException e) {
                 if (errorPolicy.equalsIgnoreCase(TaskConstants.LOG_AND_TERMINATE)) {
-                    Utils.logError(e.toString());
+                    Utils.printMessage(e.toString(), console);
                 }
             }
         }

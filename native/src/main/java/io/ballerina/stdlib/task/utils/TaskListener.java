@@ -22,6 +22,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.Trigger;
 import org.quartz.TriggerListener;
 
+import java.io.PrintStream;
 import java.util.Map;
 
 /**
@@ -32,6 +33,7 @@ import java.util.Map;
 public class TaskListener implements TriggerListener {
 
     private static final String TRIGGER_LISTENER_NAME = "TaskListener";
+    private static PrintStream console = System.err;
 
     @Override
     public String getName() {
@@ -58,8 +60,8 @@ public class TaskListener implements TriggerListener {
                 break;
             }
         }
-        TaskLogger.getTaskLogger().info("message = The trigger for time[" + trigger.getStartTime() +
-                "] has ignored as couldn't get the resources to execute the job[" + jobId + "]");
+        Utils.printMessage("The trigger for time[" + trigger.getStartTime() + "] has ignored as couldn't " +
+        "get the resources to execute the job[" + jobId + "]", console);
 
     }
 
