@@ -36,7 +36,6 @@ def packageOrg = "ballerina"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
 def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
-def originalDependencies = ballerinaDependencyFile.text
 def originalConfig = ballerinaConfigFile.text
 
 def stripBallerinaExtensionVersion(String extVersion) {
@@ -86,7 +85,6 @@ task updateTomlFiles {
 task revertTomlFiles {
     doLast {
         ballerinaConfigFile.text = originalConfig
-        ballerinaDependencyFile.text = originalDependencies
     }
 }
 
