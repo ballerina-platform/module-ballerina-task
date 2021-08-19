@@ -34,9 +34,7 @@ description = 'Ballerina - Task Ballerina Generator'
 def packageName = "task"
 def packageOrg = "ballerina"
 def tomlVersion = stripBallerinaExtensionVersion("${project.version}")
-def ballerinaDependencyFile = new File("$project.projectDir/Dependencies.toml")
 def ballerinaConfigFile = new File("$project.projectDir/Ballerina.toml")
-def originalDependencies = ballerinaDependencyFile.text
 def originalConfig = ballerinaConfigFile.text
 
 def stripBallerinaExtensionVersion(String extVersion) {
@@ -73,20 +71,16 @@ dependencies {
 
 task updateTomlFiles {
     doLast {
-        def stdlibDependentTimeVersion = stripBallerinaExtensionVersion(project.stdlibTimeVersion)
         def newConfig = ballerinaConfigFile.text.replace("@project.version@", project.version)
         newConfig = newConfig.replace("@toml.version@", tomlVersion)
         newConfig = newConfig.replace("@quartz.version@", quartzVersion)
         ballerinaConfigFile.text = newConfig
-        def newDependencyConfig = ballerinaDependencyFile.text.replace("@stdlib.time.version@", stdlibDependentTimeVersion)
-        ballerinaDependencyFile.text = newDependencyConfig
     }
 }
 
 task revertTomlFiles {
     doLast {
         ballerinaConfigFile.text = originalConfig
-        ballerinaDependencyFile.text = originalDependencies
     }
 }
 
