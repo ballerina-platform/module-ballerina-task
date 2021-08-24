@@ -14,10 +14,21 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
+import ballerina/log;
+import ballerina/email;
 import ballerina/lang.runtime;
 import ballerina/task;
 import ballerina/time;
+
+configurable string host = ?;
+configurable string username = ?;
+configurable string password = ?;
+configurable string toAddress = ?;
+configurable string subject = ?;
+configurable string body = ?;
+
+// Create the email client
+email:SmtpClient smtpClient = check new (host, username , password);
 
 // Creates a job to be executed by the scheduler.
 class Job {
@@ -26,7 +37,17 @@ class Job {
 
     // Executes this function when the scheduled trigger fires.
     public function execute() {
-        io:println("Hello world");
+        // Creates a message
+        email:Message email = {
+            to: [toAddress],
+            subject: subject,
+            body: body
+        };
+        // Sends email
+        email:Error? sendMessage = smtpClient->sendMessage(email);
+        if (sendMessage is email:Error) {
+            log:printError("Error: ", sendMessage);
+        }
     }
 }
 
@@ -37,8 +58,8 @@ public function main() returns error? {
         year: 2021,
         month: 8,
         day: 24,
-        hour: 13,
-        minute: 25,
+        hour: 15,
+        minute: 40,
         second: 50.52,
         timeAbbrev: "Asia/Colombo",
         utcOffset: {hours: 5, minutes: 30}

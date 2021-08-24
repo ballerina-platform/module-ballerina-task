@@ -1,4 +1,4 @@
 [package]
 org = "task"
-name = "hello_world"
+name = "send_email"
 version = "0.1.0"

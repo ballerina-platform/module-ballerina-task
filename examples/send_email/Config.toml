@@ -1,0 +1,6 @@
+host = "smtp.email.com"
+username = "USER_NAME"
+password = "PASSWORD"
+toAddress = "TO_ADDRESS"
+subject = "Greeting"
+body = "Hi Ballerina"
