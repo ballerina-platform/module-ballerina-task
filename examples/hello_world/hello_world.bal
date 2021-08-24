@@ -43,12 +43,13 @@ public function main() returns error? {
         timeAbbrev: "Asia/Colombo",
         utcOffset: {hours: 5, minutes: 30}
     };
-    
+
     // Schedules the one time job
     task:JobId id = check task:scheduleOneTimeJob(new Job(), time);
 
-    // Calculate the waiting time and wait until executing the job.
+    // Calculate the waiting time.
     time:Seconds seconds = time:utcDiffSeconds(check time:utcFromCivil(time), time:utcNow());
 
+    // Waits until executing the job.
     runtime:sleep((seconds + 1));
 }   
