@@ -1,3 +1,19 @@
+// Copyright (c) 2021 WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+//
+// WSO2 Inc. licenses this file to you under the Apache License,
+// Version 2.0 (the "License"); you may not use this file except
+// in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
 import ballerina/io;
 import ballerina/log;
 import ballerina/regex;
@@ -30,7 +46,7 @@ class Job {
             days = "0" + days;
         }
         string dateInString = (civil.year).toString() + "-" + months + "-" + days;
-        string|error colsedIssueCounts = getColsedIssueCounts(repoNamesWithLabel, dateInString);
+        string|error colsedIssueCounts = getClosedIssueCounts(repoNamesWithLabel, dateInString);
         if colsedIssueCounts is string {
             io:println("Closed issue count details on " + dateInString + ":\n" + colsedIssueCounts);
         } else {
@@ -44,18 +60,18 @@ class Job {
 function getColsedIssueCounts(string[] entries, string date) returns string {
     string totalCount = "";
     github:Client|error githubClient = new (config);
-    if (githubClient is github:Client) {
+    if githubClient is github:Client {
         foreach string entry in entries {
             string[] orgname = regex:split(entry, ":");
             json|error issueCount;
-            if (orgname.length() > 1) {
+            if orgname.length() > 1 {
                 issueCount = githubClient->getRepositoryIssueList(repositoryOwner, orgname[0], date, orgname[1]);
             } else {
                 issueCount = githubClient->getRepositoryIssueList(repositoryOwner, orgname[0], date);
             }
-            if (issueCount is json) {
+            if issueCount is json {
                 json|error value = issueCount.data.search.issueCount;
-                if (value is json) {
+                if value is json {
                     if (orgname.length() > 1) {
                         totalCount += orgname[0] + ":" + orgname[1] + " " + value.toString() + "\n";
                     } else {

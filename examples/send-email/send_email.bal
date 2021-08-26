@@ -28,7 +28,7 @@ configurable string subject = ?;
 configurable string body = ?;
 configurable int port = ?;
 
-// Create the email client
+// Create the email client.
 email:SmtpClient smtpClient = check new (host, username , password, port = port);
 
 // Creates a job to be executed by the scheduler.
@@ -38,13 +38,13 @@ class Job {
 
     // Executes this function when the scheduled trigger fires.
     public function execute() {
-        // Creates a message
+        // Creates a message.
         email:Message email = {
             to: [toAddress],
             subject: subject,
             body: body
         };
-        // Sends email
+        // Sends the email.
         email:Error? sendMessage = smtpClient->sendMessage(email);
         if (sendMessage is email:Error) {
             log:printError("Error: ", sendMessage);
@@ -56,7 +56,7 @@ class Job {
 
 public function main() returns error? {
 
-    // Sets trigger time
+    // Sets the trigger time.
     time:Civil time = {
         year: 2021,
         month: 8,
@@ -68,12 +68,12 @@ public function main() returns error? {
         utcOffset: {hours: 5, minutes: 30}
     };
 
-    // Schedules the one time job
+    // Schedules the one time job.
     task:JobId id = check task:scheduleOneTimeJob(new Job(), time);
 
-    // Calculate the waiting time.
+    // Calculates the waiting time.
     time:Seconds seconds = time:utcDiffSeconds(check time:utcFromCivil(time), time:utcNow());
 
-    // Waits until executing the job.
+    // Waits until the job is executed.
     runtime:sleep((seconds + 1));
 }   
