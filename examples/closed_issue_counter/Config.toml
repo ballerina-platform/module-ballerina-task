@@ -1,0 +1,3 @@
+github_access_token = "GITHUB_ACCESS_TOKEN"
+repositoryOwner = "REPO_OWNER"
+repoNamesWithLabel = [] # Sample array format: ["repoName:label"]

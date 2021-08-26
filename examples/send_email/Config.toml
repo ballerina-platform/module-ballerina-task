@@ -1,6 +1,7 @@
-host = "smtp.email.com"
-username = "USER_NAME"
-password = "PASSWORD"
+host = "smtp.gmail.com"
+username = "HOST_USERNAME"
+password = "HOST_PASSWORD"
+port = 465
 toAddress = "TO_ADDRESS"
 subject = "Greeting"
 body = "Hi Ballerina"

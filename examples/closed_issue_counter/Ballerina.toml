@@ -1,0 +1,4 @@
+[package]
+org = "task"
+name = "closed_issue_counter"
+version = "0.1.0"

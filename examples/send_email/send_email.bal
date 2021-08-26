@@ -26,9 +26,10 @@ configurable string password = ?;
 configurable string toAddress = ?;
 configurable string subject = ?;
 configurable string body = ?;
+configurable int port = ?;
 
 // Create the email client
-email:SmtpClient smtpClient = check new (host, username , password);
+email:SmtpClient smtpClient = check new (host, username , password, port = port);
 
 // Creates a job to be executed by the scheduler.
 class Job {
@@ -47,19 +48,35 @@ class Job {
         email:Error? sendMessage = smtpClient->sendMessage(email);
         if (sendMessage is email:Error) {
             log:printError("Error: ", sendMessage);
+        } else {
+            log:printInfo("The email has been sent now.");
         }
     }
 }
 
 public function main() returns error? {
 
+    // Creates a message
+        email:Message email = {
+            to: [toAddress],
+            subject: subject,
+            body: body
+        };
+        // Sends email
+        email:Error? sendMessage = smtpClient->sendMessage(email);
+        if (sendMessage is email:Error) {
+            log:printError("Error: ", sendMessage);
+        } else {
+            log:printInfo("The email has been sent now.");
+        }
+
     // Sets trigger time
     time:Civil time = {
         year: 2021,
         month: 8,
-        day: 24,
-        hour: 15,
-        minute: 40,
+        day: 26,
+        hour: 12,
+        minute: 38,
         second: 50.52,
         timeAbbrev: "Asia/Colombo",
         utcOffset: {hours: 5, minutes: 30}
