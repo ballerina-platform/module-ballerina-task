@@ -1,6 +1,6 @@
 # Overview
 
-The `closed_issue_counter` project demonstrates how to schedule one time or recurrence jobs to get closed github issues.
+This application demonstrates how to schedule one-time or recurrence jobs to get closed GitHub issues by using `task` and `http` packages.
 
 ## Prerequisite
 
@@ -8,17 +8,15 @@ Update all the GitHub related configuration in the `Config.toml`
 
 ## Run the example
  
-To run the example, move into the `closed_issue_counter` project and execute the below command.
+First, clone this repository, and then run the following commands to run this example in your local machine.
  
-```
-$ bal run
-```
-
-## Output of the example
-
-Run the following curl request to schedule or manage jobs.
+    $ cd examples/closed-issue-counter
+    $ bal run
+ 
 
 ### Sample requests
+
+Run the following curl request to schedule or manage jobs.
 
 #### Schedule one time job
     curl -v -X POST http://localhost:9092/scheduler/oneTimeJob --data "START_TIME" 
@@ -26,11 +24,13 @@ Run the following curl request to schedule or manage jobs.
 
 #### Schedule recurrence job forever
     curl -v -X POST http://localhost:9092/scheduler/recurJob/[INTERVAL]
-    Eg: curl -v -X POST http://localhost:9092/scheduler/recurJob/100
+    Eg: curl -v -X POST http://localhost:9092/scheduler/recurJob/100 --data "{\"startTime\":\"\"}" 
+    Here, A startTime may have value or be empty. If you add value, that should in this format[2021-08-26T01:55:00.520+05:30[Asia/Colombo]].
 
 #### Schedule recurrence job with trigger count
     curl -v -X POST http://localhost:9092/scheduler/recurJob/[COUNT]/[INTERVAL]
-    Eg: curl -v -X POST http://localhost:9092/scheduler/recurJob/5/100
+    Eg: curl -v -X POST http://localhost:9092/scheduler/recurJob/5/100 --data "{\"startTime\":\"\"}" 
+    Here, A startTime may have value or be empty. If you add value, that should in this format[2021-08-26T01:55:00.520+05:30[Asia/Colombo]].
 
 #### Unschedule a particular job
     curl -v -X POST http://localhost:9092/scheduler/unscheduleJob/[JOB_ID]

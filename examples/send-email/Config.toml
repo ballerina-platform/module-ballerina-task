@@ -1,0 +1,7 @@
+host = "smtp.gmail.com"
+username = "ashakalai31@gmail.com"
+password = "Ashakalai123@"
+port = 465
+toAddress = "shalog07@gmail.com"
+subject = "Greeting"
+body = "Hi Ballerina"
