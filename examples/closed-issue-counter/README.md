@@ -1,6 +1,6 @@
 # Overview
 
-This application demonstrates how to schedule one-time or recurrence jobs to retrieve a list of closed GitHub issues by using the `task` and `http` packages.
+This application demonstrates how to schedule one-time or recurring jobs to retrieve a list of closed GitHub issues by using the `task` and `http` packages.
 
 ## Prerequisite
 

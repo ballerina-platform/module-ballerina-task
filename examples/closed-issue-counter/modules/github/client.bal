@@ -37,7 +37,7 @@ isolated function getRepositoryIssueList(string repositoryOwnerName, string repo
 isolated function getFormulatedStringQueryForGetIssueList(string repositoryOwnerName, string repositoryName,
                                                           string state, string date, string? labelName) returns string {
     string query;
-    if (labelName is string) {
+    if labelName is string {
        query = string `is:${state} is:issue label:${labelName} closed:${date}..${date} repo:${repositoryOwnerName}/${repositoryName}`;
     } else {
        query = string `is:${state} is:issue closed:${date}..${date} repo:${repositoryOwnerName}/${repositoryName}`;

@@ -46,10 +46,10 @@ class Job {
         };
         // Sends the email.
         email:Error? sendMessage = smtpClient->sendMessage(email);
-        if (sendMessage is email:Error) {
-            log:printError("Error: ", sendMessage);
+        if sendMessage is email:Error {
+            log:printError("Failed to send the email", 'error = sendMessage);
         } else {
-            log:printInfo("The email has been sent now.");
+            log:printInfo("The email has been sent", recipient = toAddress, subject = subject);
         }
     }
 }

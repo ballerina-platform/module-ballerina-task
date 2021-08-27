@@ -25,7 +25,7 @@ service /scheduler on issueCounter {
 
     resource function post recurJob/[decimal interval](@http:Payload json startTime) returns error|int {
         string timeValue = (check startTime.startTime).toString();
-        if (timeValue != "") {
+        if timeValue != "" {
             task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), interval,
             startTime = check time:civilFromString(timeValue));
             return jobId.id;
@@ -37,7 +37,7 @@ service /scheduler on issueCounter {
 
     resource function post recurJob/[int repeatingCount]/[decimal interval](@http:Payload json startTime) returns error|int {
         string timeValue = (check startTime.startTime).toString();
-        if (timeValue != "") {
+        if timeValue != "" {
             task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), interval, repeatingCount,
             startTime = check time:civilFromString(timeValue));
             return jobId.id;
