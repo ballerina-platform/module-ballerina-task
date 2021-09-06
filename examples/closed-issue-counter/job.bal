@@ -14,7 +14,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/io;
 import ballerina/log;
 import ballerina/regex;
 import ballerina/task;
@@ -50,7 +49,7 @@ class Job {
         string dateInString = (civil.year).toString() + "-" + months + "-" + days;
         string|error closedIssueCounts = getClosedIssueCounts(repoNamesWithLabel, dateInString);
         if closedIssueCounts is string {
-            io:println("Closed issue count details on " + dateInString + ":\n" + closedIssueCounts);
+            log:printInfo("Closed issue count details on " + dateInString + ":\n" + closedIssueCounts);
         } else {
             log:printError("Failed to get the closed issue count details", 'error = closedIssueCounts);
         }
