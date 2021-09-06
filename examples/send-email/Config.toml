@@ -1,7 +1,7 @@
 host = "smtp.gmail.com"
-username = "ashakalai31@gmail.com"
-password = "Ashakalai123@"
+username = "ADD_USERNAME"
+password = "ADD_PASSWORD"
 port = 465
-toAddress = "shalog07@gmail.com"
+toAddress = "ADD_TO_ADDRESS"
 subject = "Greeting"
 body = "Hi Ballerina"
