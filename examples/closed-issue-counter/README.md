@@ -28,8 +28,8 @@ Run the following cURL request to schedule or manage jobs.
     Here, A startTime may have a value or be empty. If you add a value, that should be in this format[2021-08-26T01:55:00.520+05:30[Asia/Colombo]].
 
 #### Schedule recurrence job with trigger count
-    curl -v -X POST http://localhost:9092/scheduler/recurJob/[COUNT]/[INTERVAL]
-    E.g., curl -v -X POST http://localhost:9092/scheduler/recurJob/5/100 --data "{\"startTime\":\"\"}" 
+    curl -v -X POST http://localhost:9092/scheduler/recurJob/[INTERVAL]
+    E.g., curl -v -X POST http://localhost:9092/scheduler/recurJob/10 --data "{\"startTime\":\"\", \"repeatingCount\":\"5\"}" 
     Here, A startTime may have a value or be empty. If you add a value, that should be in this format[2021-08-26T01:55:00.520+05:30[Asia/Colombo]].
 
 #### Unschedule a particular job

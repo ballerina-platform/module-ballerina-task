@@ -47,41 +47,32 @@ class Job {
             days = "0" + days;
         }
         string dateInString = (civil.year).toString() + "-" + months + "-" + days;
-        string|error closedIssueCounts = getClosedIssueCounts(repoNamesWithLabel, dateInString);
-        if closedIssueCounts is string {
-            log:printInfo("Closed issue count details on " + dateInString + ":\n" + closedIssueCounts);
-        } else {
-            log:printError("Failed to get the closed issue count details", 'error = closedIssueCounts);
+        string closedCountDetails = "";
+        foreach string repoNames in repoNamesWithLabel {
+            string[] orgname = regex:split(repoNames, ":");
+            int|error closedIssueCounts = getClosedIssueCount(orgname, dateInString);
+            if closedIssueCounts is error {
+                log:printError("Failed to get the closed issue count details:", closedIssueCounts);
+            } else {
+                if orgname.length() > 1 {
+                    closedCountDetails += orgname[0] + ":" + orgname[1] + " " + closedIssueCounts.toString() + "\n";
+                } else {
+                    closedCountDetails += orgname[0] + " " + closedIssueCounts.toString() + "\n";
+                }
+                log:printInfo("Closed issue count details on " + dateInString + ":\n" + closedCountDetails);
+            }
         }
     }
 
     isolated function init() {}
 }
 
-function getClosedIssueCounts(string[] entries, string date) returns string {
-    string totalCount = "";
-    foreach string entry in entries {
-        string[] orgname = regex:split(entry, ":");
-        json|error issueCount;
-        if orgname.length() > 1 {
-            issueCount = githubClient->getRepositoryIssueList(repositoryOwner, orgname[0], date, orgname[1]);
-        } else {
-            issueCount = githubClient->getRepositoryIssueList(repositoryOwner, orgname[0], date);
-        }
-        if issueCount is json {
-            json|error value = issueCount.data.search.issueCount;
-            if value is json {
-                if orgname.length() > 1 {
-                    totalCount += orgname[0] + ":" + orgname[1] + " " + value.toString() + "\n";
-                } else {
-                    totalCount += orgname[0] + " " + value.toString() + "\n";
-                }
-            } else {
-                log:printError("Error:", value);
-            }
-        } else {
-            log:printError("Error:", issueCount);
-        }
+function getClosedIssueCount(string[] orgname, string date) returns int|error {
+    json issueCount;
+    if orgname.length() > 1 {
+        issueCount = check githubClient->getClosedIssueList(repositoryOwner, orgname[0], date, orgname[1]);
+    } else {
+        issueCount = check githubClient->getClosedIssueList(repositoryOwner, orgname[0], date);
     }
-    return totalCount;
+    return <int>(check issueCount.data.search.issueCount);
 }

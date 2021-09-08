@@ -15,6 +15,7 @@
 // under the License.
 
 import ballerina/http;
+import ballerina/lang.'int as integer;
 import ballerina/task;
 import ballerina/time;
 import ballerina/jballerina.java;
@@ -23,28 +24,28 @@ listener http:Listener issueCounter = new (9092);
 
 service /scheduler on issueCounter {
 
-    resource function post recurJob/[decimal interval](@http:Payload json startTime) returns error|int {
-        string timeValue = (check startTime.startTime).toString();
-        if timeValue != "" {
-            task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), interval,
-            startTime = check time:civilFromString(timeValue));
-            return jobId.id;
+    resource function post recurJob/[decimal interval](@http:Payload json config) returns error|int {
+        string startTime = (check config.startTime).toString();
+        string repeatingCount = (check config.repeatingCount).toString();
+        task:JobId jobId = { id: -1 };
+        if startTime != "" {
+            if repeatingCount == "" {
+                jobId = check task:scheduleJobRecurByFrequency(new Job(), interval,
+                                        startTime = check time:civilFromString(startTime));
+            } else {
+                jobId = check task:scheduleJobRecurByFrequency(new Job(), interval,
+                                        check integer:fromString(repeatingCount),
+                                        startTime = check time:civilFromString(startTime));
+            }
         } else {
-            task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), interval);
-            return jobId.id;
+            if repeatingCount == "" {
+                jobId = check task:scheduleJobRecurByFrequency(new Job(), interval);
+            } else {
+                jobId = check task:scheduleJobRecurByFrequency(new Job(), interval,
+                                        check integer:fromString(repeatingCount));
+            }
         }
-    }
-
-    resource function post recurJob/[int repeatingCount]/[decimal interval](@http:Payload json startTime) returns error|int {
-        string timeValue = (check startTime.startTime).toString();
-        if timeValue != "" {
-            task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), interval, repeatingCount,
-            startTime = check time:civilFromString(timeValue));
-            return jobId.id;
-        } else {
-            task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), interval, repeatingCount);
-            return jobId.id;
-        }
+        return jobId.id;
     }
 
     resource function post oneTimeJob(@http:Payload string time) returns error|int {
