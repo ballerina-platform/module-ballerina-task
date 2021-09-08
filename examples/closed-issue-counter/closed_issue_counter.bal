@@ -29,8 +29,8 @@ listener http:Listener issueCounter = new (9092);
 service /scheduler on issueCounter {
 
     resource function post recurJob/[decimal interval](@http:Payload JobOptions config) returns error|int {
-        string? startTime = config["startTime"];
-        int? count = config["repeatingCount"];
+        string? startTime = config?.startTime;
+        int? count = config?.repeatingCount;
         time:Civil? startTimeInCivil = (startTime is string) ? check time:civilFromString(startTime.toString()) : ();
         int repeatingCount = (count is int) ? <int>count : -1;
 
