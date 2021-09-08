@@ -1,0 +1,7 @@
+host = "smtp.gmail.com"
+username = "ADD_USERNAME"
+password = "ADD_PASSWORD"
+port = 465
+toAddress = "ADD_TO_ADDRESS"
+subject = "Greeting"
+body = "Hi Ballerina"

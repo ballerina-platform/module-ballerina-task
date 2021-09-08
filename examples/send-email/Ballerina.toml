@@ -1,0 +1,4 @@
+[package]
+org = "task"
+name = "send_email"
+version = "0.1.0"
