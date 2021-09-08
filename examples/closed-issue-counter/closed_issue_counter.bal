@@ -15,36 +15,26 @@
 // under the License.
 
 import ballerina/http;
-import ballerina/lang.'int as integer;
 import ballerina/task;
 import ballerina/time;
 import ballerina/jballerina.java;
+
+type JobOptions record {
+   string startTime?;
+   int repeatingCount?;
+};
 
 listener http:Listener issueCounter = new (9092);
 
 service /scheduler on issueCounter {
 
-    resource function post recurJob/[decimal interval](@http:Payload json config) returns error|int {
-        string startTime = (check config.startTime).toString();
-        string repeatingCount = (check config.repeatingCount).toString();
-        task:JobId jobId = { id: -1 };
-        if startTime != "" {
-            if repeatingCount == "" {
-                jobId = check task:scheduleJobRecurByFrequency(new Job(), interval,
-                                        startTime = check time:civilFromString(startTime));
-            } else {
-                jobId = check task:scheduleJobRecurByFrequency(new Job(), interval,
-                                        check integer:fromString(repeatingCount),
-                                        startTime = check time:civilFromString(startTime));
-            }
-        } else {
-            if repeatingCount == "" {
-                jobId = check task:scheduleJobRecurByFrequency(new Job(), interval);
-            } else {
-                jobId = check task:scheduleJobRecurByFrequency(new Job(), interval,
-                                        check integer:fromString(repeatingCount));
-            }
-        }
+    resource function post recurJob/[decimal interval](@http:Payload JobOptions config) returns error|int {
+        string? startTime = config["startTime"];
+        int? count = config["repeatingCount"];
+        time:Civil? startTimeInCivil = (startTime is string) ? check time:civilFromString(startTime.toString()) : ();
+        int repeatingCount = (count is int) ? <int>count : -1;
+
+        task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), interval, repeatingCount, startTimeInCivil);
         return jobId.id;
     }
 

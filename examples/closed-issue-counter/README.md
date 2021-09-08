@@ -24,12 +24,12 @@ Run the following cURL request to schedule or manage jobs.
 
 #### Schedule a recurrence job for forever
     curl -v -X POST http://localhost:9092/scheduler/recurJob/[INTERVAL]
-    E.g., curl -v -X POST http://localhost:9092/scheduler/recurJob/100 --data "{\"startTime\":\"\"}" 
+    E.g., curl -v -X POST http://localhost:9092/scheduler/recurJob/100 -d '{}' 
     Here, A startTime may have a value or be empty. If you add a value, that should be in this format[2021-08-26T01:55:00.520+05:30[Asia/Colombo]].
 
 #### Schedule recurrence job with trigger count
     curl -v -X POST http://localhost:9092/scheduler/recurJob/[INTERVAL]
-    E.g., curl -v -X POST http://localhost:9092/scheduler/recurJob/10 --data "{\"startTime\":\"\", \"repeatingCount\":\"5\"}" 
+    E.g., curl -v -X POST http://localhost:9092/scheduler/recurJob/10 -d '{"repeatingCount": 5}' 
     Here, A startTime may have a value or be empty. If you add a value, that should be in this format[2021-08-26T01:55:00.520+05:30[Asia/Colombo]].
 
 #### Unschedule a particular job
