@@ -38,7 +38,7 @@ class Job1 {
     groups: ["OneTimeJob"]
 }
 function testOneTimeJob() returns error? {
-    time:ZoneOffset zoneOffset = {hours: 5, minutes: 30};
+    time:ZoneOffset zoneOffset = {hours: 0, minutes: 0};
     time:Utc currentUtc = time:utcNow();
     time:Utc newTime = time:utcAddSeconds(currentUtc, 3);
     time:Civil time = time:utcToCivil(newTime);
@@ -70,12 +70,13 @@ class Job2 {
 }
 function testIntervalJob() returns error? {
     time:Utc currentUtc = time:utcNow();
-    time:Utc newTime = time:utcAddSeconds(currentUtc, 3);
-    time:Civil startTime = time:utcToCivil(currentUtc);
-    time:Civil endTime = time:utcToCivil(newTime);
+    time:Utc newTime1 = time:utcAddSeconds(currentUtc, 10);
+    time:Utc newTime2 = time:utcAddSeconds(currentUtc, 20);
+    time:Civil startTime = time:utcToCivil(newTime1);
+    time:Civil endTime = time:utcToCivil(newTime2);
 
     JobId result = check scheduleJobRecurByFrequency(new Job2(1), 1, startTime = startTime, endTime = endTime);
-    runtime:sleep(10);
+    runtime:sleep(15);
     test:assertTrue(count2 > 1, msg = "Expected count mismatched.");
 }
 
@@ -483,12 +484,11 @@ class Job21 {
 }
 function testIntervalJobWithStattTime() returns error? {
     time:Utc currentUtc = time:utcNow();
-    time:Utc newTime = time:utcAddSeconds(currentUtc, 3);
-    time:Civil startTime = time:utcToCivil(currentUtc);
-    time:Civil endTime = time:utcToCivil(newTime);
+    time:Utc newTime = time:utcAddSeconds(currentUtc, 10);
+    time:Civil startTime = time:utcToCivil(newTime);
 
     JobId result = check scheduleJobRecurByFrequency(new Job21(1), 1, startTime = startTime);
-    runtime:sleep(10);
+    runtime:sleep(20);
     test:assertTrue(count21 > 1, msg = "Expected count mismatched.");
 }
 
@@ -513,8 +513,7 @@ class Job22 {
 }
 function testIntervalJobWithEndTime() returns error? {
     time:Utc currentUtc = time:utcNow();
-    time:Utc newTime = time:utcAddSeconds(currentUtc, 5);
-    time:Civil startTime = time:utcToCivil(currentUtc);
+    time:Utc newTime = time:utcAddSeconds(currentUtc, 10);
     time:Civil endTime = time:utcToCivil(newTime);
 
     JobId result = check scheduleJobRecurByFrequency(new Job22(1), 1, endTime = endTime);
@@ -596,6 +595,20 @@ isolated function testScheduleJobsWithNegativeInterval() returns error? {
     JobId|Error output = scheduleJobRecurByFrequency(new Job23(), -1d);
     if(output is Error) {
         test:assertTrue(output.message().includes("Repeat interval must be >= 0"));
+    } else {
+        test:assertFail("Test failed.");
+    }
+}
+
+@test:Config {
+    groups: ["FrequencyJob", "negative"]
+}
+isolated function testScheduleJobsWithInvalidStartTime() returns error? {
+    time:Civil startTime = {"utcOffset":{"hours":0,"minutes":0},"timeAbbrev":"Z","dayOfWeek":1,"year":2021,"month":12,
+                            "day":13,"hour":7,"minute":25,"second":40.893987};
+    JobId|Error output = scheduleJobRecurByFrequency(new Job23(), 4, startTime = startTime);
+    if(output is Error) {
+        test:assertTrue(output.message().includes("Invalid time"), output.message());
     } else {
         test:assertFail("Test failed.");
     }
