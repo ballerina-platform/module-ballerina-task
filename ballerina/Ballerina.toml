@@ -9,7 +9,7 @@ license = ["Apache-2.0"]
 distribution = "slbeta6"
 
 [[platform.java11.dependency]]
-path = "../native/build/libs/task-native-2.1.0-SNAPSHOT.jar"
+path = "../native/build/libs/task-native-2.1.0.jar"
 
 [[platform.java11.dependency]]
 path = "./lib/quartz-2.3.2.jar"
