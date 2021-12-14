@@ -483,9 +483,7 @@ class Job21 {
 }
 function testIntervalJobWithStattTime() returns error? {
     time:Utc currentUtc = time:utcNow();
-    time:Utc newTime = time:utcAddSeconds(currentUtc, 3);
     time:Civil startTime = time:utcToCivil(currentUtc);
-    time:Civil _ = time:utcToCivil(newTime);
 
     _ = check scheduleJobRecurByFrequency(new Job21(1), 1, startTime = startTime);
     runtime:sleep(10);
@@ -514,7 +512,6 @@ class Job22 {
 function testIntervalJobWithEndTime() returns error? {
     time:Utc currentUtc = time:utcNow();
     time:Utc newTime = time:utcAddSeconds(currentUtc, 5);
-    time:Civil _ = time:utcToCivil(currentUtc);
     time:Civil endTime = time:utcToCivil(newTime);
 
     _ = check scheduleJobRecurByFrequency(new Job22(1), 1, endTime = endTime);
