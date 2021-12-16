@@ -58,12 +58,12 @@ public enum WaitingPolicy {
 # + time - The Ballerina `time:Civil`
 # + return - Time in milliseconds or else `task:Error` if the process failed due to any reason
 public isolated function getTimeInMillies(time:Civil time) returns int|Error {
-    if (time[UTC_OFF_SET] == ()) {
+    if time[UTC_OFF_SET] == () {
         time:ZoneOffset zoneOffset = {hours: 0, minutes: 0};
         time.utcOffset = zoneOffset;
     }
     time:Utc|time:Error utc = time:utcFromCivil(time);
-    if (utc is time:Utc) {
+    if utc is time:Utc {
         return <int> decimal:round((<decimal>utc[0] + utc[1]) * 1000);
     } else {
         return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);

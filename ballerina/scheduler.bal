@@ -66,15 +66,15 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,  int maxCount = -1,
                                     time:Civil? startTime = (), time:Civil? endTime = (), TaskPolicy taskPolicy = {})
                                     returns JobId|Error {
-    if (maxCount != -1 && maxCount < 1) {
+    if maxCount != -1 && maxCount < 1 {
         return error Error("The maxCount should be a positive integer.");
     }
     int? sTime = ();
     int? eTime = ();
-    if (startTime is time:Civil) {
+    if startTime is time:Civil {
         sTime = check getTimeInMillies(startTime);
     }
-    if (endTime is time:Civil) {
+    if endTime is time:Civil {
         eTime = check getTimeInMillies(endTime);
     }
     int result = check scheduleIntervalJob(job, interval, maxCount, sTime, eTime, taskPolicy);
