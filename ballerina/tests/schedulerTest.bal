@@ -607,7 +607,7 @@ isolated function testScheduleJobsWithInvalidStartTime() returns error? {
     time:Civil startTime = {"utcOffset":{"hours":0,"minutes":0},"timeAbbrev":"Z","dayOfWeek":1,"year":2021,"month":12,
                             "day":13,"hour":7,"minute":25,"second":40.893987};
     JobId|Error output = scheduleJobRecurByFrequency(new Job23(), 4, startTime = startTime);
-    if(output is Error) {
+    if output is Error {
         test:assertTrue(output.message().includes("Invalid time"), output.message());
     } else {
         test:assertFail("Test failed.");
