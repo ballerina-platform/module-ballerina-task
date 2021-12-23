@@ -610,6 +610,6 @@ isolated function testScheduleJobsWithInvalidStartTime() returns error? {
     if output is Error {
         test:assertTrue(output.message().includes("Invalid time"), output.message());
     } else {
-        test:assertFail("Test failed.");
+        test:assertFail("scheduleJobRecurByFrequency did not fail with invalid start time");
     }
 }
