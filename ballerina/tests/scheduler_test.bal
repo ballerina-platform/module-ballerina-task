@@ -44,7 +44,7 @@ function testOneTimeJob() returns error? {
     time:Civil time = time:utcToCivil(newTime);
     time.utcOffset = zoneOffset;
 
-    JobId id = check scheduleOneTimeJob(new Job1(5), time);
+    _ = check scheduleOneTimeJob(new Job1(5), time);
     runtime:sleep(15);
     test:assertEquals(count, 5, msg = "Expected count mismatched.");
 }
@@ -75,7 +75,7 @@ function testIntervalJob() returns error? {
     time:Civil startTime = time:utcToCivil(newTime1);
     time:Civil endTime = time:utcToCivil(newTime2);
 
-    JobId result = check scheduleJobRecurByFrequency(new Job2(1), 1, startTime = startTime, endTime = endTime);
+    _ = check scheduleJobRecurByFrequency(new Job2(1), 1, startTime = startTime, endTime = endTime);
     runtime:sleep(15);
     test:assertTrue(count2 > 1, msg = "Expected count mismatched.");
 }
@@ -105,8 +105,8 @@ class Job4 {
     groups: ["WorkerPool"]
 }
 function testConfigureWorkerPool() returns error? {
-    JobId result = check scheduleJobRecurByFrequency(new Job3(), 1);
-    JobId result1 = check scheduleJobRecurByFrequency(new Job4(), 1);
+    _ = check scheduleJobRecurByFrequency(new Job3(), 1);
+    _ = check scheduleJobRecurByFrequency(new Job4(), 1);
     runtime:sleep(5);
     test:assertTrue(count3 < 7, msg = "Expected count mismatched.");
     test:assertTrue(count4 < 7, msg = "Expected count mismatched.");
@@ -131,7 +131,7 @@ class Job5 {
     groups: ["FrequencyJob"]
 }
 function testIntervalJobWithCount() returns error? {
-    JobId result = check scheduleJobRecurByFrequency(new Job5(), 1, maxCount = 5);
+    _ = check scheduleJobRecurByFrequency(new Job5(), 1, maxCount = 5);
     runtime:sleep(10);
     test:assertEquals(count5, 5, msg = "Expected count mismatched.");
 }
@@ -225,7 +225,7 @@ class Job9 {
     groups: ["FrequencyJob"]
 }
 function testLogAndTerminate() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job9(), 5, maxCount = 2,
+    _ = check scheduleJobRecurByFrequency(new Job9(), 5, maxCount = 2,
     taskPolicy = { errorPolicy: LOG_AND_TERMINATE });
     runtime:sleep(10);
     test:assertEquals(count9, 1, msg = "Expected count mismatched.");
@@ -247,7 +247,7 @@ class Job10 {
     groups: ["FrequencyJob"]
 }
 function testTerminate() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job10(), 5, maxCount = 2, taskPolicy = { errorPolicy: TERMINATE });
+    _ = check scheduleJobRecurByFrequency(new Job10(), 5, maxCount = 2, taskPolicy = { errorPolicy: TERMINATE });
     runtime:sleep(10);
     test:assertEquals(count9, 1, msg = "Expected count mismatched.");
 }
@@ -268,7 +268,7 @@ class Job11 {
     groups: ["FrequencyJob"]
 }
 function testLogAndContinue() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job11(), 5, maxCount = 3,
+    _ = check scheduleJobRecurByFrequency(new Job11(), 5, maxCount = 3,
     taskPolicy = { errorPolicy: LOG_AND_CONTINUE });
     runtime:sleep(12);
     test:assertEquals(count11, 3, msg = "Expected count mismatched.");
@@ -290,7 +290,7 @@ class Job12 {
     groups: ["FrequencyJob"]
 }
 function testContinue() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job12(), 5, maxCount = 3, taskPolicy = { errorPolicy: CONTINUE });
+    _ = check scheduleJobRecurByFrequency(new Job12(), 5, maxCount = 3, taskPolicy = { errorPolicy: CONTINUE });
     runtime:sleep(12);
     test:assertEquals(count12, 3, msg = "Expected count mismatched.");
 }
@@ -346,8 +346,8 @@ class Job15 {
     groups: ["FrequencyJob"]
 }
 function testPauseAllJobsAndResumeAllJob() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job15(), 5, maxCount = 5);
-    id = check scheduleJobRecurByFrequency(new Job14(), 5, maxCount = 5);
+    _ = check scheduleJobRecurByFrequency(new Job15(), 5, maxCount = 5);
+    _ = check scheduleJobRecurByFrequency(new Job14(), 5, maxCount = 5);
     runtime:sleep(3);
     check pauseAllJobs();
     runtime:sleep(10);
@@ -385,8 +385,8 @@ class Job17 {
     groups: ["FrequencyJob"]
 }
 isolated function testGetRunningJobs() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job16(), 5);
-    id = check scheduleJobRecurByFrequency(new Job17(), 5);
+    _ = check scheduleJobRecurByFrequency(new Job16(), 5);
+    _ = check scheduleJobRecurByFrequency(new Job17(), 5);
     runtime:sleep(3);
     JobId[] ids = getRunningJobs();
     test:assertTrue(ids.length() >= 2, msg = "Expected count mismatched.");
@@ -458,7 +458,7 @@ class Job20 {
 }
 function testConfigureWorker() returns error? {
     check configureWorkerPool(6, 7000);
-    JobId result = check scheduleJobRecurByFrequency(new Job20(), 1);
+    _ = check scheduleJobRecurByFrequency(new Job20(), 1);
     runtime:sleep(5);
     test:assertTrue((4 < count20 && count20 <= 6), msg = "Expected count mismatched.");
 }
@@ -487,7 +487,7 @@ function testIntervalJobWithStattTime() returns error? {
     time:Utc newTime = time:utcAddSeconds(currentUtc, 10);
     time:Civil startTime = time:utcToCivil(newTime);
 
-    JobId result = check scheduleJobRecurByFrequency(new Job21(1), 1, startTime = startTime);
+    _ = check scheduleJobRecurByFrequency(new Job21(1), 1, startTime = startTime);
     runtime:sleep(20);
     test:assertTrue(count21 > 1, msg = "Expected count mismatched.");
 }
@@ -516,7 +516,7 @@ function testIntervalJobWithEndTime() returns error? {
     time:Utc newTime = time:utcAddSeconds(currentUtc, 10);
     time:Civil endTime = time:utcToCivil(newTime);
 
-    JobId result = check scheduleJobRecurByFrequency(new Job22(1), 1, endTime = endTime);
+    _ = check scheduleJobRecurByFrequency(new Job22(1), 1, endTime = endTime);
     runtime:sleep(7);
     test:assertTrue(count22 >= 4, msg = "Expected count mismatched.");
 }
@@ -533,7 +533,7 @@ class Job23 {
     groups: ["FrequencyJob", "negative"]
 }
 isolated function testConfigurationValidation() returns error? {
-    JobId result = check scheduleJobRecurByFrequency(new Job23(), 1);
+    _ = check scheduleJobRecurByFrequency(new Job23(), 1);
     Error? output = configureWorkerPool(-6, 7000);
     if(output is Error) {
         test:assertTrue(output.message().includes("Cannot create the Scheduler.Thread count must be > 0"));
@@ -569,8 +569,8 @@ isolated function testEmptyRunningJobs() returns error? {
     } else {
         test:assertTrue(ids.length() == 0);
     }
-    Error? output = configureWorkerPool(7, 7000);
-    JobId result = check scheduleJobRecurByFrequency(new Job23(), 1);
+    check configureWorkerPool(7, 7000);
+    _ = check scheduleJobRecurByFrequency(new Job23(), 1);
     ids = getRunningJobs();
     test:assertTrue(ids.length() == 1);
 }
