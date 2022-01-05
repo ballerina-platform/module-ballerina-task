@@ -67,8 +67,7 @@ public isolated function getTimeInMillies(time:Civil time) returns int|Error {
         if utc > time:utcNow() {
             return <int> decimal:round((<decimal>utc[0] + utc[1]) * 1000);
         }
-        string timeInString = time.toString();
-        return error Error(string `Invalid time: ${timeInString}.`);
+        return error Error(string `Invalid time: ${time.toString()}.`);
     } else {
         return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);
     }
