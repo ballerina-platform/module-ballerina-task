@@ -68,7 +68,7 @@ public isolated function getTimeInMillies(time:Civil time) returns int|Error {
             return <int> decimal:round((<decimal>utc[0] + utc[1]) * 1000);
         }
         return error Error(
-                    string `Invalid time: ${time.toString()}.Scheduled time should be greater than the current time`);
+                    string `Invalid time: ${time.toString()}. Scheduled time should be greater than the current time`);
     } else {
         return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);
     }
