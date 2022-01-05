@@ -57,7 +57,7 @@ class Job2 {
     int i = 1;
 
     public function execute() {
-        count2 = count2 +1;
+        count2 = count2 + 1;
     }
 
     isolated function init(int i) {
@@ -87,7 +87,7 @@ class Job3 {
     *Job;
 
     public function execute() {
-        count3 = count3 +1;
+        count3 = count3 + 1;
     }
 }
 
@@ -98,9 +98,10 @@ class Job4 {
     *Job;
 
     public function execute() {
-        count4 = count4 +1;
+        count4 = count4 + 1;
     }
 }
+
 @test:Config {
     groups: ["WorkerPool"]
 }
@@ -123,7 +124,7 @@ class Job5 {
     *Job;
 
     public function execute() {
-        count5 = count5 +1 ;
+        count5 = count5 + 1;
     }
 }
 
@@ -143,7 +144,7 @@ class Job6 {
     *Job;
 
     public function execute() {
-        count6 = count6 + 1 ;
+        count6 = count6 + 1;
     }
 }
 
@@ -152,7 +153,7 @@ class Job6 {
     dependsOn: [testLogIgnore]
 }
 function testIgnoreTrigger() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job6(), 5, maxCount = 10, taskPolicy = { waitingPolicy: IGNORE });
+    JobId id = check scheduleJobRecurByFrequency(new Job6(), 5, maxCount = 10, taskPolicy = {waitingPolicy: IGNORE});
     runtime:sleep(3);
     check pauseJob(id);
     runtime:sleep(10);
@@ -168,7 +169,7 @@ class Job7 {
     *Job;
 
     public function execute() {
-        count7 = count7 +1 ;
+        count7 = count7 + 1;
     }
 }
 
@@ -176,7 +177,7 @@ class Job7 {
     groups: ["FrequencyJob"]
 }
 function testWaitInWaitingPolicy() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job7(), 5, maxCount = 10, taskPolicy = { waitingPolicy: WAIT });
+    JobId id = check scheduleJobRecurByFrequency(new Job7(), 5, maxCount = 10, taskPolicy = {waitingPolicy: WAIT});
     runtime:sleep(3);
     check pauseJob(id);
     runtime:sleep(10);
@@ -192,7 +193,7 @@ class Job8 {
     *Job;
 
     public function execute() {
-        count8 = count8 +1 ;
+        count8 = count8 + 1;
     }
 }
 
@@ -200,7 +201,7 @@ class Job8 {
     groups: ["FrequencyJob"]
 }
 function testLogIgnore() returns error? {
-    JobId id = check scheduleJobRecurByFrequency(new Job8(), 5, maxCount = 3, taskPolicy = { waitingPolicy: LOG_AND_IGNORE });
+    JobId id = check scheduleJobRecurByFrequency(new Job8(), 5, maxCount = 3, taskPolicy = {waitingPolicy: LOG_AND_IGNORE});
     runtime:sleep(3);
     check pauseJob(id);
     runtime:sleep(10);
@@ -217,7 +218,7 @@ class Job9 {
 
     public function execute() {
         count9 = count9 + 1;
-        panic error ("ERROR: Error occurred during execute the job.");
+        panic error("ERROR: Error occurred during execute the job.");
     }
 }
 
@@ -226,7 +227,7 @@ class Job9 {
 }
 function testLogAndTerminate() returns error? {
     _ = check scheduleJobRecurByFrequency(new Job9(), 5, maxCount = 2,
-    taskPolicy = { errorPolicy: LOG_AND_TERMINATE });
+    taskPolicy = {errorPolicy: LOG_AND_TERMINATE});
     runtime:sleep(10);
     test:assertEquals(count9, 1, msg = "Expected count mismatched.");
 }
@@ -239,7 +240,7 @@ class Job10 {
 
     public function execute() {
         count10 = count10 + 1;
-        panic error ("ERROR: Error occurred during execute the job.");
+        panic error("ERROR: Error occurred during execute the job.");
     }
 }
 
@@ -247,7 +248,7 @@ class Job10 {
     groups: ["FrequencyJob"]
 }
 function testTerminate() returns error? {
-    _ = check scheduleJobRecurByFrequency(new Job10(), 5, maxCount = 2, taskPolicy = { errorPolicy: TERMINATE });
+    _ = check scheduleJobRecurByFrequency(new Job10(), 5, maxCount = 2, taskPolicy = {errorPolicy: TERMINATE});
     runtime:sleep(10);
     test:assertEquals(count9, 1, msg = "Expected count mismatched.");
 }
@@ -260,7 +261,7 @@ class Job11 {
 
     public function execute() {
         count11 = count11 + 1;
-        panic error ("ERROR: Error occurred during execute the job.");
+        panic error("ERROR: Error occurred during execute the job.");
     }
 }
 
@@ -269,7 +270,7 @@ class Job11 {
 }
 function testLogAndContinue() returns error? {
     _ = check scheduleJobRecurByFrequency(new Job11(), 5, maxCount = 3,
-    taskPolicy = { errorPolicy: LOG_AND_CONTINUE });
+    taskPolicy = {errorPolicy: LOG_AND_CONTINUE});
     runtime:sleep(12);
     test:assertEquals(count11, 3, msg = "Expected count mismatched.");
 }
@@ -282,7 +283,7 @@ class Job12 {
 
     public function execute() {
         count12 = count12 + 1;
-        panic error ("ERROR: Error occurred during execute the job.");
+        panic error("ERROR: Error occurred during execute the job.");
     }
 }
 
@@ -290,7 +291,7 @@ class Job12 {
     groups: ["FrequencyJob"]
 }
 function testContinue() returns error? {
-    _ = check scheduleJobRecurByFrequency(new Job12(), 5, maxCount = 3, taskPolicy = { errorPolicy: CONTINUE });
+    _ = check scheduleJobRecurByFrequency(new Job12(), 5, maxCount = 3, taskPolicy = {errorPolicy: CONTINUE});
     runtime:sleep(12);
     test:assertEquals(count12, 3, msg = "Expected count mismatched.");
 }
@@ -415,7 +416,6 @@ function testUnscheduleJob() returns error? {
     test:assertEquals(count18, 3, msg = "Expected count mismatched.");
 }
 
-
 class Job19 {
 
     *Job;
@@ -433,7 +433,7 @@ isolated function testCivilRecordValidation() {
     time:ZoneOffset zoneOffset = {hours: 30, minutes: 0};
     time.utcOffset = zoneOffset;
     JobId|Error result = scheduleOneTimeJob(new Job19(), time);
-    if(result is Error) {
+    if (result is Error) {
         test:assertTrue(result.message().includes("Couldn't convert given time to milli seconds"),
                     msg = "Output mismatched.");
     } else {
@@ -448,7 +448,7 @@ class Job20 {
     *Job;
 
     public function execute() {
-        count20 = count20 +1;
+        count20 = count20 + 1;
     }
 }
 
@@ -471,7 +471,7 @@ class Job21 {
     int i = 1;
 
     public function execute() {
-        count21 = count21 +1;
+        count21 = count21 + 1;
     }
 
     isolated function init(int i) {
@@ -500,7 +500,7 @@ class Job22 {
     int i = 1;
 
     public function execute() {
-        count22 = count22 +1;
+        count22 = count22 + 1;
     }
 
     isolated function init(int i) {
@@ -535,7 +535,7 @@ class Job23 {
 isolated function testConfigurationValidation() returns error? {
     _ = check scheduleJobRecurByFrequency(new Job23(), 1);
     Error? output = configureWorkerPool(-6, 7000);
-    if(output is Error) {
+    if (output is Error) {
         test:assertTrue(output.message().includes("Cannot create the Scheduler.Thread count must be > 0"));
     } else {
         test:assertFail("Test failed.");
@@ -547,7 +547,7 @@ isolated function testConfigurationValidation() returns error? {
 }
 isolated function testMaxCountValidation() {
     JobId|Error output = scheduleJobRecurByFrequency(new Job23(), 1, maxCount = -4);
-    if(output is Error) {
+    if (output is Error) {
         test:assertTrue(output.message().includes("The maxCount should be a positive integer."));
     } else {
         test:assertFail("Test failed.");
@@ -562,7 +562,7 @@ isolated function testEmptyRunningJobs() returns error? {
     JobId[] ids = getRunningJobs();
     if (ids.length() > 0) {
         foreach JobId i in ids {
-           check unscheduleJob(i);
+            check unscheduleJob(i);
         }
         ids = getRunningJobs();
         test:assertTrue(ids.length() == 0);
@@ -581,7 +581,7 @@ isolated function testEmptyRunningJobs() returns error? {
 isolated function testUnscheduleJobs() returns error? {
     JobId id = {id: 12};
     Error? result = unscheduleJob(id);
-    if(result is Error) {
+    if (result is Error) {
         test:assertTrue(result.message().includes("Invalid job id"));
     } else {
         test:assertFail("Test failed.");
@@ -593,7 +593,7 @@ isolated function testUnscheduleJobs() returns error? {
 }
 isolated function testScheduleJobsWithNegativeInterval() returns error? {
     JobId|Error output = scheduleJobRecurByFrequency(new Job23(), -1d);
-    if(output is Error) {
+    if (output is Error) {
         test:assertTrue(output.message().includes("Repeat interval must be >= 0"));
     } else {
         test:assertFail("Test failed.");
@@ -604,8 +604,17 @@ isolated function testScheduleJobsWithNegativeInterval() returns error? {
     groups: ["FrequencyJob", "negative"]
 }
 isolated function testScheduleJobsWithInvalidStartTime() returns error? {
-    time:Civil startTime = {"utcOffset":{"hours":0,"minutes":0},"timeAbbrev":"Z","dayOfWeek":1,"year":2021,"month":12,
-                            "day":13,"hour":7,"minute":25,"second":40.893987};
+    time:Civil startTime = {
+        "utcOffset": {"hours": 0, "minutes": 0},
+        "timeAbbrev": "Z",
+        "dayOfWeek": 1,
+        "year": 2021,
+        "month": 12,
+        "day": 13,
+        "hour": 7,
+        "minute": 25,
+        "second": 40.893987
+    };
     JobId|Error output = scheduleJobRecurByFrequency(new Job23(), 4, startTime = startTime);
     if output is Error {
         test:assertTrue(output.message().includes("Invalid time"), output.message());
