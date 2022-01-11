@@ -90,4 +90,4 @@ time:Civil time = {
 task:JobId result = check task:scheduleJobRecurByFrequency(new Job("Hi"), 2.5, maxCount = 10, startTime = time);
 ```
 
-For information on the operations, which you can perform with the regex module, see the below **Functions**.
+For information on the operations, which you can perform with the task module, see the below **Functions**.
