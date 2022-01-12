@@ -25,7 +25,7 @@ import ballerina/time;
 # + workerCount - Specifies the number of workers that are available for the concurrent execution of jobs.
 #                 It should be a positive integer. The recommendation is to set a value less than 10. Default sets to 5.
 # + waitingTime - The number of seconds as a decimal the scheduler will tolerate a trigger to pass its next-fire-time
-#                 before being considered as `ignored the trigger`.
+#                 before being considered as `ignored the trigger`
 # + return - A `task:Error` if the process failed due to any reason or else ()
 public isolated function configureWorkerPool(int workerCount = 5, time:Seconds waitingTime = 5)
                                 returns Error? {
@@ -41,7 +41,7 @@ public isolated function configureWorkerPool(int workerCount = 5, time:Seconds w
 # ```
 #
 # + triggerTime - The specific time in Ballerina `time:Civil` to trigger only one time
-# + job - Ballerina job, which is to be executed during the trigger.
+# + job - Ballerina job, which is to be executed during the trigger
 # + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) returns JobId|Error {
     int result = check scheduleJob(job, check getTimeInMillies(triggerTime));
@@ -55,7 +55,7 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 # task:JobId jobId = check task:scheduleJobRecurByFrequency(new Job(), 3);
 # ```
 #
-# + job - Ballerina job, which is to be executed by the scheduler.
+# + job - Ballerina job, which is to be executed by the scheduler
 # + interval - The duration of the trigger (in seconds), which is used to run the job frequently
 # + maxCount - The maximum number of trigger counts
 # + startTime - The trigger start time in Ballerina `time:Civil`. If it is not provided, a trigger will
