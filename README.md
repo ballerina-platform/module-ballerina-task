@@ -7,11 +7,95 @@ Ballerina Task Library
   [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/task.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Ftask)
   [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-task/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-task)
 
-This `task` library is one of the standard libraries of <a target="_blank" href="https://ballerina.io/">Ballerina</a> language.
+This library provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
-This package provides the functionality to configure and manage one-time or periodic jobs.
+### Jobs and Scheduling
 
-For more information on all the operations supported by this package, go to the [`task` package](https://docs.central.ballerina.io/ballerina/task/latest).
+Every scheduling job in Ballerina needs to be represented by a `Job` object. Therefore, a `job` class with your custom logic needs to be created to execute it when the task is triggered.
+
+The `task` package has the following two scheduling systems to schedule the job:
+
+- One-time job execution
+- Frequency-based job execution
+
+#### One-time Job Execution
+
+This API provides the functionality to schedule a job at a specified time.
+
+The following code snippet shows how to schedule a one-time job.
+
+```ballerina
+class Job {
+
+    *task:Job;
+    string msg;
+
+    public function execute() {
+        io:println(self.msg);
+    }
+
+    isolated function init(string msg) {
+        self.msg = msg;
+    }
+}
+
+time:ZoneOffset zoneOffset = {
+    hours: 5,
+    minutes: 30,
+    seconds: <decimal>0.0
+};
+time:Civil time = {
+    year: 2021,
+    month: 4,
+    day: 13,
+    hour: 4,
+    minute: 50,
+    second: 50.52,
+    timeAbbrev: "Asia/Colombo",
+    utcOffset: zoneOffset
+};
+
+task:JobId result = check task:scheduleOneTimeJob(new Job("Hi"), time);
+```
+
+##### Frequency-based Job Execution
+
+This API provides the functionality to schedule jobs on a specific interval either once or periodically by configuring the configuration such as start time, end time, and maximum count.
+
+The following code snippet shows how to schedule a recurring job by using this API.
+
+```ballerina
+class Job {
+
+    *task:Job;
+    string msg;
+
+    public function execute() {
+        io:println(self.msg);
+    }
+
+    isolated function init(string msg) {
+        self.msg = msg;
+    }
+}
+
+time:ZoneOffset zoneOffset = {
+    hours: 5,
+    minutes: 30
+};
+time:Civil time = {
+    year: 2021,
+    month: 3,
+    day: 31,
+    hour: 4,
+    minute: 50,
+    second: 50.52,
+    timeAbbrev: "Asia/Colombo",
+    utcOffset: zoneOffset
+};
+
+task:JobId result = check task:scheduleJobRecurByFrequency(new Job("Hi"), 2.5, maxCount = 10, startTime = time);
+```
 
 For a quick sample on demonstrating the usage, see [Ballerina By Example](https://ballerina.io/learn/by-example/).
 
@@ -82,5 +166,7 @@ All contributors are encouraged to read [Ballerina Code of Conduct](https://ball
 
 ## Useful Links
 
+* For more information go to the [`task` library](https://lib.ballerina.io/ballerina/task/latest).
+* For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
 * Chat live with us on our [Slack channel](https://ballerina.io/community/slack/).
 * Technical questions should be posted on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
