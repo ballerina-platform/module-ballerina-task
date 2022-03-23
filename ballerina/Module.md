@@ -2,7 +2,7 @@
 
 This module provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
-### Jobs and Scheduling
+### Jobs and scheduling
 
 Every scheduling job in Ballerina needs to be represented by a `Job` object. Therefore, a `job` class with your custom logic needs to be created to execute it when the task is triggered.
 
@@ -11,7 +11,7 @@ The `task` package has the following two scheduling systems to schedule the job:
 - One-time job execution
 - Frequency-based job execution 
 
-#### One-time Job Execution
+#### One-time job execution
 
 This API provides the functionality to schedule a job at a specified time.
 
@@ -51,7 +51,7 @@ time:Civil time = {
 task:JobId result = check task:scheduleOneTimeJob(new Job("Hi"), time);
 ```
 
-##### Frequency-based Job Execution
+##### Frequency-based job execution
 
 This API provides the functionality to schedule jobs on a specific interval either once or periodically by configuring the configuration such as start time, end time, and maximum count.
 
