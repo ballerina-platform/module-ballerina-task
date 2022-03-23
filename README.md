@@ -9,7 +9,7 @@ Ballerina Task Library
 
 This library provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
-### Jobs and Scheduling
+### Jobs and scheduling
 
 Every scheduling job in Ballerina needs to be represented by a `Job` object. Therefore, a `job` class with your custom logic needs to be created to execute it when the task is triggered.
 
@@ -18,7 +18,7 @@ The `task` package has the following two scheduling systems to schedule the job:
 - One-time job execution
 - Frequency-based job execution
 
-#### One-time Job Execution
+#### One-time job execution
 
 This API provides the functionality to schedule a job at a specified time.
 
@@ -58,7 +58,7 @@ time:Civil time = {
 task:JobId result = check task:scheduleOneTimeJob(new Job("Hi"), time);
 ```
 
-##### Frequency-based Job Execution
+##### Frequency-based job execution
 
 This API provides the functionality to schedule jobs on a specific interval either once or periodically by configuring the configuration such as start time, end time, and maximum count.
 
@@ -99,14 +99,14 @@ task:JobId result = check task:scheduleJobRecurByFrequency(new Job("Hi"), 2.5, m
 
 For a quick sample on demonstrating the usage, see [Ballerina By Example](https://ballerina.io/learn/by-example/).
 
-## Issues and Projects 
+## Issues and projects 
 
 Issues and Project are disabled for this repository as this is part of the Ballerina Standard Library. To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library). 
 
 This repository only contains the source code for the package.
 
-## Building from the Source
-### Setting Up the Prerequisites
+## Build from the source
+### Set up the prerequisites
 
 1. Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
    * [Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
@@ -115,9 +115,9 @@ This repository only contains the source code for the package.
    
         > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
      
-### Building the Source
+### Build the source
 
-Execute the commands below to build from source.
+Execute the commands below to build from the source.
 
 1. To build the library:
         
@@ -156,15 +156,15 @@ Execute the commands below to build from source.
         ./gradlew clean build -PpublishToCentral=true
 
 
-## Contributing to Ballerina
+## Contribute to Ballerina
 
 As an open source project, Ballerina welcomes contributions from the community. To start contributing, read these [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md) for information on how you should go about contributing to our project.
 
-## Code of Conduct
+## Code of conduct
 
 All contributors are encouraged to read [Ballerina Code of Conduct](https://ballerina.io/code-of-conduct).
 
-## Useful Links
+## Useful links
 
 * For more information go to the [`task` library](https://lib.ballerina.io/ballerina/task/latest).
 * For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
