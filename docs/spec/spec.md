@@ -20,12 +20,12 @@ The conforming implementation of the specification is released and included in t
 2. [Job](#2-job)
 3. [Worker Pool and Waiting Time](#3-worker-pool-and-waiting-time)
 4. [Job Scheduling](#4-job-scheduling)
-5. [Manage Scheduled Jobs](#4-manage-scheduled-jobs)
-    * 5.1 [Pause All Jobs](#51-pause-all-jobs)
-    * 5.2 [Resume All Jobs](#52-resume-all-jobs)
-    * 5.3 [Pause Job](#53-pause-job)
-    * 5.4 [Resume Job](#54-resume-job)
-    * 5.5 [Get Running Jobs](#55-get-running-jobs)
+5. [Manage Scheduled Jobs](#5-manage-scheduled-jobs)
+    * 5.1. [Pause All Jobs](#51-pause-all-jobs)
+    * 5.2. [Resume All Jobs](#52-resume-all-jobs)
+    * 5.3. [Pause Job](#53-pause-job)
+    * 5.4. [Resume Job](#54-resume-job)
+    * 5.5. [Get Running Jobs](#55-get-running-jobs)
 6. [Unschedule a Particular Scheduled Job](#6-unschedule-a-particular-scheduled-job)
 
 ## 1. Overview
@@ -102,27 +102,27 @@ This package provides the following two policies to manage triggers:
 
 The following APIs provide by this package to manage the scheduled jobs.
 
-### 5.1 Pause All Jobs
+### 5.1. Pause All Jobs
 The following API is used to pause all the jobs.
 ```ballerina
 public isolated function pauseAllJobs() returns Error?
 ```
-### 5.2 Resume All Jobs
+### 5.2. Resume All Jobs
 The following API is used to resume all the jobs.
 ```ballerina
 public isolated function resumeAllJobs() returns Error?
 ```
-### 5.3 Pause Job
+### 5.3. Pause Job
 The following API is used to pause all the jobs.
 ```ballerina
 public isolated function pauseJob(JobId jobId) returns Error?
 ```
-### 5.4 Resume Job
+### 5.4. Resume Job
 The following API is used to resume all the jobs.
 ```ballerina
 public isolated function resumeJob(JobId jobId) returns Error?
 ```
-### 5.5 Get Running Jobs
+### 5.5. Get Running Jobs
 The following API is used to get all the running jobs.
 ```ballerina
 public isolated function getRunningJobs() returns JobId[]
