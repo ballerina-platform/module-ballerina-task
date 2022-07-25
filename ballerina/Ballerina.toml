@@ -10,6 +10,9 @@ license = ["Apache-2.0"]
 distribution = "2201.0.4"
 
 [[platform.java11.dependency]]
+groupId = "task.ballerina.stdlib"
+artifactId = "task-native"
+version = "2.2.3"
 path = "../native/build/libs/task-native-2.2.3-SNAPSHOT.jar"
 
 [[platform.java11.dependency]]
