@@ -1,4 +1,4 @@
-# Specification: Ballerina Cache Library
+# Specification: Ballerina Task Library
 
 _Owners_: @daneshk @kalaiyarasiganeshalingam                                      
 _Reviewers_: @daneshk  
