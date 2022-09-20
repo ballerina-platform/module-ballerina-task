@@ -4,8 +4,7 @@
     "queryAllPublicMethods": true,
     "methods": [
       {
-        "name": "<init>",
-        "parameterTypes": [ ]
+        "name": "<init>"
       }
     ]
   },
@@ -16,8 +15,7 @@
     "name": "org.quartz.simpl.CascadingClassLoadHelper",
     "methods": [
       {
-        "name": "<init>",
-        "parameterTypes": [ ]
+        "name": "<init>"
       }
     ]
   },
@@ -26,8 +24,7 @@
     "queryAllPublicMethods": true,
     "methods": [
       {
-        "name": "<init>",
-        "parameterTypes": [ ]
+        "name": "<init>"
       },
       {
         "name": "setInstanceId",
@@ -54,8 +51,7 @@
     "queryAllPublicMethods": true,
     "methods": [
       {
-        "name": "<init>",
-        "parameterTypes": [ ]
+        "name": "<init>"
       },
       {
         "name": "setInstanceId",
