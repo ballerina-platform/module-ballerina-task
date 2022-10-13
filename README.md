@@ -168,5 +168,5 @@ All contributors are encouraged to read [Ballerina Code of Conduct](https://ball
 
 * For more information go to the [`task` library](https://lib.ballerina.io/ballerina/task/latest).
 * For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
-* Chat live with us on our [Slack channel](https://ballerina.io/community/slack/).
+* Chat live with us on our [Discord server](https://discord.gg/ballerinalang).
 * Technical questions should be posted on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.
