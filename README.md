@@ -2,10 +2,11 @@ Ballerina Task Library
 ===================
 
   [![Build](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml)
+  [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-task/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-task)
   [![Trivy](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/trivy-scan.yml)  
+  [![GraalVM Check](https://img.shields.io/github/workflow/status/ballerina-platform/module-ballerina-task/Build%20with%20bal%20test%20native?label=GraalVM%20Check)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-with-bal-test-native.yml)  
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-task.svg)](https://github.com/ballerina-platform/module-ballerina-task/commits/master)
   [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/task.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Ftask)
-  [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-task/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-task)
 
 This library provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
