@@ -1,4 +1,4 @@
-Ballerina Task Library
+Ballerina Task Librar
 ===================
 
   [![Build](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml)
