@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+[Enable non-quartz logs](https://github.com/ballerina-platform/ballerina-standard-library/issues/4282)
+
+## [2.3.0] - 2022-09-29
+
 ### Added
 - [Add GraalVM native-image build tool support](https://github.com/ballerina-platform/ballerina-standard-library/issues/3315)
 
