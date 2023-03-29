@@ -41,6 +41,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Utility functions used in ballerina task module.
@@ -141,6 +144,12 @@ public class Utils {
     public static void printMessage(String msg, PrintStream console) {
         OffsetDateTime utcNow = OffsetDateTime.now(ZoneOffset.UTC);
         console.println("time = " + formatter.format(utcNow) + " message = " + msg);
+    }
+
+    public static void disableQuartzLogs() {
+        Logger hikariLogger = Logger.getLogger(TaskConstants.QUARTZ_CLASS_NAME);
+        hikariLogger.setLevel(Level.OFF);
+        LogManager.getLogManager().addLogger(hikariLogger);
     }
 
     public static boolean isInt(Object time) {
