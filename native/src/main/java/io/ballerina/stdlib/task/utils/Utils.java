@@ -147,9 +147,9 @@ public class Utils {
     }
 
     public static void disableQuartzLogs() {
-        Logger hikariLogger = Logger.getLogger(TaskConstants.QUARTZ_CLASS_NAME);
-        hikariLogger.setLevel(Level.OFF);
-        LogManager.getLogManager().addLogger(hikariLogger);
+        Logger quartzLogger = Logger.getLogger(TaskConstants.QUARTZ_CLASS_NAME);
+        quartzLogger.setLevel(Level.OFF);
+        LogManager.getLogManager().addLogger(quartzLogger);
     }
 
     public static boolean isInt(Object time) {
