@@ -111,6 +111,7 @@ public class TaskActions {
     }
 
     public static Object unscheduleJob(Long jobId) {
+        Utils.disableQuartzLogs();
         try {
             TaskManager.getInstance().unScheduleJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
@@ -120,6 +121,7 @@ public class TaskActions {
     }
 
     public static Object pauseAllJobs() {
+        Utils.disableQuartzLogs();
         try {
             TaskManager.getInstance().pause();
         } catch (SchedulerException e) {
@@ -129,6 +131,7 @@ public class TaskActions {
     }
 
     public static Object resumeAllJobs() {
+        Utils.disableQuartzLogs();
         try {
             TaskManager.getInstance().resume();
         } catch (SchedulerException e) {
@@ -138,6 +141,7 @@ public class TaskActions {
     }
 
     public static Object pauseJob(Long jobId) {
+        Utils.disableQuartzLogs();
         try {
             TaskManager.getInstance().pauseJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
@@ -147,6 +151,7 @@ public class TaskActions {
     }
 
     public static Object resumeJob(Long jobId) {
+        Utils.disableQuartzLogs();
         try {
             TaskManager.getInstance().resumeJob(Math.toIntExact(jobId));
         } catch (SchedulerException | SchedulingException e) {
