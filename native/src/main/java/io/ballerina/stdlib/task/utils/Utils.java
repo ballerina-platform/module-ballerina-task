@@ -149,12 +149,14 @@ public class Utils {
     }
 
     public static void disableQuartzLogs() {
+        Logger quartzLogger = Logger.getLogger(TaskConstants.QUARTZ_CLASS_NAME);
+        quartzLogger.setLevel(Level.OFF);
+        LogManager.getLogManager().addLogger(quartzLogger);
         LogManager logManager = LogManager.getLogManager();
         Enumeration<String> names = logManager.getLoggerNames();
         for (String name : Collections.list(names)) {
-            if (name.contains(TaskConstants.QUARTZ) || name.isEmpty()) {
-                Logger logger = LogManager.getLogManager().getLogger(name);
-                logger.setLevel(Level.OFF);
+            if (name.contains(TaskConstants.QUARTZ)) {
+                LogManager.getLogManager().getLogger(name).setLevel(Level.OFF);
             }
         }
     }
