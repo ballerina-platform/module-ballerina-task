@@ -38,7 +38,9 @@ import java.io.PrintStream;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -147,9 +149,13 @@ public class Utils {
     }
 
     public static void disableQuartzLogs() {
-        Logger quartzLogger = Logger.getLogger(TaskConstants.QUARTZ_CLASS_NAME);
-        quartzLogger.setLevel(Level.OFF);
-        LogManager.getLogManager().addLogger(quartzLogger);
+        Enumeration<String> names = LogManager.getLogManager().getLoggerNames();
+        for (String name : Collections.list(names)) {
+            if (name.contains(TaskConstants.QUARTZ_CLASS_NAME) || name.isEmpty()) {
+                Logger logger = LogManager.getLogManager().getLogger(name);
+                logger.setLevel(Level.OFF);
+            }
+        }
     }
 
     public static boolean isInt(Object time) {
