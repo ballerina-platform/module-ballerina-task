@@ -49,6 +49,7 @@ public class TaskConstants {
     public static final String TERMINATE = "TERMINATE";
     public static final String WAIT = "WAIT";
     public static final String QUARTZ_CLASS_NAME = "org.quartz";
+    public static final String QUARTZ = "quartz";
 
     public static final BString ERR_POLICY = StringUtils.fromString("errorPolicy");
     public static final BString WAITING_POLICY = StringUtils.fromString("waitingPolicy");
