@@ -149,7 +149,9 @@ public class Utils {
     }
 
     public static void disableQuartzLogs() {
-        Logger.getLogger("").setLevel(Level.OFF);
+        Logger quartzLogger = Logger.getLogger(TaskConstants.QUARTZ_CLASS_NAME);
+        quartzLogger.setLevel(Level.OFF);
+        LogManager.getLogManager().addLogger(quartzLogger);
         LogManager logManager = LogManager.getLogManager();
         Enumeration<String> names = logManager.getLoggerNames();
         for (String name : Collections.list(names)) {
