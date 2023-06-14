@@ -5,6 +5,7 @@
 
 [ballerina]
 dependencies-toml-version = "2"
+distribution-version = "2201.6.0-20230614-102000-d1aade7d"
 
 [[package]]
 org = "ballerina"
@@ -12,6 +13,15 @@ name = "jballerina.java"
 version = "0.0.0"
 modules = [
 	{org = "ballerina", packageName = "jballerina.java", moduleName = "jballerina.java"}
+]
+
+[[package]]
+org = "ballerina"
+name = "lang.error"
+version = "0.0.0"
+scope = "testOnly"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
 ]
 
 [[package]]
@@ -29,7 +39,7 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "task"
-version = "2.3.3"
+version = "2.4.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "lang.runtime"},
@@ -46,7 +56,8 @@ name = "test"
 version = "0.0.0"
 scope = "testOnly"
 dependencies = [
-	{org = "ballerina", name = "jballerina.java"}
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.error"}
 ]
 modules = [
 	{org = "ballerina", packageName = "test", moduleName = "test"}
@@ -55,12 +66,11 @@ modules = [
 [[package]]
 org = "ballerina"
 name = "time"
-version = "2.2.5"
+version = "2.3.0"
 dependencies = [
 	{org = "ballerina", name = "jballerina.java"}
 ]
 modules = [
 	{org = "ballerina", packageName = "time", moduleName = "time"}
 ]
-
 
