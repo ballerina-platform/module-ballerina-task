@@ -16,4 +16,33 @@
   ~ under the License.
   -->
 <FindBugsFilter>
+    <Match>
+        <Class name="io.ballerina.stdlib.task.actions.TaskActions"/>
+        <Method name="scheduleIntervalJob"/>
+        <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.task.actions.TaskActions"/>
+        <Method name="scheduleJob"/>
+        <Bug pattern="DMI_RANDOM_USED_ONLY_ONCE"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.task.objects.TaskManager"/>
+        <Method name="getScheduler"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.task.objects.TaskManager"/>
+        <Method name="getTriggerInfoMap"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.task.objects.TaskManager"/>
+        <Method name="initializeScheduler"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="io.ballerina.stdlib.task.utils.TaskCallBack"/>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
 </FindBugsFilter>
