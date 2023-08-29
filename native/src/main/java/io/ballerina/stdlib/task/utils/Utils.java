@@ -54,7 +54,7 @@ import java.util.logging.Logger;
  */
 public class Utils {
 
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     public static BError createTaskError(String message) {
         return ErrorCreator.createDistinctError(TaskConstants.ERROR, ModuleUtils.getModule(),
@@ -149,9 +149,7 @@ public class Utils {
     }
 
     public static void disableQuartzLogs() {
-        Logger quartzLogger = Logger.getLogger(TaskConstants.QUARTZ_CLASS_NAME);
-        quartzLogger.setLevel(Level.OFF);
-        LogManager.getLogManager().addLogger(quartzLogger);
+        Logger.getLogger("").setLevel(Level.OFF);
         LogManager logManager = LogManager.getLogManager();
         Enumeration<String> names = logManager.getLoggerNames();
         for (String name : Collections.list(names)) {

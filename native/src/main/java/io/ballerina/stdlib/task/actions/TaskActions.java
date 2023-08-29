@@ -46,9 +46,9 @@ import static io.ballerina.runtime.api.creators.ValueCreator.createArrayValue;
  */
 public class TaskActions {
 
-    private static int bound = 1000000;
-    private static String value = "1000";
-    private static PrintStream console = System.err;
+    private static final int bound = 1000000;
+    private static final String value = "1000";
+    private static final PrintStream console = System.err;
 
     static {
         Utils.disableQuartzLogs();
