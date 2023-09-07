@@ -1,0 +1,76 @@
+[
+  {
+    "name": "io.ballerina.stdlib.task.utils.TaskJob",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "<init>"
+      }
+    ]
+  },
+  {
+    "name": "java.beans.PropertyVetoException"
+  },
+  {
+    "name": "org.quartz.simpl.CascadingClassLoadHelper",
+    "methods": [
+      {
+        "name": "<init>"
+      }
+    ]
+  },
+  {
+    "name": "org.quartz.simpl.RAMJobStore",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "<init>"
+      },
+      {
+        "name": "setInstanceId",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "setInstanceName",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "setMisfireThreshold",
+        "parameterTypes": [
+          "long"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "org.quartz.simpl.SimpleThreadPool",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "<init>"
+      },
+      {
+        "name": "setInstanceId",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "setInstanceName",
+        "parameterTypes": [
+          "java.lang.String"
+        ]
+      },
+      {
+        "name": "setThreadCount",
+        "parameterTypes": [
+          "int"
+        ]
+      }
+    ]
+  }
+]

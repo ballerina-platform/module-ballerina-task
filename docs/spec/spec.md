@@ -1,32 +1,31 @@
-# Specification: Ballerina Cache Library
+# Specification: Ballerina Task Library
 
 _Owners_: @daneshk @kalaiyarasiganeshalingam                                      
 _Reviewers_: @daneshk  
 _Created_: 2021/12/12  
 _Updated_: 2022/02/17  
 _Edition_: Swan Lake  
-_Issue_: [#2326](https://github.com/ballerina-platform/ballerina-standard-library/issues/2326)
 
-# Introduction
+## Introduction
 This is the specification for the Task standard library of [Ballerina language](https://ballerina.io/), which provides APIs to schedule a Ballerina job either once or periodically and manage the execution of those jobs.
 
 The Task library specification has evolved and may continue to evolve in the future. The released versions of the specification can be found under the relevant GitHub tag.
 
-If you have any feedback or suggestions about the library, start a discussion via a [GitHub issue](https://github.com/ballerina-platform/ballerina-standard-library/issues) or in the [Slack channel](https://ballerina.io/community/). Based on the outcome of the discussion, the specification and implementation can be updated. Community feedback is always welcome. Any accepted proposal, which affects the specification is stored under `/docs/proposals`. Proposals under discussion can be found with the label `type/proposal` in GitHub.
+If you have any feedback or suggestions about the library, start a discussion via a [GitHub issue](https://github.com/ballerina-platform/ballerina-standard-library/issues) or in the [Discord server](https://discord.gg/ballerinalang). Based on the outcome of the discussion, the specification and implementation can be updated. Community feedback is always welcome. Any accepted proposal, which affects the specification is stored under `/docs/proposals`. Proposals under discussion can be found with the label `type/proposal` in GitHub.
 
 The conforming implementation of the specification is released and included in the distribution. Any deviation from the specification is considered a bug.
 
-# Contents
+## Contents
 1. [Overview](#1-overview)
 2. [Job](#2-job)
 3. [Worker Pool and Waiting Time](#3-worker-pool-and-waiting-time)
 4. [Job Scheduling](#4-job-scheduling)
-5. [Manage Scheduled Jobs](#4-manage-scheduled-jobs)
-    * 5.1 [Pause All Jobs](#51-pause-all-jobs)
-    * 5.2 [Resume All Jobs](#52-resume-all-jobs)
-    * 5.3 [Pause Job](#53-pause-job)
-    * 5.4 [Resume Job](#54-resume-job)
-    * 5.5 [Get Running Jobs](#55-get-running-jobs)
+5. [Manage Scheduled Jobs](#5-manage-scheduled-jobs)
+    * 5.1. [Pause All Jobs](#51-pause-all-jobs)
+    * 5.2. [Resume All Jobs](#52-resume-all-jobs)
+    * 5.3. [Pause Job](#53-pause-job)
+    * 5.4. [Resume Job](#54-resume-job)
+    * 5.5. [Get Running Jobs](#55-get-running-jobs)
 6. [Unschedule a Particular Scheduled Job](#6-unschedule-a-particular-scheduled-job)
 
 ## 1. Overview
@@ -103,27 +102,27 @@ This package provides the following two policies to manage triggers:
 
 The following APIs provide by this package to manage the scheduled jobs.
 
-### 5.1 Pause All Jobs
+### 5.1. Pause All Jobs
 The following API is used to pause all the jobs.
 ```ballerina
 public isolated function pauseAllJobs() returns Error?
 ```
-### 5.2 Resume All Jobs
+### 5.2. Resume All Jobs
 The following API is used to resume all the jobs.
 ```ballerina
 public isolated function resumeAllJobs() returns Error?
 ```
-### 5.3 Pause Job
+### 5.3. Pause Job
 The following API is used to pause all the jobs.
 ```ballerina
 public isolated function pauseJob(JobId jobId) returns Error?
 ```
-### 5.4 Resume Job
+### 5.4. Resume Job
 The following API is used to resume all the jobs.
 ```ballerina
 public isolated function resumeJob(JobId jobId) returns Error?
 ```
-### 5.5 Get Running Jobs
+### 5.5. Get Running Jobs
 The following API is used to get all the running jobs.
 ```ballerina
 public isolated function getRunningJobs() returns JobId[]

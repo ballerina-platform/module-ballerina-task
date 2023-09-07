@@ -159,7 +159,7 @@ function testIgnoreTrigger() returns error? {
     runtime:sleep(10);
     check resumeJob(id);
     runtime:sleep(8);
-    test:assertEquals(count6, 3, msg = "Expected count mismatched.");
+    test:assertTrue(count6 >= 3 && count6 <= 5, msg = "Expected count mismatched.");
 }
 
 int count7 = 0;

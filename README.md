@@ -2,10 +2,11 @@ Ballerina Task Library
 ===================
 
   [![Build](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml)
+  [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-task/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-task)
   [![Trivy](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/trivy-scan.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/trivy-scan.yml)  
+  [![GraalVM Check](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-with-bal-test-graalvm.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-with-bal-test-graalvm.yml)  
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-task.svg)](https://github.com/ballerina-platform/module-ballerina-task/commits/master)
   [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/task.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Ftask)
-  [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-task/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-task)
 
 This library provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
@@ -108,10 +109,10 @@ This repository only contains the source code for the package.
 ## Build from the source
 ### Set up the prerequisites
 
-1. Download and install Java SE Development Kit (JDK) version 11 (from one of the following locations).
-   * [Oracle](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
+1. Download and install Java SE Development Kit (JDK) version 17 (from one of the following locations).
+   * [Oracle](https://www.oracle.com/java/technologies/downloads/)
    
-   * [OpenJDK](https://adoptopenjdk.net/)
+   * [OpenJDK](https://adoptium.net/)
    
         > **Note:** Set the JAVA_HOME environment variable to the path name of the directory into which you installed JDK.
      
@@ -168,5 +169,5 @@ All contributors are encouraged to read [Ballerina Code of Conduct](https://ball
 
 * For more information go to the [`task` library](https://lib.ballerina.io/ballerina/task/latest).
 * For example demonstrations of the usage, go to [Ballerina By Examples](https://ballerina.io/learn/by-example/).
-* Chat live with us on our [Slack channel](https://ballerina.io/community/slack/).
+* Chat live with us on our [Discord server](https://discord.gg/ballerinalang).
 * Technical questions should be posted on Stack Overflow with the [#ballerina](https://stackoverflow.com/questions/tagged/ballerina) tag.

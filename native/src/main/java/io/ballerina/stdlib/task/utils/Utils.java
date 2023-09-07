@@ -38,9 +38,14 @@ import java.io.PrintStream;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 /**
  * Utility functions used in ballerina task module.
@@ -49,7 +54,7 @@ import java.util.UUID;
  */
 public class Utils {
 
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     public static BError createTaskError(String message) {
         return ErrorCreator.createDistinctError(TaskConstants.ERROR, ModuleUtils.getModule(),
@@ -141,6 +146,17 @@ public class Utils {
     public static void printMessage(String msg, PrintStream console) {
         OffsetDateTime utcNow = OffsetDateTime.now(ZoneOffset.UTC);
         console.println("time = " + formatter.format(utcNow) + " message = " + msg);
+    }
+
+    public static void disableQuartzLogs() {
+        Logger.getLogger("").setLevel(Level.OFF);
+        LogManager logManager = LogManager.getLogManager();
+        Enumeration<String> names = logManager.getLoggerNames();
+        for (String name : Collections.list(names)) {
+            if (name.contains(TaskConstants.QUARTZ)) {
+                LogManager.getLogManager().getLogger(name).setLevel(Level.OFF);
+            }
+        }
     }
 
     public static boolean isInt(Object time) {
