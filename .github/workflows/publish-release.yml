@@ -12,5 +12,5 @@ jobs:
     uses: ballerina-platform/ballerina-standard-library/.github/workflows/release-package-template.yml@main
     secrets: inherit
     with:
-      package-name: io
+      package-name: task
       package-org: ballerina
