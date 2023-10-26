@@ -44,7 +44,9 @@ import static io.ballerina.runtime.api.creators.ValueCreator.createArrayValue;
  *
  * @since 0.1.4
  */
-public class TaskActions {
+public final class TaskActions {
+
+    private TaskActions() {}
 
     private static final int bound = 1000000;
     private static final String value = "1000";

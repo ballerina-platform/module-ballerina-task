@@ -52,7 +52,9 @@ import java.util.logging.Logger;
  *
  * @since 0.995.0
  */
-public class Utils {
+public final class Utils {
+
+    private Utils() {}
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
