@@ -9,14 +9,14 @@ icon = "icon.png"
 license = ["Apache-2.0"]
 distribution = "2201.8.0"
 
-[platform.java17]
+[platform.java21]
 graalvmCompatible = true
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "task-native"
 version = "2.5.1"
 path = "../native/build/libs/task-native-2.5.1-SNAPSHOT.jar"
 
-[[platform.java17.dependency]]
+[[platform.java21.dependency]]
 path = "./lib/quartz-2.3.2.jar"
