@@ -18,7 +18,8 @@
 package io.ballerina.stdlib.task.utils;
 
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.async.Callback;
+import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import org.quartz.Job;
@@ -39,7 +40,15 @@ public class TaskJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) {
         Runtime runtime = TaskManager.getInstance().getRuntime();
         BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
-        Callback callback = new TaskCallBack(jobExecutionContext);
-        runtime.invokeMethodAsync(job, TaskConstants.EXECUTE, null, null, callback);
+        try {
+            Object result = runtime.call(job, TaskConstants.EXECUTE);
+            if (result instanceof BError error) {
+                Utils.notifyFailure(jobExecutionContext, error);
+            }
+        } catch (BError error) {
+            Utils.notifyFailure(jobExecutionContext, error);
+        } catch (Throwable t) {
+            Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
+        }
     }
 }
