@@ -19,6 +19,7 @@ package io.ballerina.stdlib.task.utils;
 
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.task.objects.TaskManager;
@@ -38,17 +39,21 @@ public class TaskJob implements Job {
      */
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
-        Runtime runtime = TaskManager.getInstance().getRuntime();
-        BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
-        try {
-            Object result = runtime.call(job, TaskConstants.EXECUTE);
-            if (result instanceof BError error) {
+        Thread.startVirtualThread(() -> {
+            Runtime runtime = TaskManager.getInstance().getRuntime();
+            BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
+            try {
+                ObjectType objectType = (ObjectType) job.getOriginalType();
+                if (objectType.isIsolated() && objectType.isIsolated(TaskConstants.EXECUTE)) {
+                    runtime.startIsolatedWorker(job, TaskConstants.EXECUTE, null, null, null);
+                } else {
+                    runtime.startNonIsolatedWorker(job, TaskConstants.EXECUTE, null, null, null);
+                }
+            } catch (BError error) {
                 Utils.notifyFailure(jobExecutionContext, error);
+            } catch (Throwable t) {
+                Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
             }
-        } catch (BError error) {
-            Utils.notifyFailure(jobExecutionContext, error);
-        } catch (Throwable t) {
-            Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
-        }
+        });
     }
 }
