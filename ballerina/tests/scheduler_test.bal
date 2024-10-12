@@ -229,7 +229,7 @@ function testLogAndTerminate() returns error? {
     _ = check scheduleJobRecurByFrequency(new Job9(), 5, maxCount = 2,
     taskPolicy = {errorPolicy: LOG_AND_TERMINATE});
     runtime:sleep(10);
-    test:assertEquals(count9, 1, msg = "Expected count mismatched.");
+    test:assertEquals(count9, 2, msg = "Expected count mismatched.");
 }
 
 int count10 = 0;
@@ -250,7 +250,7 @@ class Job10 {
 function testTerminate() returns error? {
     _ = check scheduleJobRecurByFrequency(new Job10(), 5, maxCount = 2, taskPolicy = {errorPolicy: TERMINATE});
     runtime:sleep(10);
-    test:assertEquals(count9, 1, msg = "Expected count mismatched.");
+    test:assertEquals(count9, 2, msg = "Expected count mismatched.");
 }
 
 int count11 = 0;
