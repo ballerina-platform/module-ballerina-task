@@ -18,6 +18,7 @@
 package io.ballerina.stdlib.task.utils;
 
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.values.BError;
@@ -44,11 +45,9 @@ public class TaskJob implements Job {
             BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
             try {
                 ObjectType objectType = (ObjectType) job.getOriginalType();
-                if (objectType.isIsolated() && objectType.isIsolated(TaskConstants.EXECUTE)) {
-                    runtime.startIsolatedWorker(job, TaskConstants.EXECUTE, null, null, null);
-                } else {
-                    runtime.startNonIsolatedWorker(job, TaskConstants.EXECUTE, null, null, null);
-                }
+                boolean isConcurrentSafe = objectType.isIsolated() && objectType.isIsolated(TaskConstants.EXECUTE);
+                StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
+                runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
             } catch (BError error) {
                 Utils.notifyFailure(jobExecutionContext, error);
             } catch (Throwable t) {
