@@ -17,8 +17,8 @@
  */
 package io.ballerina.stdlib.task.utils;
 
-import io.ballerina.runtime.api.TypeTags;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.types.TypeTags;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
@@ -26,6 +26,7 @@ import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.JobExecutionContext;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
@@ -57,6 +58,8 @@ public final class Utils {
     private Utils() {}
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+    private static final PrintStream console = System.out;
 
     public static BError createTaskError(String message) {
         return ErrorCreator.createDistinctError(TaskConstants.ERROR, ModuleUtils.getModule(),
@@ -163,5 +166,33 @@ public final class Utils {
 
     public static boolean isInt(Object time) {
         return TypeUtils.getType(time).getTag() == TypeTags.INT_TAG;
+    }
+
+    public static void notifyFailure(JobExecutionContext jobExecutionContext, BError bError) {
+        Scheduler scheduler = jobExecutionContext.getScheduler();
+        String errorPolicy = (String) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.ERROR_POLICY);
+        String jobId = (String) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB_ID);
+        if (isLogged(errorPolicy)) {
+            Utils.printMessage("Unable to execute the job[" + jobId + "]. " + bError.getMessage(), console);
+        }
+        if (isTerminated(errorPolicy)) {
+            try {
+                scheduler.unscheduleJob(jobExecutionContext.getTrigger().getKey());
+            } catch (SchedulerException e) {
+                if (errorPolicy.equalsIgnoreCase(TaskConstants.LOG_AND_TERMINATE)) {
+                    Utils.printMessage(e.toString(), console);
+                }
+            }
+        }
+    }
+
+    private static boolean isLogged(String errorPolicy) {
+        return errorPolicy.equalsIgnoreCase(TaskConstants.LOG_AND_TERMINATE) ||
+                errorPolicy.equalsIgnoreCase(TaskConstants.LOG_AND_CONTINUE);
+    }
+
+    private static boolean isTerminated(String errorPolicy) {
+        return errorPolicy.equalsIgnoreCase(TaskConstants.LOG_AND_TERMINATE) ||
+                errorPolicy.equalsIgnoreCase(TaskConstants.TERMINATE);
     }
 }
