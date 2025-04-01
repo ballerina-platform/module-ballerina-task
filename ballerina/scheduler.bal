@@ -141,7 +141,7 @@ public isolated function resumeJob(JobId jobId) returns Error? {
 # task:JobId[] result = task:getRunningJobs();
 # ```
 #
-# + return - Returns the IDs of all the running jobs as an array
+# + return - IDs of all the running jobs as an array
 public isolated function getRunningJobs() returns JobId[] {
     JobId[] jobIds = [];
     int[] ids = externGetRunningJobs();
