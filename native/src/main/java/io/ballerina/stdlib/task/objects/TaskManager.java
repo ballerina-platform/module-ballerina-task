@@ -20,6 +20,9 @@ package io.ballerina.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BMap;
+import io.ballerina.stdlib.task.TokenAcquisition;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.utils.TaskConstants;
 import io.ballerina.stdlib.task.utils.Utils;
@@ -35,10 +38,19 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.ballerina.stdlib.task.TokenAcquisition.CONNECTION;
+import static io.ballerina.stdlib.task.TokenAcquisition.INSTANCE_ID;
+import static io.ballerina.stdlib.task.TokenAcquisition.LIVENESS_INTERVAL;
+import static io.ballerina.stdlib.task.TokenAcquisition.TOKEN_HOLDER;
+
 /**
  * Task manager to handle schedulers in ballerina tasks.
  */
 public class TaskManager {
+    public static final String TOKEN_HOLDER = "token_holder";
+    public static final String INSTANCE_ID = "instanceId";
+    public static final String CONNECTION = "connection";
+    public static final String LIVENESS_INTERVAL = "livenessInterval";
     private Scheduler scheduler;
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
@@ -125,6 +137,16 @@ public class TaskManager {
         Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
                 TaskConstants.TRIGGER_ID);
         scheduleJob(job, trigger, jobId);
+    }
+
+    public void scheduleIntervalJobWithTokenCheck(JobDataMap jobDataMap, long interval, long maxCount,
+                                                  Object startTime, Object endTime, String waitingPolicy,
+                                                  Integer jobId, BMap response) throws SchedulerException {
+        jobDataMap.put(TOKEN_HOLDER, response.getBooleanValue(TokenAcquisition.TOKEN_HOLDER));
+        jobDataMap.put(INSTANCE_ID, response.getStringValue(TokenAcquisition.INSTANCE_ID));
+        jobDataMap.put(CONNECTION, response.get(TokenAcquisition.CONNECTION));
+        jobDataMap.put(LIVENESS_INTERVAL, response.get(TokenAcquisition.LIVENESS_INTERVAL));
+        scheduleIntervalJob(jobDataMap, interval, maxCount, startTime, endTime, waitingPolicy, jobId);
     }
 
     private void scheduleJob(JobDetail job, Trigger trigger, Integer jobId) throws SchedulerException {
