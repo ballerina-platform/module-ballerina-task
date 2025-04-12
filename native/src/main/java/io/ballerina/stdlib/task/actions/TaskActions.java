@@ -97,6 +97,24 @@ public final class TaskActions {
         return jobId;
     }
 
+    public static Object scheduleIntervalJobWithToken(Environment env, BObject job, BDecimal interval, long maxCount,
+                                                      Object startTime, Object endTime, BMap<BString, Object> policy,
+                                                      BMap tokenHolder) {
+        Utils.disableQuartzLogs();
+        int jobId = new Random().nextInt(bound);
+        JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
+                String.valueOf(jobId));
+        try {
+            getScheduler(env);
+            TaskManager.getInstance().scheduleIntervalJobWithTokenCheck(jobDataMap,
+                    (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
+                    endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), jobId, tokenHolder);
+        } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+        return jobId;
+    }
+
     private static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
         Utils.disableQuartzLogs();
         return TaskManager.getInstance().getScheduler(Utils.createSchedulerProperties(
