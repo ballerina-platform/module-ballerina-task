@@ -31,9 +31,7 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.logging.Logger;
 
 import static io.ballerina.stdlib.task.TokenAcquisition.attemptTokenAcquisition;
 import static io.ballerina.stdlib.task.TokenAcquisition.upsertToken;
@@ -54,11 +52,8 @@ public class TaskJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) {
         Thread.startVirtualThread(() -> {
             Runtime runtime = TaskManager.getInstance().getRuntime();
-            BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
             Boolean isTokenHolder = (Boolean) jobExecutionContext.getMergedJobDataMap().get(TOKEN_HOLDER);
-            Connection connection = (Connection) jobExecutionContext.getMergedJobDataMap().get(CONNECTION);
-            String instanceId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
-            int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
+            BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
             boolean needsRollback = false;
             if (isTokenHolder == null || isTokenHolder) {
                 try {
@@ -72,6 +67,9 @@ public class TaskJob implements Job {
                     Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
                 }
             } else {
+                Connection connection = (Connection) jobExecutionContext.getMergedJobDataMap().get(CONNECTION);
+                String instanceId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
+                int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
                 try {
                     connection.setAutoCommit(false);
                     needsRollback = true;
