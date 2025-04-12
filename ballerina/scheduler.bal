@@ -16,6 +16,32 @@
 
 import ballerina/jballerina.java;
 import ballerina/time;
+import ballerina/sql;
+import ballerinax/mysql;
+import ballerinax/mysql.driver as _;
+import ballerina/uuid;
+import ballerina/io;
+
+final int livenessCheckInterval = 30;
+
+# Represents the configuration required to connect to a database related to task coordination.
+#
+# + host - The hostname of the database server
+# + user - The username for the database connection
+# + password - The password for the database connection
+# + port - The port number of the database server
+# + database - The name of the database to connect to
+# + options - Additional options for the MySQL connection
+# + connectionPool - The connection pool configuration
+public type DatabaseConfig record {
+    string host = "localhost";
+    string? user = ();
+    string? password = ();
+    int port = 3306;
+    string? database = ();
+    mysql:Options? options = ();
+    sql:ConnectionPool? connectionPool = ();
+};
 
 # Configure the scheduler worker pool.
 # ```ballerina
@@ -62,10 +88,15 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy -  The policy, which is used to handle the error and will be waiting during the trigger time
+# + taskCoordination - The flag to indicate whether the job should be coordinated with other jobs
+# + databaseConfig - The database configuration to be used for task coordination
+# + livenessCheckInterval - The interval (in seconds) to check the liveness of the job. Default is 30 seconds. 
+#   When using multiple nodes, the duration must be different from other nodes.
 # + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,  int maxCount = -1,
-                                    time:Civil? startTime = (), time:Civil? endTime = (), TaskPolicy taskPolicy = {})
-                                    returns JobId|Error {
+                                    time:Civil? startTime = (), time:Civil? endTime = (), TaskPolicy taskPolicy = {},
+                                    boolean taskCoordination = false, DatabaseConfig databaseConfig = {}, 
+                                    int livenessCheckInterval = 30) returns JobId|Error {
     if maxCount != -1 && maxCount < 1 {
         return error Error("The maxCount should be a positive integer.");
     }
@@ -77,7 +108,21 @@ public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,
     if endTime is time:Civil {
         eTime = check getTimeInMillies(endTime);
     }
-    int result = check scheduleIntervalJob(job, interval, maxCount, sTime, eTime, taskPolicy);
+    int result;
+    if taskCoordination {
+        string instanceId = uuid:createRandomUuid();
+        io:println("Instance ID: ", instanceId);
+        boolean tokenAcquired = false;
+        map<any> response;
+        do {
+            response = acquireToken(databaseConfig, instanceId, tokenAcquired, livenessCheckInterval);
+        } on fail error err {
+            return error Error(err.message());
+        }
+        result = check scheduleIntervalJobWithToken(job, interval, maxCount, sTime, eTime, taskPolicy, response);
+    } else {
+        result = check scheduleIntervalJob(job, interval, maxCount, sTime, eTime, taskPolicy);
+    }
     JobId jobId = {id: result};
     return jobId;
 }
@@ -167,6 +212,11 @@ TaskPolicy taskPolicy) returns int|Error = @java:Method {
     'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
+isolated function scheduleIntervalJobWithToken(Job job, decimal interval, int maxcount, int? startTime, int? endTime,
+TaskPolicy taskPolicy, map<any> response) returns int|Error = @java:Method {
+    'class: "io.ballerina.stdlib.task.actions.TaskActions"
+} external;
+
 isolated function externUnscheduleJob(int id) returns Error? = @java:Method {
     name: "unscheduleJob",
     'class: "io.ballerina.stdlib.task.actions.TaskActions"
@@ -195,4 +245,9 @@ isolated function externResumeJob(int id) returns Error? = @java:Method {
 isolated function externGetRunningJobs() returns int[] = @java:Method {
     name: "getRunningJobs",
     'class: "io.ballerina.stdlib.task.actions.TaskActions"
+} external;
+
+isolated function acquireToken(DatabaseConfig dbConfig, string instanceId, 
+                               boolean tokenAcquired, int livenessInterval) returns map<any> = @java:Method {
+    'class: "io.ballerina.stdlib.task.TokenAcquisition"
 } external;
