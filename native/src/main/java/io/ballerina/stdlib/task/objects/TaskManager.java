@@ -20,7 +20,6 @@ package io.ballerina.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.stdlib.task.TokenAcquisition;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
@@ -37,11 +36,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static io.ballerina.stdlib.task.TokenAcquisition.CONNECTION;
-import static io.ballerina.stdlib.task.TokenAcquisition.INSTANCE_ID;
-import static io.ballerina.stdlib.task.TokenAcquisition.LIVENESS_INTERVAL;
-import static io.ballerina.stdlib.task.TokenAcquisition.TOKEN_HOLDER;
 
 /**
  * Task manager to handle schedulers in ballerina tasks.

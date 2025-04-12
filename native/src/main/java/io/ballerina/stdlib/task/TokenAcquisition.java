@@ -49,6 +49,7 @@ public class TokenAcquisition {
     public static final BString TOKEN_HOLDER = StringUtils.fromString("tokenholder");
     public static final BString CONNECTION = StringUtils.fromString("connection");
     public static final BString LIVENESS_INTERVAL = StringUtils.fromString("livenessInterval");
+    public static final String LAST_HEARTBEAT = "last_heartbeat";
 
     public static class Error extends Exception {
         public Error(String message) {
@@ -142,9 +143,7 @@ public class TokenAcquisition {
                         ResultSet healthCheckRs = healthStmt.executeQuery();
 
                         if (healthCheckRs.next()) {
-                            System.out.println("Current Timestamp: " + timestamp);
-                            Timestamp lastHeartbeat = healthCheckRs.getTimestamp("last_heartbeat");
-                            System.out.println("Last Heartbeat: " + lastHeartbeat);
+                            Timestamp lastHeartbeat = healthCheckRs.getTimestamp(LAST_HEARTBEAT);
                             long timeDiffSeconds = (timestamp.getTime() - lastHeartbeat.getTime()) / 1000;
 
                             if (timeDiffSeconds > livenessInterval) {
