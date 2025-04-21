@@ -19,30 +19,62 @@
 package io.ballerina.stdlib.task;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
+import static io.ballerina.stdlib.task.TokenAcquisition.JDBC_URL;
+
+/**
+ * Scheduler for health check updates.
+ */
 public class HealthCheckScheduler {
-
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    public static final String HEALTH_CHECK_QUERY = "INSERT INTO health_check(token_id, last_heartbeat) " +
+            "VALUES (?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE last_heartbeat = CURRENT_TIMESTAMP";
 
-    public static void startHealthCheckUpdater(Connection connection, String tokenId, int periodInSeconds) {
+    public static void startHealthCheckUpdater(DatabaseConfig dbConfig, String tokenId, int periodInSeconds) {
         Runnable task = () -> {
-            String healthCheckQuery = "INSERT INTO health_check(token_id, last_heartbeat) " +
-                    "VALUES (?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE last_heartbeat = CURRENT_TIMESTAMP";
-            try (PreparedStatement stmt = connection.prepareStatement(healthCheckQuery)) {
-                stmt.setString(1, tokenId);
-                stmt.executeUpdate();
-                connection.commit();
+            boolean needsRollback = false;
+            Connection connection = null;
+            try {
+                synchronized (dbConfig) {
+                    String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
+                    connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+                    connection.setAutoCommit(false);
+                    needsRollback = true;
+                    try (PreparedStatement stmt = connection.prepareStatement(HEALTH_CHECK_QUERY)) {
+                        stmt.setString(1, tokenId);
+                        stmt.executeUpdate();
+                        connection.commit();
+                        needsRollback = false;
+                    }
+                }
             } catch (SQLException e) {
-                Logger.getLogger(HealthCheckScheduler.class.getName())
-                        .severe("Error updating health check: " + e.getMessage());
+                if (connection != null && needsRollback) {
+                    try {
+                        connection.rollback();
+                    } catch (SQLException rollbackException) {
+                        throw new RuntimeException("Failed to rollback transaction", rollbackException);
+                    }
+                }
             }
         };
         scheduler.scheduleAtFixedRate(task, 0, periodInSeconds, TimeUnit.SECONDS);
+    }
+
+    public static void shutdown() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }
