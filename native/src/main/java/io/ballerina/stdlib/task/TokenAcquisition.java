@@ -66,11 +66,7 @@ public class TokenAcquisition {
     public static final String UPSERT_VALID_TOKEN_QUERY = "INSERT INTO token_holder(token_id, is_active) " +
             "VALUES (?, true) ON DUPLICATE KEY UPDATE is_active = true";
 
-    public static class Error extends Exception {
-        public Error(String message) {
-            super(message);
-        }
-    }
+    private TokenAcquisition() { }
 
     /**
      * Acquires token with proper transaction handling.
@@ -97,7 +93,9 @@ public class TokenAcquisition {
             }
             connection.commit();
             needsRollback = false;
-            HealthCheckScheduler.startHealthCheckUpdater(dbConfig, instanceId, heartbeatFrequency);
+            if (tokenAcquired) {
+                HealthCheckScheduler.startHealthCheckUpdater(dbConfig, instanceId, heartbeatFrequency);
+            }
             return generateResponse(tokenAcquired, livenessInterval, instanceId, dbConfig);
         } catch (Exception e) {
             Utils.rollbackIfNeeded(connection, needsRollback);
@@ -170,7 +168,6 @@ public class TokenAcquisition {
                 }
             }
         }
-
         return tokenAcquired;
     }
 }

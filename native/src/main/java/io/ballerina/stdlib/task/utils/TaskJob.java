@@ -66,44 +66,56 @@ public class TaskJob implements Job {
             DatabaseConfig dbConfig = (DatabaseConfig) jobExecutionContext.getMergedJobDataMap().get(DATABASE_CONFIG);
             String instanceId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
             String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
-            Connection connection = null;
-            boolean needsRollback = false;
-            try {
-                connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
-                connection.setAutoCommit(false);
-                needsRollback = true;
-                if (isTokenHolder) {
-                    boolean acquiredToken = hasActiveToken(connection, instanceId);
-                    connection.commit();
-                    needsRollback = false;
-                    if (acquiredToken) {
-                        executeJob(job, runtime, jobExecutionContext);
-                    }
-                } else {
-                    int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
-                    boolean acquiredToken =
-                            attemptTokenAcquisition(connection, instanceId, false, livenessInterval);
-                    if (!acquiredToken) {
-                        upsertToken(connection, instanceId);
-                    }
-                    connection.commit();
-                    needsRollback = false;
-                    if (acquiredToken) {
-                        executeJob(job, runtime, jobExecutionContext);
-                    }
-                }
-            } catch (SQLException e) {
-                rollbackIfNeeded(connection, needsRollback);
-                Utils.notifyFailure(jobExecutionContext,
-                        ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
-            } catch (BError error) {
-                rollbackIfNeeded(connection, needsRollback);
-                Utils.notifyFailure(jobExecutionContext, error);
-            } catch (Throwable t) {
-                rollbackIfNeeded(connection, needsRollback);
-                Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
-            }
+            processJobWithCoordination(job, runtime, jobExecutionContext, isTokenHolder, instanceId, jdbcUrl, dbConfig);
         });
+    }
+
+    private void processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
+                                            boolean isTokenHolder, String instanceId,
+                                            String jdbcUrl, DatabaseConfig dbConfig) {
+        Connection connection = null;
+        boolean needsRollback = false;
+
+        try {
+            connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+            connection.setAutoCommit(false);
+            needsRollback = true;
+
+            boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext,
+                                                                 instanceId, isTokenHolder);
+            connection.commit();
+            needsRollback = false;
+
+            if (shouldExecuteJob) {
+                executeJob(job, runtime, jobExecutionContext);
+            }
+        } catch (SQLException e) {
+            handleExecutionException(connection, needsRollback, jobExecutionContext,
+                    ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
+        } catch (BError error) {
+            handleExecutionException(connection, needsRollback, jobExecutionContext, error);
+        } catch (Throwable t) {
+            handleExecutionException(connection, needsRollback, jobExecutionContext, ErrorCreator.createError(t));
+        }
+    }
+
+    private boolean checkAndUpdateTokenStatus(Connection connection, JobExecutionContext jobExecutionContext,
+                                              String instanceId, boolean isTokenHolder) throws SQLException {
+        if (isTokenHolder) {
+            return hasActiveToken(connection, instanceId);
+        }
+        int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
+        boolean acquiredToken = attemptTokenAcquisition(connection, instanceId, false, livenessInterval);
+        if (!acquiredToken) {
+            upsertToken(connection, instanceId);
+        }
+        return acquiredToken;
+    }
+
+    private void handleExecutionException(Connection connection, boolean needsRollback,
+                                          JobExecutionContext jobExecutionContext, BError error) {
+        rollbackIfNeeded(connection, needsRollback);
+        Utils.notifyFailure(jobExecutionContext, error);
     }
 
     private void executeJob(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext) {

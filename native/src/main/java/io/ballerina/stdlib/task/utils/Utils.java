@@ -202,7 +202,9 @@ public final class Utils {
         if (connection != null && needsRollback) {
             try {
                 connection.rollback();
-            } catch (SQLException ignored) { }
+            } catch (SQLException ignored) {
+
+            }
         }
     }
 }
