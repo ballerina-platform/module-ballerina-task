@@ -14,7 +14,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
+import ballerina/sql;
 import ballerina/time;
+import ballerinax/mysql;
+import ballerinax/mysql.driver as _;
+import ballerina/uuid;
 
 # A read-only record consisting of a unique identifier for a created job.
 public type JobId readonly & record {|
@@ -52,6 +56,38 @@ public enum WaitingPolicy {
   IGNORE,
   LOG_AND_IGNORE
 }
+
+# Represents the configuration required to connect to a database related to task coordination.
+#
+# + host - The hostname of the database server
+# + user - The username for the database connection
+# + password - The password for the database connection
+# + port - The port number of the database server
+# + database - The name of the database to connect to
+# + options - Additional options for the MySQL connection
+# + connectionPool - The connection pool configuration
+public type DatabaseConfig record {
+  string host = "localhost";
+  string? user = ();
+  string? password = ();
+  int port = 3306;
+  string? database = ();
+  mysql:Options? options = ();
+  sql:ConnectionPool? connectionPool = ();
+};
+
+# Represents the configuration required for task coordination.
+#
+# + databaseConfig - The database configuration for task coordination
+# + livenessCheckInterval - The interval (in seconds) to check the liveness of the job. Default is 30 seconds.
+# + nodeId - Optional identifier for the current node (auto-generated if not provided)
+# + heartbeatFrequency - The interval (in seconds) for the node to update its heartbeat. Default is one second.
+public type CoordinationConfig record {
+    DatabaseConfig databaseConfig = {};
+    int livenessCheckInterval = 30;
+    string nodeId = uuid:createRandomUuid();
+    int heartbeatFrequency = 1;
+};
 
 # Gets time in milliseconds of the given `time:Civil`.
 #
