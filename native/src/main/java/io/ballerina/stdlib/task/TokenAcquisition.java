@@ -32,8 +32,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-import static io.ballerina.stdlib.task.HealthCheckScheduler.startHealthCheckUpdater;
-
+/**
+ * Handles token acquisition with proper transaction management.
+ */
 public class TokenAcquisition {
 
     public static final BString DB_HOST = StringUtils.fromString("host");
@@ -41,6 +42,7 @@ public class TokenAcquisition {
     public static final BString DB_PASSWORD = StringUtils.fromString("password");
     public static final BString DB_PORT = StringUtils.fromString("port");
     public static final BString DATABASE = StringUtils.fromString("database");
+    public static final BString DATABASE_CONFIG = StringUtils.fromString("databaseConfig");
     public static final String JDBC_URL = "jdbc:mysql://%s:%d/%s";
     public static final BString STATUS = StringUtils.fromString("status");
     public static final BString ACTIVE_STATUS = StringUtils.fromString("active");
@@ -50,6 +52,19 @@ public class TokenAcquisition {
     public static final BString CONNECTION = StringUtils.fromString("connection");
     public static final BString LIVENESS_INTERVAL = StringUtils.fromString("livenessInterval");
     public static final String LAST_HEARTBEAT = "last_heartbeat";
+    public static final String HAS_TOKEN_QUERY =
+            "SELECT token_id FROM token_holder WHERE token_id = ? AND is_active = true";
+    public static final String UPSERT_INVALID_TOKEN_QUERY = "INSERT INTO token_holder(token_id, is_active) " +
+            "VALUES (?, false) ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)";
+    public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT token_id FROM token_holder WHERE is_active = true";
+    public static final String INSERT_TOKEN_QUERY = "INSERT INTO token_holder(token_id, is_active) VALUES (?, true)";
+    public static final String CURRENT_TIMESTAMP_QUERY = "SELECT CURRENT_TIMESTAMP";
+    public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE token_id = ? " +
+            "ORDER BY last_heartbeat DESC LIMIT 1";
+    public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false WHERE token_id = ?";
+    public static final String TOKEN_ID = "token_id";
+    public static final String UPSERT_VALID_TOKEN_QUERY = "INSERT INTO token_holder(token_id, is_active) " +
+            "VALUES (?, true) ON DUPLICATE KEY UPDATE is_active = true";
 
     public static class Error extends Exception {
         public Error(String message) {
@@ -57,128 +72,100 @@ public class TokenAcquisition {
         }
     }
 
+    /**
+     * Acquires token with proper transaction handling.
+     */
     public static BMap<BString, Object> acquireToken(BMap<Object, Object> databaseConfig,
-                                                     BString id, boolean tokenAcquired, int livenessInterval) {
+                                                     BString id, boolean tokenAcquired, int livenessInterval,
+                                                     int heartbeatFrequency) {
         DatabaseConfig dbConfig = new DatabaseConfig(
                 databaseConfig.getStringValue(DB_HOST).getValue(), databaseConfig.getStringValue(DB_USER).getValue(),
                 databaseConfig.getStringValue(DB_PASSWORD).getValue(), databaseConfig.getIntValue(DB_PORT).intValue(),
                 databaseConfig.getStringValue(DATABASE).getValue(), null
         );
+        Connection connection = null;
+        boolean needsRollback = false;
         try {
             String instanceId = id.getValue();
             String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
-            Connection connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+            connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
             connection.setAutoCommit(false);
+            needsRollback = true;
             tokenAcquired = attemptTokenAcquisition(connection, instanceId, tokenAcquired, livenessInterval);
-            connection.commit();
-            startHealthCheckUpdater(connection, instanceId, 1);
             if (!tokenAcquired) {
                 upsertToken(connection, instanceId);
             }
-            return generateResponse(tokenAcquired, livenessInterval, instanceId, connection);
+            connection.commit();
+            needsRollback = false;
+            HealthCheckScheduler.startHealthCheckUpdater(dbConfig, instanceId, heartbeatFrequency);
+            return generateResponse(tokenAcquired, livenessInterval, instanceId, dbConfig);
         } catch (Exception e) {
+            Utils.rollbackIfNeeded(connection, needsRollback);
             throw Utils.createTaskError(e.getMessage());
         }
     }
 
-    private static BMap<BString, Object> generateResponse(boolean tokenAcquired, int interval, String myInstanceId,
-                                                          Connection connection) {
+    private static BMap<BString, Object> generateResponse(boolean tokenAcquired, int interval, String instanceId,
+                                                          DatabaseConfig databaseConfig) {
         BMap<BString, Object> response = ValueCreator.createMapValue();
         response.put(STATUS, tokenAcquired ? ACTIVE_STATUS : STANDBY_STATUS);
-        response.put(INSTANCE_ID, StringUtils.fromString(myInstanceId));
+        response.put(INSTANCE_ID, StringUtils.fromString(instanceId));
         response.put(TOKEN_HOLDER, tokenAcquired);
-        response.put(CONNECTION, connection);
+        response.put(DATABASE_CONFIG, databaseConfig);
         response.put(LIVENESS_INTERVAL, interval);
         return response;
     }
 
-    public static void upsertToken(Connection connection, String myInstanceId) throws SQLException {
-        String sql = "INSERT INTO token_holder(token_id, is_active) VALUES (?, false) " +
-                "ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, myInstanceId);
+    public static void upsertToken(Connection connection, String instanceId) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(UPSERT_INVALID_TOKEN_QUERY)) {
+            stmt.setString(1, instanceId);
             stmt.executeUpdate();
-            connection.commit();
         }
     }
 
+    public static boolean hasActiveToken(Connection connection, String instanceId) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement(HAS_TOKEN_QUERY)) {
+            stmt.setString(1, instanceId);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next();
+        }
+    }
 
-    public static boolean attemptTokenAcquisition(Connection connection, String myInstanceId,
+    public static boolean attemptTokenAcquisition(Connection connection, String instanceId,
                                                   boolean acquired, int livenessInterval) throws SQLException {
         boolean tokenAcquired = acquired;
-        String checkSql = "SELECT token_id FROM token_holder WHERE is_active = true";
-
-        try (PreparedStatement stmt = connection.prepareStatement(checkSql)) {
+        try (PreparedStatement stmt = connection.prepareStatement(CHECK_ACTIVE_TOKEN_QUERY)) {
             ResultSet rs = stmt.executeQuery();
-
             if (!rs.next()) {
-                String insertTokenSql = "INSERT INTO token_holder(token_id, is_active) VALUES (?, true)";
-                try (PreparedStatement insertStmt = connection.prepareStatement(insertTokenSql)) {
-                    insertStmt.setString(1, myInstanceId);
-                    insertStmt.executeUpdate();
-                }
-                tokenAcquired = true;
-            } else {
-                String existingTokenId = rs.getString("token_id");
+                PreparedStatement insertStmt = connection.prepareStatement(INSERT_TOKEN_QUERY);
+                insertStmt.setString(1, instanceId);
+                insertStmt.executeUpdate();
+                return true;
+            }
+            String existingTokenId = rs.getString(TOKEN_ID);
+            if (existingTokenId.equals(instanceId)) {
+                return true;
+            }
+            try (PreparedStatement prepareStatement = connection.prepareStatement(CURRENT_TIMESTAMP_QUERY)) {
+                ResultSet response = prepareStatement.executeQuery();
+                Timestamp timestamp = response.next()
+                        ? response.getTimestamp(1) : Timestamp.from(Instant.now());
+                PreparedStatement healthStmt = connection.prepareStatement(HEALTH_CHECK_QUERY);
+                healthStmt.setString(1, existingTokenId);
+                ResultSet healthCheckRs = healthStmt.executeQuery();
 
-                if (existingTokenId.equals(myInstanceId)) {
-                    tokenAcquired = true;
-                } else {
-                    String sql = "SELECT CURRENT_TIMESTAMP";
-                    PreparedStatement prepareStatement = connection.prepareStatement(sql);
-                    ResultSet response = prepareStatement.executeQuery();
-                    Timestamp timestamp;
-                    if (response.next()) {
-                        timestamp = response.getTimestamp(1);
-                    } else {
-                        timestamp = Timestamp.from(Instant.now());
-                    }
+                if (healthCheckRs.next()) {
+                    Timestamp lastHeartbeat = healthCheckRs.getTimestamp(LAST_HEARTBEAT);
+                    long timeDiffSeconds = (timestamp.getTime() - lastHeartbeat.getTime()) / 1000;
+                    if (timeDiffSeconds > livenessInterval) {
+                        PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
+                        deactivateStmt.setString(1, existingTokenId);
+                        deactivateStmt.executeUpdate();
 
-                    String healthCheckSql = "SELECT last_heartbeat FROM health_check WHERE token_id = ? " +
-                            "ORDER BY last_heartbeat DESC LIMIT 1";
-
-                    try (PreparedStatement healthStmt = connection.prepareStatement(healthCheckSql)) {
-                        healthStmt.setString(1, existingTokenId);
-                        ResultSet healthCheckRs = healthStmt.executeQuery();
-
-                        if (healthCheckRs.next()) {
-                            Timestamp lastHeartbeat = healthCheckRs.getTimestamp(LAST_HEARTBEAT);
-                            long timeDiffSeconds = (timestamp.getTime() - lastHeartbeat.getTime()) / 1000;
-
-                            if (timeDiffSeconds > livenessInterval) {
-                                String deactivateSql = "UPDATE token_holder SET is_active = false WHERE token_id = ?";
-                                try (PreparedStatement deactivateStmt = connection.prepareStatement(deactivateSql)) {
-                                    deactivateStmt.setString(1, existingTokenId);
-                                    deactivateStmt.executeUpdate();
-                                }
-                                String checkExistingSql = "SELECT token_id FROM token_holder WHERE token_id = ?";
-                                boolean hasExistingRecord;
-
-                                try (PreparedStatement checkExistingStmt
-                                             = connection.prepareStatement(checkExistingSql)) {
-                                    checkExistingStmt.setString(1, myInstanceId);
-                                    ResultSet existingRs = checkExistingStmt.executeQuery();
-                                    hasExistingRecord = existingRs.next();
-                                }
-
-                                if (hasExistingRecord) {
-                                    String updateSql = "UPDATE token_holder SET is_active = true WHERE token_id = ?";
-                                    try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
-                                        updateStmt.setString(1, myInstanceId);
-                                        updateStmt.executeUpdate();
-                                    }
-                                } else {
-                                    String insertTokenSql = "INSERT INTO token_holder(token_id, is_active) " +
-                                            "VALUES (?, true)";
-                                    try (PreparedStatement insertStmt = connection.prepareStatement(insertTokenSql)) {
-                                        insertStmt.setString(1, myInstanceId);
-                                        insertStmt.executeUpdate();
-                                    }
-                                }
-                                tokenAcquired = true;
-                            }
-                        }
+                        PreparedStatement tokenStatement = connection.prepareStatement(UPSERT_VALID_TOKEN_QUERY);
+                        tokenStatement.setString(1, instanceId);
+                        tokenStatement.executeUpdate();
+                        tokenAcquired = true;
                     }
                 }
             }

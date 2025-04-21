@@ -26,19 +26,24 @@ import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.task.DatabaseConfig;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import static io.ballerina.stdlib.task.TokenAcquisition.JDBC_URL;
 import static io.ballerina.stdlib.task.TokenAcquisition.attemptTokenAcquisition;
+import static io.ballerina.stdlib.task.TokenAcquisition.hasActiveToken;
 import static io.ballerina.stdlib.task.TokenAcquisition.upsertToken;
-import static io.ballerina.stdlib.task.objects.TaskManager.CONNECTION;
+import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;
 import static io.ballerina.stdlib.task.objects.TaskManager.INSTANCE_ID;
 import static io.ballerina.stdlib.task.objects.TaskManager.LIVENESS_INTERVAL;
 import static io.ballerina.stdlib.task.objects.TaskManager.TOKEN_HOLDER;
+import static io.ballerina.stdlib.task.utils.Utils.rollbackIfNeeded;
 
 /**
  * Represents a Quartz job related to an appointment.
@@ -54,60 +59,63 @@ public class TaskJob implements Job {
             Runtime runtime = TaskManager.getInstance().getRuntime();
             Boolean isTokenHolder = (Boolean) jobExecutionContext.getMergedJobDataMap().get(TOKEN_HOLDER);
             BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
+            if (isTokenHolder == null) {
+                executeJob(job, runtime, jobExecutionContext);
+                return;
+            }
+            DatabaseConfig dbConfig = (DatabaseConfig) jobExecutionContext.getMergedJobDataMap().get(DATABASE_CONFIG);
+            String instanceId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
+            String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
+            Connection connection = null;
             boolean needsRollback = false;
-            if (isTokenHolder == null || isTokenHolder) {
-                try {
-                    ObjectType objectType = (ObjectType) job.getOriginalType();
-                    boolean isConcurrentSafe = objectType.isIsolated() && objectType.isIsolated(TaskConstants.EXECUTE);
-                    StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
-                    runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
-                } catch (BError error) {
-                    Utils.notifyFailure(jobExecutionContext, error);
-                } catch (Throwable t) {
-                    Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
-                }
-            } else {
-                Connection connection = (Connection) jobExecutionContext.getMergedJobDataMap().get(CONNECTION);
-                String instanceId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
-                int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
-                try {
-                    connection.setAutoCommit(false);
-                    needsRollback = true;
-                    boolean acquired
-                            = attemptTokenAcquisition(connection, instanceId, false, livenessInterval);
+            try {
+                connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+                connection.setAutoCommit(false);
+                needsRollback = true;
+                if (isTokenHolder) {
+                    boolean acquiredToken = hasActiveToken(connection, instanceId);
                     connection.commit();
-                    if (acquired) {
-                        ObjectType objectType = (ObjectType) job.getOriginalType();
-                        boolean isConcurrentSafe = objectType.isIsolated()
-                                && objectType.isIsolated(TaskConstants.EXECUTE);
-                        StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
-                        runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
-                    } else {
+                    needsRollback = false;
+                    if (acquiredToken) {
+                        executeJob(job, runtime, jobExecutionContext);
+                    }
+                } else {
+                    int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
+                    boolean acquiredToken =
+                            attemptTokenAcquisition(connection, instanceId, false, livenessInterval);
+                    if (!acquiredToken) {
                         upsertToken(connection, instanceId);
                     }
+                    connection.commit();
                     needsRollback = false;
-                } catch (BError error) {
-                    Utils.notifyFailure(jobExecutionContext, error);
-                    rollbackIfNeeded(connection, needsRollback);
-                } catch (SQLException sqlException) {
-                    Utils.notifyFailure(jobExecutionContext, ErrorCreator
-                            .createError(StringUtils.fromString("Database error: " + sqlException.getMessage())));
-                    rollbackIfNeeded(connection, needsRollback);
-                } catch (Throwable t) {
-                    Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
-                    rollbackIfNeeded(connection, needsRollback);
+                    if (acquiredToken) {
+                        executeJob(job, runtime, jobExecutionContext);
+                    }
                 }
+            } catch (SQLException e) {
+                rollbackIfNeeded(connection, needsRollback);
+                Utils.notifyFailure(jobExecutionContext,
+                        ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
+            } catch (BError error) {
+                rollbackIfNeeded(connection, needsRollback);
+                Utils.notifyFailure(jobExecutionContext, error);
+            } catch (Throwable t) {
+                rollbackIfNeeded(connection, needsRollback);
+                Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
             }
         });
     }
 
-    private void rollbackIfNeeded(Connection connection, boolean needsRollback) {
-        if (connection != null && needsRollback) {
-            try {
-                connection.rollback();
-            } catch (SQLException e) {
-                //
-            }
+    private void executeJob(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext) {
+        try {
+            ObjectType objectType = (ObjectType) job.getOriginalType();
+            boolean isConcurrentSafe = objectType.isIsolated() && objectType.isIsolated(TaskConstants.EXECUTE);
+            StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
+            runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
+        } catch (BError error) {
+            Utils.notifyFailure(jobExecutionContext, error);
+        } catch (Throwable t) {
+            Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
         }
     }
 }

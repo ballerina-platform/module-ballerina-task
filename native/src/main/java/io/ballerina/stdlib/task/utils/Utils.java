@@ -36,6 +36,8 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.matchers.GroupMatcher;
 
 import java.io.PrintStream;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -194,5 +196,13 @@ public final class Utils {
     private static boolean isTerminated(String errorPolicy) {
         return errorPolicy.equalsIgnoreCase(TaskConstants.LOG_AND_TERMINATE) ||
                 errorPolicy.equalsIgnoreCase(TaskConstants.TERMINATE);
+    }
+
+    public static void rollbackIfNeeded(Connection connection, boolean needsRollback) {
+        if (connection != null && needsRollback) {
+            try {
+                connection.rollback();
+            } catch (SQLException ignored) { }
+        }
     }
 }

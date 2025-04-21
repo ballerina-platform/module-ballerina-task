@@ -45,6 +45,7 @@ public class TaskManager {
     public static final String INSTANCE_ID = "instanceId";
     public static final String CONNECTION = "connection";
     public static final String LIVENESS_INTERVAL = "livenessInterval";
+    public static final String DATABASE_CONFIG = "databaseConfig";
     private Scheduler scheduler;
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
@@ -138,7 +139,7 @@ public class TaskManager {
                                                   Integer jobId, BMap response) throws SchedulerException {
         jobDataMap.put(TOKEN_HOLDER, response.getBooleanValue(TokenAcquisition.TOKEN_HOLDER));
         jobDataMap.put(INSTANCE_ID, response.getStringValue(TokenAcquisition.INSTANCE_ID));
-        jobDataMap.put(CONNECTION, response.get(TokenAcquisition.CONNECTION));
+        jobDataMap.put(DATABASE_CONFIG, response.get(TokenAcquisition.DATABASE_CONFIG));
         jobDataMap.put(LIVENESS_INTERVAL, response.get(TokenAcquisition.LIVENESS_INTERVAL));
         scheduleIntervalJob(jobDataMap, interval, maxCount, startTime, endTime, waitingPolicy, jobId);
     }
