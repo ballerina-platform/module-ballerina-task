@@ -53,17 +53,17 @@ public class TokenAcquisition {
     public static final BString LIVENESS_INTERVAL = StringUtils.fromString("livenessInterval");
     public static final String LAST_HEARTBEAT = "last_heartbeat";
     public static final String HAS_TOKEN_QUERY =
-            "SELECT token_id FROM token_holder WHERE token_id = ? AND is_active = true";
-    public static final String UPSERT_INVALID_TOKEN_QUERY = "INSERT INTO token_holder(token_id, is_active) " +
+            "SELECT node_id FROM token_holder WHERE node_id = ? AND is_active = true";
+    public static final String UPSERT_INVALID_TOKEN_QUERY = "INSERT INTO token_holder(node_id, is_active) " +
             "VALUES (?, false) ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)";
-    public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT token_id FROM token_holder WHERE is_active = true";
-    public static final String INSERT_TOKEN_QUERY = "INSERT INTO token_holder(token_id, is_active) VALUES (?, true)";
+    public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT node_id FROM token_holder WHERE is_active = true";
+    public static final String INSERT_TOKEN_QUERY = "INSERT INTO token_holder(node_id, is_active) VALUES (?, true)";
     public static final String CURRENT_TIMESTAMP_QUERY = "SELECT CURRENT_TIMESTAMP";
-    public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE token_id = ? " +
+    public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE node_id = ? " +
             "ORDER BY last_heartbeat DESC LIMIT 1";
-    public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false WHERE token_id = ?";
-    public static final String TOKEN_ID = "token_id";
-    public static final String UPSERT_VALID_TOKEN_QUERY = "INSERT INTO token_holder(token_id, is_active) " +
+    public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false WHERE node_id = ?";
+    public static final String TOKEN_ID = "node_id";
+    public static final String UPSERT_VALID_TOKEN_QUERY = "INSERT INTO token_holder(node_id, is_active) " +
             "VALUES (?, true) ON DUPLICATE KEY UPDATE is_active = true";
 
     private TokenAcquisition() { }

@@ -32,7 +32,7 @@ import static io.ballerina.stdlib.task.TokenAcquisition.JDBC_URL;
  */
 public class HealthCheckScheduler {
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    public static final String HEALTH_CHECK_QUERY = "INSERT INTO health_check(token_id, last_heartbeat) " +
+    public static final String HEALTH_CHECK_QUERY = "INSERT INTO health_check(node_id, last_heartbeat) " +
             "VALUES (?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE last_heartbeat = CURRENT_TIMESTAMP";
 
     private HealthCheckScheduler() {
