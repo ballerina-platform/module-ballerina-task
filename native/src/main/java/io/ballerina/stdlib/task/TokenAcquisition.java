@@ -49,22 +49,24 @@ public class TokenAcquisition {
     public static final BString STANDBY_STATUS = StringUtils.fromString("standby");
     public static final BString INSTANCE_ID = StringUtils.fromString("instanceId");
     public static final BString TOKEN_HOLDER = StringUtils.fromString("tokenholder");
-    public static final BString CONNECTION = StringUtils.fromString("connection");
     public static final BString LIVENESS_INTERVAL = StringUtils.fromString("livenessInterval");
     public static final String LAST_HEARTBEAT = "last_heartbeat";
     public static final String HAS_TOKEN_QUERY =
             "SELECT node_id FROM token_holder WHERE node_id = ? AND is_active = true";
-    public static final String UPSERT_INVALID_TOKEN_QUERY = "INSERT INTO token_holder(node_id, is_active) " +
-            "VALUES (?, false) ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)";
-    public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT node_id FROM token_holder WHERE is_active = true";
-    public static final String INSERT_TOKEN_QUERY = "INSERT INTO token_holder(node_id, is_active) VALUES (?, true)";
+    public static final String UPSERT_INVALID_TOKEN_QUERY = "INSERT INTO token_holder(node_id, term, is_active) " +
+            "VALUES (?, 1, false) ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)";
+    public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT node_id FROM token_holder WHERE is_active = true " +
+            "AND term = (SELECT MAX(term) as term FROM token_holder)";
+    public static final String INSERT_TOKEN_QUERY = "INSERT INTO token_holder(node_id, term, is_active) VALUES (?, 1," +
+            "true)";
     public static final String CURRENT_TIMESTAMP_QUERY = "SELECT CURRENT_TIMESTAMP";
     public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE node_id = ? " +
             "ORDER BY last_heartbeat DESC LIMIT 1";
     public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false WHERE node_id = ?";
     public static final String TOKEN_ID = "node_id";
-    public static final String UPSERT_VALID_TOKEN_QUERY = "INSERT INTO token_holder(node_id, is_active) " +
-            "VALUES (?, true) ON DUPLICATE KEY UPDATE is_active = true";
+    public static final String UPSERT_VALID_TOKEN_QUERY = "INSERT INTO token_holder(node_id, term, is_active) " +
+            "VALUES (?, ?, true) ON DUPLICATE KEY UPDATE is_active = true, term = ?";
+    public static final String GET_MAX_TERM_QUERY = "SELECT COALESCE(MAX(term), 0) FROM token_holder";
 
     private TokenAcquisition() { }
 
@@ -151,17 +153,24 @@ public class TokenAcquisition {
                 PreparedStatement healthStmt = connection.prepareStatement(HEALTH_CHECK_QUERY);
                 healthStmt.setString(1, existingTokenId);
                 ResultSet healthCheckRs = healthStmt.executeQuery();
-
+                int currentTerm = 1;
                 if (healthCheckRs.next()) {
                     Timestamp lastHeartbeat = healthCheckRs.getTimestamp(LAST_HEARTBEAT);
                     long timeDiffSeconds = (timestamp.getTime() - lastHeartbeat.getTime()) / 1000;
                     if (timeDiffSeconds > livenessInterval) {
+                        PreparedStatement maxTermQuery = connection.prepareStatement(GET_MAX_TERM_QUERY);
+                        ResultSet maxTerm = maxTermQuery.executeQuery();
+                        if (maxTerm.next()) {
+                            currentTerm = maxTerm.getInt(1) + 1;
+                        }
                         PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
                         deactivateStmt.setString(1, existingTokenId);
                         deactivateStmt.executeUpdate();
 
                         PreparedStatement tokenStatement = connection.prepareStatement(UPSERT_VALID_TOKEN_QUERY);
                         tokenStatement.setString(1, instanceId);
+                        tokenStatement.setInt(2, currentTerm);
+                        tokenStatement.setInt(3, currentTerm);
                         tokenStatement.executeUpdate();
                         tokenAcquired = true;
                     }
