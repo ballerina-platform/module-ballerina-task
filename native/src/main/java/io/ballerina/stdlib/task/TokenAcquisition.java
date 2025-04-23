@@ -57,12 +57,13 @@ public class TokenAcquisition {
             "VALUES (?, 1, false) ON DUPLICATE KEY UPDATE is_active = VALUES(is_active)";
     public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT node_id FROM token_holder WHERE is_active = true " +
             "AND term = (SELECT MAX(term) as term FROM token_holder)";
-    public static final String INSERT_TOKEN_QUERY = "INSERT INTO token_holder(node_id, term, is_active) VALUES (?, 1," +
-            "true)";
+    public static final String INSERT_TOKEN_QUERY = "INSERT INTO token_holder(node_id, term, is_active) " +
+            "VALUES (?, 1, true)";
     public static final String CURRENT_TIMESTAMP_QUERY = "SELECT CURRENT_TIMESTAMP";
     public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE node_id = ? " +
             "ORDER BY last_heartbeat DESC LIMIT 1";
-    public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false WHERE node_id = ?";
+    public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false, " +
+            "term = ? WHERE node_id = (SELECT node_id FROM token_holder AND node_id != ?);";
     public static final String TOKEN_ID = "node_id";
     public static final String UPSERT_VALID_TOKEN_QUERY = "INSERT INTO token_holder(node_id, term, is_active) " +
             "VALUES (?, ?, true) ON DUPLICATE KEY UPDATE is_active = true, term = ?";
@@ -164,7 +165,8 @@ public class TokenAcquisition {
                             currentTerm = maxTerm.getInt(1) + 1;
                         }
                         PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
-                        deactivateStmt.setString(1, existingTokenId);
+                        deactivateStmt.setInt(1, currentTerm);
+                        deactivateStmt.setString(2, instanceId);
                         deactivateStmt.executeUpdate();
 
                         PreparedStatement tokenStatement = connection.prepareStatement(UPSERT_VALID_TOKEN_QUERY);
