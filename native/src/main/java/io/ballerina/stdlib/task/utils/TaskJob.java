@@ -38,7 +38,6 @@ import java.sql.SQLException;
 import static io.ballerina.stdlib.task.TokenAcquisition.JDBC_URL;
 import static io.ballerina.stdlib.task.TokenAcquisition.attemptTokenAcquisition;
 import static io.ballerina.stdlib.task.TokenAcquisition.hasActiveToken;
-import static io.ballerina.stdlib.task.TokenAcquisition.upsertToken;
 import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;
 import static io.ballerina.stdlib.task.objects.TaskManager.INSTANCE_ID;
 import static io.ballerina.stdlib.task.objects.TaskManager.LIVENESS_INTERVAL;
@@ -105,11 +104,7 @@ public class TaskJob implements Job {
             return hasActiveToken(connection, instanceId);
         }
         int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
-        boolean acquiredToken = attemptTokenAcquisition(connection, instanceId, false, livenessInterval);
-        if (!acquiredToken) {
-            upsertToken(connection, instanceId);
-        }
-        return acquiredToken;
+        return attemptTokenAcquisition(connection, instanceId, false, livenessInterval);
     }
 
     private void handleExecutionException(Connection connection, boolean needsRollback,
