@@ -198,13 +198,9 @@ public final class Utils {
                 errorPolicy.equalsIgnoreCase(TaskConstants.TERMINATE);
     }
 
-    public static void rollbackIfNeeded(Connection connection, boolean needsRollback) {
-        if (connection != null && needsRollback) {
-            try {
-                connection.rollback();
-            } catch (SQLException ignored) {
-
-            }
+    public static void handleRollback(Connection connection) throws SQLException {
+        if (connection != null) {
+            connection.rollback();
         }
     }
 }

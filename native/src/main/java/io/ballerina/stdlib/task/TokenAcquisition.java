@@ -32,6 +32,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
+import static io.ballerina.stdlib.task.utils.Utils.handleRollback;
+
 /**
  * Handles token acquisition with proper transaction management.
  */
@@ -80,20 +82,18 @@ public class TokenAcquisition {
      */
     public static BMap<BString, Object> acquireToken(BMap<Object, Object> databaseConfig,
                                                      BString id, boolean tokenAcquired, int livenessInterval,
-                                                     int heartbeatFrequency) {
+                                                     int heartbeatFrequency) throws SQLException {
         DatabaseConfig dbConfig = new DatabaseConfig(
                 databaseConfig.getStringValue(DB_HOST).getValue(), databaseConfig.getStringValue(DB_USER).getValue(),
                 databaseConfig.getStringValue(DB_PASSWORD).getValue(), databaseConfig.getIntValue(DB_PORT).intValue(),
                 databaseConfig.getStringValue(DATABASE).getValue(), null
         );
         Connection connection = null;
-        boolean needsRollback = false;
         try {
             String instanceId = id.getValue();
             String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
             connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
             connection.setAutoCommit(false);
-            needsRollback = true;
             PreparedStatement stmt = connection.prepareStatement(HAS_TOKEN_QUERY);
             stmt.setString(1, instanceId);
             ResultSet rs = stmt.executeQuery();
@@ -102,11 +102,10 @@ public class TokenAcquisition {
             }
             tokenAcquired = attemptTokenAcquisition(connection, instanceId, tokenAcquired, livenessInterval);
             connection.commit();
-            needsRollback = false;
             HealthCheckScheduler.startHealthCheckUpdater(dbConfig, instanceId, heartbeatFrequency);
             return generateResponse(tokenAcquired, livenessInterval, instanceId, dbConfig);
         } catch (Exception e) {
-            Utils.rollbackIfNeeded(connection, needsRollback);
+            handleRollback(connection);
             throw Utils.createTaskError(e.getMessage());
         }
     }

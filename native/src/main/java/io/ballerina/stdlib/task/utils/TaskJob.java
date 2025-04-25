@@ -42,7 +42,7 @@ import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;
 import static io.ballerina.stdlib.task.objects.TaskManager.INSTANCE_ID;
 import static io.ballerina.stdlib.task.objects.TaskManager.LIVENESS_INTERVAL;
 import static io.ballerina.stdlib.task.objects.TaskManager.TOKEN_HOLDER;
-import static io.ballerina.stdlib.task.utils.Utils.rollbackIfNeeded;
+import static io.ballerina.stdlib.task.utils.Utils.handleRollback;
 
 /**
  * Represents a Quartz job related to an appointment.
@@ -92,12 +92,12 @@ public class TaskJob implements Job {
                 }
             }
         } catch (SQLException e) {
-            handleExecutionException(connection, needsRollback, jobExecutionContext,
+            handleExecutionException(connection, jobExecutionContext,
                     ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
         } catch (BError error) {
-            handleExecutionException(connection, needsRollback, jobExecutionContext, error);
+            handleExecutionException(connection, jobExecutionContext, error);
         } catch (Throwable t) {
-            handleExecutionException(connection, needsRollback, jobExecutionContext, ErrorCreator.createError(t));
+            handleExecutionException(connection, jobExecutionContext, ErrorCreator.createError(t));
         }
     }
 
@@ -110,10 +110,14 @@ public class TaskJob implements Job {
         return attemptTokenAcquisition(connection, instanceId, false, livenessInterval);
     }
 
-    private void handleExecutionException(Connection connection, boolean needsRollback,
+    private void handleExecutionException(Connection connection,
                                           JobExecutionContext jobExecutionContext, BError error) {
-        rollbackIfNeeded(connection, needsRollback);
-        Utils.notifyFailure(jobExecutionContext, error);
+        try {
+            handleRollback(connection);
+            Utils.notifyFailure(jobExecutionContext, error);
+        } catch (SQLException e) {
+            Utils.notifyFailure(jobExecutionContext, error);
+        }
     }
 
     private void executeJob(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext) {
