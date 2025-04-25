@@ -80,7 +80,7 @@ public class TokenAcquisition {
     /**
      * Acquires token with proper transaction handling.
      */
-    public static BMap<BString, Object> acquireToken(BMap<Object, Object> databaseConfig,
+    public static Object acquireToken(BMap<Object, Object> databaseConfig,
                                                      BString id, boolean tokenAcquired, int livenessInterval,
                                                      int heartbeatFrequency) throws SQLException {
         DatabaseConfig dbConfig = new DatabaseConfig(
