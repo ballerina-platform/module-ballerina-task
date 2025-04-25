@@ -62,12 +62,12 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy -  The policy, which is used to handle the error and will be waiting during the trigger time
-# + coordinationConfig - The configuration related to task coordination
+# + warmBackupConfig - The configuration related to task coordination
 #   When using multiple nodes, the duration must be different from other nodes.
 # + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,  int maxCount = -1,
                                     time:Civil? startTime = (), time:Civil? endTime = (), TaskPolicy taskPolicy = {},
-                                    CoordinationConfig? coordinationConfig = ()) returns JobId|Error {
+                                    WarmBackupConfig? warmBackupConfig = ()) returns JobId|Error {
     if maxCount != -1 && maxCount < 1 {
         return error Error("The maxCount should be a positive integer.");
     }
@@ -80,14 +80,14 @@ public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,
         eTime = check getTimeInMillies(endTime);
     }
     int result;
-    if coordinationConfig !is () {
-        string instanceId = coordinationConfig.nodeId;
+    if warmBackupConfig !is () {
+        string instanceId = warmBackupConfig.nodeId;
         boolean tokenAcquired = false;
         map<any> response;
         do {
-            response = check acquireToken(coordinationConfig.databaseConfig, instanceId, 
-                                          tokenAcquired, coordinationConfig.livenessCheckInterval, 
-                                          coordinationConfig.heartbeatFrequency);
+            response = check acquireToken(warmBackupConfig.databaseConfig, instanceId, 
+                                          tokenAcquired, warmBackupConfig.livenessCheckInterval, 
+                                          warmBackupConfig.heartbeatFrequency);
         } on fail error err {
             return error Error(err.message());
         }

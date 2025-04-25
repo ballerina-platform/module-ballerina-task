@@ -82,7 +82,7 @@ public type DatabaseConfig record {
 # + livenessCheckInterval - The interval (in seconds) to check the liveness of the job. Default is 30 seconds.
 # + nodeId - Optional identifier for the current node (auto-generated if not provided)
 # + heartbeatFrequency - The interval (in seconds) for the node to update its heartbeat. Default is one second.
-public type CoordinationConfig record {
+public type WarmBackupConfig record {
     DatabaseConfig databaseConfig = {};
     int livenessCheckInterval = 30;
     string nodeId = uuid:createRandomUuid();
