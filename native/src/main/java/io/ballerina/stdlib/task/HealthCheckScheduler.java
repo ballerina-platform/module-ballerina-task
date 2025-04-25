@@ -35,18 +35,7 @@ public class HealthCheckScheduler {
     public static final String HEALTH_CHECK_QUERY = "INSERT INTO health_check(node_id, last_heartbeat) " +
             "VALUES (?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE last_heartbeat = CURRENT_TIMESTAMP";
 
-    private HealthCheckScheduler() {
-        // Private constructor to prevent instantiation
-    }
-
-    /**
-     * Dedicated exception for database transaction failures.
-     */
-    public static class DatabaseTransactionException extends SQLException {
-        public DatabaseTransactionException(String message, Throwable cause) {
-            super(message, cause);
-        }
-    }
+    private HealthCheckScheduler() { }
 
     /**
      * Starts the health check updater to periodically update the heartbeat.
@@ -58,22 +47,24 @@ public class HealthCheckScheduler {
     public static void startHealthCheckUpdater(DatabaseConfig dbConfig, String tokenId, int periodInSeconds) {
         Runnable task = () -> {
             boolean needsRollback = false;
-            Connection connection = null;
-
+            String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
+            Connection connection;
             try {
-                String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
                 connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+            } catch (SQLException e) {
+
+                throw new RuntimeException("Failed to rollback transaction", e);
+            }
+            try {
                 connection.setAutoCommit(false);
                 needsRollback = true;
-
-                try (PreparedStatement stmt = connection.prepareStatement(HEALTH_CHECK_QUERY)) {
-                    stmt.setString(1, tokenId);
-                    stmt.executeUpdate();
-                    connection.commit();
-                    needsRollback = false;
-                }
+                PreparedStatement stmt = connection.prepareStatement(HEALTH_CHECK_QUERY);
+                stmt.setString(1, tokenId);
+                stmt.executeUpdate();
+                connection.commit();
+                needsRollback = false;
             } catch (SQLException e) {
-                if (connection != null && needsRollback) {
+                if (needsRollback) {
                     try {
                         connection.rollback();
                     } catch (SQLException rollbackException) {
