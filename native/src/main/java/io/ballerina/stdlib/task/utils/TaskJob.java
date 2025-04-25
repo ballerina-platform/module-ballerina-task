@@ -74,19 +74,22 @@ public class TaskJob implements Job {
                                             String jdbcUrl, DatabaseConfig dbConfig) {
         Connection connection = null;
         boolean needsRollback = false;
-
+        boolean deadStatus = false;
         try {
             connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
-            connection.setAutoCommit(false);
-            needsRollback = true;
-
-            boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext,
-                                                                 instanceId, isTokenHolder);
-            connection.commit();
-            needsRollback = false;
-
-            if (shouldExecuteJob) {
-                executeJob(job, runtime, jobExecutionContext);
+        } catch (Exception e) {
+            deadStatus = true;
+        }
+        try {
+            if (!deadStatus) {
+                connection.setAutoCommit(false);
+                needsRollback = true;
+                boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext,
+                        instanceId, isTokenHolder);
+                connection.commit();
+                if (shouldExecuteJob) {
+                    executeJob(job, runtime, jobExecutionContext);
+                }
             }
         } catch (SQLException e) {
             handleExecutionException(connection, needsRollback, jobExecutionContext,
