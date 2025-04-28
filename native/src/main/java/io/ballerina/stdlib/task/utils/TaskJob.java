@@ -49,6 +49,8 @@ import static io.ballerina.stdlib.task.utils.Utils.handleRollback;
  */
 public class TaskJob implements Job {
 
+    public static final String GROUP_ID = "groupId";
+
     public TaskJob() {
     }
 
@@ -63,17 +65,18 @@ public class TaskJob implements Job {
                 return;
             }
             DatabaseConfig dbConfig = (DatabaseConfig) jobExecutionContext.getMergedJobDataMap().get(DATABASE_CONFIG);
-            String instanceId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
+            String taskId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
+            String groupId = ((BString) jobExecutionContext.getMergedJobDataMap().get(GROUP_ID)).getValue();
             String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
-            processJobWithCoordination(job, runtime, jobExecutionContext, isTokenHolder, instanceId, jdbcUrl, dbConfig);
+            processJobWithCoordination(job, runtime, jobExecutionContext, isTokenHolder,
+                                       taskId, groupId, jdbcUrl, dbConfig);
         });
     }
 
     private void processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
-                                            boolean isTokenHolder, String instanceId,
+                                            boolean isTokenHolder, String taskId, String groupId,
                                             String jdbcUrl, DatabaseConfig dbConfig) {
         Connection connection = null;
-        boolean needsRollback = false;
         boolean deadStatus = false;
         try {
             connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
@@ -83,9 +86,8 @@ public class TaskJob implements Job {
         try {
             if (!deadStatus) {
                 connection.setAutoCommit(false);
-                needsRollback = true;
-                boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext,
-                        instanceId, isTokenHolder);
+                boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext, taskId,
+                                                                     groupId, isTokenHolder);
                 connection.commit();
                 if (shouldExecuteJob) {
                     executeJob(job, runtime, jobExecutionContext);
@@ -102,12 +104,13 @@ public class TaskJob implements Job {
     }
 
     private boolean checkAndUpdateTokenStatus(Connection connection, JobExecutionContext jobExecutionContext,
-                                              String instanceId, boolean isTokenHolder) throws SQLException {
+                                              String taskId, String groupId, boolean isTokenHolder)
+            throws SQLException {
         if (isTokenHolder) {
-            return hasActiveToken(connection, instanceId);
+            return hasActiveToken(connection, taskId, groupId);
         }
         int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
-        return attemptTokenAcquisition(connection, instanceId, false, livenessInterval);
+        return attemptTokenAcquisition(connection, taskId, groupId, false, livenessInterval);
     }
 
     private void handleExecutionException(Connection connection,

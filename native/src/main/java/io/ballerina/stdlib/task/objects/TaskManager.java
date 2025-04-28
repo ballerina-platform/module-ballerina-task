@@ -37,6 +37,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.ballerina.stdlib.task.utils.TaskJob.GROUP_ID;
+
 /**
  * Task manager to handle schedulers in ballerina tasks.
  */
@@ -138,7 +140,8 @@ public class TaskManager {
                                                   Object startTime, Object endTime, String waitingPolicy,
                                                   Integer jobId, BMap response) throws SchedulerException {
         jobDataMap.put(TOKEN_HOLDER, response.getBooleanValue(TokenAcquisition.TOKEN_HOLDER));
-        jobDataMap.put(INSTANCE_ID, response.getStringValue(TokenAcquisition.INSTANCE_ID));
+        jobDataMap.put(INSTANCE_ID, response.getStringValue(TokenAcquisition.TASK_ID));
+        jobDataMap.put(GROUP_ID, response.getStringValue(TokenAcquisition.GROUP_ID));
         jobDataMap.put(DATABASE_CONFIG, response.get(TokenAcquisition.DATABASE_CONFIG));
         jobDataMap.put(LIVENESS_INTERVAL, response.get(TokenAcquisition.LIVENESS_INTERVAL));
         scheduleIntervalJob(jobDataMap, interval, maxCount, startTime, endTime, waitingPolicy, jobId);

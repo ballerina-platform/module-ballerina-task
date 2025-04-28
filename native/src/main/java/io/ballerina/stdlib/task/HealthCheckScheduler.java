@@ -35,8 +35,8 @@ public final class HealthCheckScheduler {
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private static final ExecutorService virtualThreadExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
-    public static final String HEALTH_CHECK_QUERY = "INSERT INTO health_check(node_id, last_heartbeat) " +
-            "VALUES (?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE last_heartbeat = CURRENT_TIMESTAMP";
+    public static final String HEALTH_CHECK_QUERY = "INSERT INTO health_check(task_id, group_id, last_heartbeat) " +
+            "VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE last_heartbeat = CURRENT_TIMESTAMP";
 
     private HealthCheckScheduler() { }
 
@@ -47,7 +47,8 @@ public final class HealthCheckScheduler {
      * @param tokenId Token identifier
      * @param periodInSeconds Period between updates in seconds
      */
-    public static void startHealthCheckUpdater(DatabaseConfig dbConfig, String tokenId, int periodInSeconds) {
+    public static void startHealthCheckUpdater(DatabaseConfig dbConfig, String tokenId,
+                                               String groupId, int periodInSeconds) {
         Runnable task = () -> {
             String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
             Connection connection;
@@ -60,6 +61,7 @@ public final class HealthCheckScheduler {
                 connection.setAutoCommit(false);
                 PreparedStatement stmt = connection.prepareStatement(HEALTH_CHECK_QUERY);
                 stmt.setString(1, tokenId);
+                stmt.setString(2, groupId);
                 stmt.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {

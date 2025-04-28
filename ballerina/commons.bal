@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/time;
-import ballerina/uuid;
 import ballerina/crypto;
 
 configurable int maxOpenConnections = 15;
@@ -179,12 +178,15 @@ public type FailoverServer record {|
 #
 # + databaseConfig - The database configuration for task coordination
 # + livenessCheckInterval - The interval (in seconds) to check the liveness of the job. Default is 30 seconds.
-# + nodeId - Optional identifier for the current node (auto-generated if not provided)
+# + taskId - Optional identifier for the current node (auto-generated if not provided)
+# + groupId - The identifier for the group of nodes. This is used to identify the group of nodes that are
+#             coordinating the task. It is recommended to use a unique identifier for each group of nodes.
 # + heartbeatFrequency - The interval (in seconds) for the node to update its heartbeat. Default is one second.
 public type WarmBackupConfig record {
     DatabaseConfig databaseConfig = {};
     int livenessCheckInterval = 30;
-    string nodeId = uuid:createRandomUuid();
+    string taskId;
+    string groupId;
     int heartbeatFrequency = 1;
 };
 

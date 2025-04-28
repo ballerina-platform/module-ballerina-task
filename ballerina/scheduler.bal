@@ -81,11 +81,12 @@ public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,
     }
     int result;
     if warmBackupConfig !is () {
-        string instanceId = warmBackupConfig.nodeId;
+        string taskId = warmBackupConfig.taskId;
+        string groupId = warmBackupConfig.groupId;
         boolean tokenAcquired = false;
         map<any> response;
         do {
-            response = check acquireToken(warmBackupConfig.databaseConfig, instanceId, 
+            response = check acquireToken(warmBackupConfig.databaseConfig, taskId, groupId,
                                           tokenAcquired, warmBackupConfig.livenessCheckInterval, 
                                           warmBackupConfig.heartbeatFrequency);
         } on fail error err {
@@ -219,7 +220,8 @@ isolated function externGetRunningJobs() returns int[] = @java:Method {
     'class: "io.ballerina.stdlib.task.actions.TaskActions"
 } external;
 
-isolated function acquireToken(DatabaseConfig dbConfig, string instanceId, boolean tokenAcquired, int livenessInterval,
-                               int heartbeatFrequency) returns map<any>|error = @java:Method {
+isolated function acquireToken(DatabaseConfig dbConfig, string instanceId, string groupId, boolean tokenAcquired,
+                               int livenessInterval, int heartbeatFrequency)
+    returns map<any>|error = @java:Method {
     'class: "io.ballerina.stdlib.task.TokenAcquisition"
 } external;
