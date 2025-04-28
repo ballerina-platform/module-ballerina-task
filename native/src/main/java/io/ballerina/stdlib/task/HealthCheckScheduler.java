@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,8 +31,10 @@ import static io.ballerina.stdlib.task.TokenAcquisition.JDBC_URL;
 /**
  * Scheduler for health check updates.
  */
-public class HealthCheckScheduler {
+public final class HealthCheckScheduler {
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+    private static final ExecutorService virtualThreadExecutor = Executors.newVirtualThreadPerTaskExecutor();
+
     public static final String HEALTH_CHECK_QUERY = "INSERT INTO health_check(node_id, last_heartbeat) " +
             "VALUES (?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE last_heartbeat = CURRENT_TIMESTAMP";
 
@@ -46,37 +49,33 @@ public class HealthCheckScheduler {
      */
     public static void startHealthCheckUpdater(DatabaseConfig dbConfig, String tokenId, int periodInSeconds) {
         Runnable task = () -> {
-            boolean needsRollback = false;
             String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
             Connection connection;
             try {
                 connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
             } catch (SQLException e) {
-
                 throw new RuntimeException("Failed to rollback transaction", e);
             }
             try {
                 connection.setAutoCommit(false);
-                needsRollback = true;
                 PreparedStatement stmt = connection.prepareStatement(HEALTH_CHECK_QUERY);
                 stmt.setString(1, tokenId);
                 stmt.executeUpdate();
                 connection.commit();
-                needsRollback = false;
             } catch (SQLException e) {
-                if (needsRollback) {
-                    try {
-                        connection.rollback();
-                    } catch (SQLException rollbackException) {
-                        throw new RuntimeException("Failed to rollback transaction", rollbackException);
-                    }
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackException) {
+                    throw new RuntimeException("Failed to rollback transaction", rollbackException);
                 }
             } finally {
                 closeConnection(connection);
             }
         };
-
-        scheduler.scheduleAtFixedRate(task, 0, periodInSeconds, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(
+                () -> virtualThreadExecutor.submit(task),
+                0, periodInSeconds, TimeUnit.SECONDS
+        );
     }
 
 

@@ -10,12 +10,22 @@
  *
  *  Unless required by applicable law or agreed to in writing,
  *  software distributed under the License is distributed on an
- *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- *  KIND, either express or implied.  See the License for the
+ *  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS
+ *  OF ANY KIND, either express or implied.  See the License for the
  *  specific language governing permissions and limitations
  *  under the License.
  */
 
 package io.ballerina.stdlib.task;
 
+/**
+ * Represents the configuration required to connect to a database.
+ *
+ * @param host     The hostname or IP address of the database server.
+ * @param user     The username for authenticating with the database.
+ * @param password The password for authenticating with the database.
+ * @param port     The port number on which the database server is listening.
+ * @param database The name of the database to connect to.
+ * @param options  Additional connection options.
+ */
 public record DatabaseConfig(String host, String user, String password, int port, String database, String options) { }

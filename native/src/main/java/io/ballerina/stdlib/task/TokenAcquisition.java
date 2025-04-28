@@ -37,8 +37,7 @@ import static io.ballerina.stdlib.task.utils.Utils.handleRollback;
 /**
  * Handles token acquisition with proper transaction management.
  */
-public class TokenAcquisition {
-
+public final class TokenAcquisition {
     public static final BString DB_HOST = StringUtils.fromString("host");
     public static final BString DB_USER = StringUtils.fromString("user");
     public static final BString DB_PASSWORD = StringUtils.fromString("password");

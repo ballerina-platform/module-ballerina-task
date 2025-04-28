@@ -89,7 +89,7 @@ public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,
                                           tokenAcquired, warmBackupConfig.livenessCheckInterval, 
                                           warmBackupConfig.heartbeatFrequency);
         } on fail error err {
-            return error Error(err.message());
+            return error Error(err.message(), err);
         }
         result = check scheduleIntervalJobWithToken(job, interval, maxCount, sTime, eTime, taskPolicy, response);
     } else {
@@ -158,7 +158,7 @@ public isolated function resumeJob(JobId jobId) returns Error? {
 # task:JobId[] result = task:getRunningJobs();
 # ```
 #
-# + return - Returns the IDs of all the running jobs as an array
+# + return - IDs of all the running jobs as an array
 public isolated function getRunningJobs() returns JobId[] {
     JobId[] jobIds = [];
     int[] ids = externGetRunningJobs();
@@ -220,6 +220,6 @@ isolated function externGetRunningJobs() returns int[] = @java:Method {
 } external;
 
 isolated function acquireToken(DatabaseConfig dbConfig, string instanceId, boolean tokenAcquired, int livenessInterval,
-                               int heartbeatFrequency) returns map<anydata>|error = @java:Method {
+                               int heartbeatFrequency) returns map<any>|error = @java:Method {
     'class: "io.ballerina.stdlib.task.TokenAcquisition"
 } external;

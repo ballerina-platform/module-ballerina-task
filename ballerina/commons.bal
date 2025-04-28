@@ -14,11 +14,32 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/sql;
 import ballerina/time;
-import ballerinax/mysql;
-import ballerinax/mysql.driver as _;
 import ballerina/uuid;
+import ballerina/crypto;
+
+configurable int maxOpenConnections = 15;
+configurable decimal maxConnectionLifeTime = 1800.0;
+configurable int minIdleConnections = 15;
+
+# Represents the properties, which are used to configure a DB connection pool.
+# Default values of the fields can be set through the configuration API.
+#
+# + maxOpenConnections - The maximum number of open connections that the pool is allowed to have.
+#                        Includes both idle and in-use connections. The default value is 15. This can be changed through
+#                        the configuration API with the `ballerina.sql.maxOpenConnections` key
+# + maxConnectionLifeTime - The maximum lifetime (in seconds) of a connection in the pool. The default value is 1800
+#                           seconds (30 minutes). A value of 0 indicates an unlimited maximum lifetime (infinite lifetime).
+#                           The minimum allowed value is 30 seconds. This can be changed through the configuration API
+#                           with the `ballerina.sql.maxConnectionLifeTime` key.
+# + minIdleConnections - The minimum number of idle connections that the pool tries to maintain. The default value
+#                        is the same as `maxOpenConnections` and it can be changed through the configuration
+#                        API with the `ballerina.sql.minIdleConnections` key
+public type ConnectionPool record {|
+    int maxOpenConnections = maxOpenConnections;
+    decimal maxConnectionLifeTime = maxConnectionLifeTime;
+    int minIdleConnections = minIdleConnections;
+|};
 
 # A read-only record consisting of a unique identifier for a created job.
 public type JobId readonly & record {|
@@ -64,7 +85,7 @@ public enum WaitingPolicy {
 # + password - The password for the database connection
 # + port - The port number of the database server
 # + database - The name of the database to connect to
-# + options - Additional options for the MySQL connection
+# + options - Additional options for the database connection
 # + connectionPool - The connection pool configuration
 public type DatabaseConfig record {
   string host = "localhost";
@@ -72,9 +93,87 @@ public type DatabaseConfig record {
   string? password = ();
   int port = 3306;
   string? database = ();
-  mysql:Options? options = ();
-  sql:ConnectionPool? connectionPool = ();
+  Options? options = ();
+  ConnectionPool? connectionPool = ();
 };
+
+# Provides a set of additional configurations related to the database connection.
+#
+# + ssl - SSL configurations to be used
+# + failoverConfig - Server failover configurations to be used
+# + useXADatasource - Flag to enable or disable XADatasource
+# + connectTimeout - Timeout (in seconds) to be used when establishing a connection to the database server
+# + socketTimeout - Socket timeout (in seconds) to be used during the read/write operations with the database server
+#                   (0 means no socket timeout)
+# + serverTimezone - Configures the connection time zone, which is used by the `Connector/J` if the conversion between a Ballerina
+#                    application and a target time zone is required when preserving instant temporal values
+# + noAccessToProcedureBodies - With this option the user is allowed to invoke procedures with access to metadata restricted
+public type Options record {|
+    SecureSocket ssl?;
+    FailoverConfig failoverConfig?;
+    boolean useXADatasource = false;
+    decimal connectTimeout = 30;
+    decimal socketTimeout = 0;
+    string serverTimezone?;
+    boolean noAccessToProcedureBodies = false;
+|};
+
+public type SecureSocket record {|
+    SSLMode mode = SSL_PREFERRED;
+    crypto:KeyStore key?;
+    crypto:TrustStore cert?;
+    boolean allowPublicKeyRetrieval = false;
+|};
+
+# Establish an encrypted connection if the server supports encrypted connections. Falls back to an unencrypted
+# connection if an encrypted connection cannot be established.
+public const SSL_PREFERRED = "PREFERRED";
+
+# Establish an encrypted connection if the server supports encrypted connections. The connection attempt fails if
+# an encrypted connection cannot be established.
+public const SSL_REQUIRED = "REQUIRED";
+
+# Establish an encrypted connection if the server supports encrypted connections. The connection attempt fails if
+# an encrypted connection cannot be established. Additionally, verifies the server Certificate Authority (CA)
+# certificate against the configured CA certificates. The connection attempt fails if no valid matching CA
+# certificates are found.
+public const SSL_VERIFY_CA = "VERIFY_CA";
+
+# Establish an encrypted connection if the server supports encrypted connections and verifies the server
+# Certificate Authority (CA) certificate against the configured CA certificates. The connection attempt fails if an
+# encrypted connection cannot be established or no valid matching CA certificates are found. Also, performs hostname
+# identity verification by checking the hostname the client uses for connecting to the server against the identity
+# in the certificate that the server sends to the client.
+public const SSL_VERIFY_IDENTITY = "VERIFY_IDENTITY";
+
+# Establish an unencrypted connection to the server. If the server supports encrypted connections, the connection
+# attempt fails.
+public const SSL_DISABLED = "DISABLED";
+
+# `SSLMode` as a union of available SSL modes.
+public type SSLMode SSL_PREFERRED|SSL_REQUIRED|SSL_VERIFY_CA|SSL_VERIFY_IDENTITY|SSL_DISABLED;
+
+# Configuration to be used for server failover.
+#
+# + failoverServers - Array of `FailoverServer` for the secondary servers
+# + timeBeforeRetry - Time the driver waits before attempting to fall back to the primary host
+# + queriesBeforeRetry - Number of queries that are executed before the driver attempts to fall back to the primary host
+# + failoverReadOnly - Open connection to secondary host with READ ONLY mode.
+public type FailoverConfig record {|
+    FailoverServer[] failoverServers;
+    int timeBeforeRetry?;
+    int queriesBeforeRetry?;
+    boolean failoverReadOnly = true;
+|};
+
+# Configuration for failover servers
+#
+# + host - Hostname of the secondary server
+# + port - Port of the secondary server
+public type FailoverServer record {|
+    string host;
+    int port;
+|};
 
 # Represents the configuration required for task coordination.
 #
