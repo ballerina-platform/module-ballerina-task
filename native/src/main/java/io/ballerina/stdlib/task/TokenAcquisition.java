@@ -44,7 +44,6 @@ public final class TokenAcquisition {
     public static final BString DB_PORT = StringUtils.fromString("port");
     public static final BString DATABASE = StringUtils.fromString("database");
     public static final BString DATABASE_CONFIG = StringUtils.fromString("databaseConfig");
-    public static final String JDBC_URL = "jdbc:mysql://%s:%d/%s";
     public static final BString STATUS = StringUtils.fromString("status");
     public static final BString ACTIVE_STATUS = StringUtils.fromString("active");
     public static final BString STANDBY_STATUS = StringUtils.fromString("standby");
@@ -53,11 +52,13 @@ public final class TokenAcquisition {
     public static final BString TOKEN_HOLDER = StringUtils.fromString("tokenholder");
     public static final BString LIVENESS_INTERVAL = StringUtils.fromString("livenessInterval");
     public static final String LAST_HEARTBEAT = "last_heartbeat";
+    public static final String ID = "task_id";
+    public static final String JDBC_URL = "jdbc:mysql://%s:%d/%s";
     public static final String HAS_ACTIVE_TOKEN_QUERY =
             "SELECT task_id FROM token_holder WHERE task_id = ? AND group_id = ? AND is_active = true";
     public static final String HAS_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE task_id = ?";
     public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE is_active = true " +
-            "AND group_id = ? AND term = (SELECT MAX(term) as term FROM token_holder)";
+            "AND group_id = ? AND term = (SELECT MAX(term) as term FROM token_holder WHERE group_id = ?)";
     public static final String INSERT_TOKEN_QUERY =
             "INSERT INTO token_holder(task_id, group_id, term, is_active) VALUES (?, ?, 1, true) " +
             "ON DUPLICATE KEY UPDATE group_id = VALUES(group_id), term = 1, is_active = true";
@@ -66,7 +67,6 @@ public final class TokenAcquisition {
             "group_id = ? ORDER BY last_heartbeat DESC LIMIT 1";
     public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false, " +
             "term = ? WHERE group_id = ? AND task_id != ?";
-    public static final String ID = "task_id";
     public static final String UPSERT_VALID_TOKEN_QUERY =
             "INSERT INTO token_holder(task_id, group_id, term, is_active) " +
             "VALUES (?, ?, ?, true) ON DUPLICATE KEY UPDATE is_active = true, term = ?";
@@ -74,7 +74,7 @@ public final class TokenAcquisition {
             "SELECT COALESCE(MAX(term), 0) FROM token_holder WHERE group_id = ?";
     public static final String UPSERT_TOKEN = "INSERT INTO token_holder (task_id, group_id, term, is_active) " +
             "SELECT ?, ?, COALESCE(MAX(term), 0), false FROM token_holder ON DUPLICATE KEY " +
-            "UPDATE is_active = false, term = COALESCE((SELECT MAX(term) FROM token_holder), 0)";
+            "UPDATE is_active = false, term = COALESCE((SELECT MAX(term) FROM token_holder WHERE group_id = ?), 0)";
 
     private TokenAcquisition() { }
 
@@ -138,6 +138,7 @@ public final class TokenAcquisition {
         boolean acquiredToken = hasToken;
         try (PreparedStatement stmt = connection.prepareStatement(CHECK_ACTIVE_TOKEN_QUERY)) {
             stmt.setString(1, groupId);
+            stmt.setString(2, groupId);
             ResultSet result = stmt.executeQuery();
             if (!result.next()) {
                 PreparedStatement insertStmt = connection.prepareStatement(INSERT_TOKEN_QUERY);
@@ -153,6 +154,7 @@ public final class TokenAcquisition {
             PreparedStatement insertStatement = connection.prepareStatement(UPSERT_TOKEN);
             insertStatement.setString(1, taskId);
             insertStatement.setString(2, groupId);
+            insertStatement.setString(3, groupId);
             insertStatement.executeUpdate();
 
             try (PreparedStatement prepareStatement = connection.prepareStatement(CURRENT_TIMESTAMP_QUERY)) {
@@ -178,8 +180,8 @@ public final class TokenAcquisition {
                     }
                     PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
                     deactivateStmt.setInt(1, currentTerm);
-                    deactivateStmt.setString(2, taskId);
-                    deactivateStmt.setString(3, groupId);
+                    deactivateStmt.setString(2, groupId);
+                    deactivateStmt.setString(3, taskId);
                     deactivateStmt.executeUpdate();
 
                     PreparedStatement tokenStatement = connection.prepareStatement(UPSERT_VALID_TOKEN_QUERY);
