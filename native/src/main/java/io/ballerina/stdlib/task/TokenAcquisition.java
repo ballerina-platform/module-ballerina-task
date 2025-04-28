@@ -166,23 +166,24 @@ public final class TokenAcquisition {
                     Timestamp lastHeartbeat = healthCheckRs.getTimestamp(LAST_HEARTBEAT);
                     long timeDiffSeconds = (timestamp.getTime() - lastHeartbeat.getTime()) / 1000;
                     if (timeDiffSeconds <= livenessInterval) {
-                        PreparedStatement maxTermQuery = connection.prepareStatement(GET_MAX_TERM_QUERY);
-                        ResultSet maxTerm = maxTermQuery.executeQuery();
-                        if (maxTerm.next()) {
-                            currentTerm = maxTerm.getInt(1) + 1;
-                        }
-                        PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
-                        deactivateStmt.setInt(1, currentTerm);
-                        deactivateStmt.setString(2, instanceId);
-                        deactivateStmt.executeUpdate();
-
-                        PreparedStatement tokenStatement = connection.prepareStatement(UPSERT_VALID_TOKEN_QUERY);
-                        tokenStatement.setString(1, instanceId);
-                        tokenStatement.setInt(2, currentTerm);
-                        tokenStatement.setInt(3, currentTerm);
-                        tokenStatement.executeUpdate();
-                        acquiredToken = true;
+                        return acquiredToken;
                     }
+                    PreparedStatement maxTermQuery = connection.prepareStatement(GET_MAX_TERM_QUERY);
+                    ResultSet maxTerm = maxTermQuery.executeQuery();
+                    if (maxTerm.next()) {
+                        currentTerm = maxTerm.getInt(1) + 1;
+                    }
+                    PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
+                    deactivateStmt.setInt(1, currentTerm);
+                    deactivateStmt.setString(2, instanceId);
+                    deactivateStmt.executeUpdate();
+
+                    PreparedStatement tokenStatement = connection.prepareStatement(UPSERT_VALID_TOKEN_QUERY);
+                    tokenStatement.setString(1, instanceId);
+                    tokenStatement.setInt(2, currentTerm);
+                    tokenStatement.setInt(3, currentTerm);
+                    tokenStatement.executeUpdate();
+                    acquiredToken = true;
                 }
             }
         }
