@@ -58,13 +58,14 @@ public final class TokenAcquisition {
     public static final String HAS_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE task_id = ?";
     public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE is_active = true " +
             "AND group_id = ? AND term = (SELECT MAX(term) as term FROM token_holder)";
-    public static final String INSERT_TOKEN_QUERY = "INSERT INTO token_holder(task_id, group_id, term, is_active) " +
-            "VALUES (?, ?, 1, true)";
+    public static final String INSERT_TOKEN_QUERY =
+            "INSERT INTO token_holder(task_id, group_id, term, is_active) VALUES (?, ?, 1, true) " +
+            "ON DUPLICATE KEY UPDATE group_id = VALUES(group_id), term = 1, is_active = true";
     public static final String CURRENT_TIMESTAMP_QUERY = "SELECT CURRENT_TIMESTAMP";
     public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE task_id = ? AND " +
             "group_id = ? ORDER BY last_heartbeat DESC LIMIT 1";
     public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false, " +
-            "term = ? WHERE task_id != ? AND group_id = ?";
+            "term = ? WHERE group_id = ? AND task_id != ?";
     public static final String ID = "task_id";
     public static final String UPSERT_VALID_TOKEN_QUERY =
             "INSERT INTO token_holder(task_id, group_id, term, is_active) " +
