@@ -55,24 +55,17 @@ public final class TokenAcquisition {
     public static final String ID = "task_id";
     public static final String JDBC_URL = "jdbc:mysql://%s:%d/%s";
     public static final String HAS_ACTIVE_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE group_id = ?";
-    public static final String CHECK_ACTIVE_TOKEN_QUERY =
-            "SELECT task_id FROM token_holder " +
-                    "WHERE group_id = ? AND term = (SELECT MAX(term) FROM token_holder WHERE group_id = ?)";
+    public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE group_id = ? AND " +
+            "term = (SELECT MAX(term) FROM token_holder WHERE group_id = ?)";
     public static final String INSERT_TOKEN_QUERY =
             "INSERT INTO token_holder(task_id, group_id, term) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE term = 1";
     public static final String CURRENT_TIMESTAMP_QUERY = "SELECT CURRENT_TIMESTAMP";
-
-    public static final String HEALTH_CHECK_QUERY =
-            "SELECT last_heartbeat FROM health_check WHERE task_id = ? AND group_id = ? " +
-            "ORDER BY last_heartbeat DESC LIMIT 1";
-
-    public static final String UPSERT_VALID_TOKEN_QUERY =
-            "INSERT INTO token_holder(task_id, group_id, term) VALUES (?, ?, ?) " +
-                    "ON DUPLICATE KEY UPDATE term = VALUES(term)";
-
+    public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE task_id = ? " +
+            "AND group_id = ? ORDER BY last_heartbeat DESC LIMIT 1";
+    public static final String UPSERT_VALID_TOKEN_QUERY = "INSERT INTO token_holder(task_id, group_id, term) VALUES " +
+            "(?, ?, ?) ON DUPLICATE KEY UPDATE term = VALUES(term)";
     public static final String GET_MAX_TERM_QUERY =
             "SELECT COALESCE(MAX(term), 0) FROM token_holder WHERE group_id = ?";
-
 
     private TokenAcquisition() { }
 
