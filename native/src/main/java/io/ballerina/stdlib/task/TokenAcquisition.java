@@ -96,12 +96,6 @@ public final class TokenAcquisition {
             String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
             connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
             connection.setAutoCommit(false);
-            PreparedStatement stmt = connection.prepareStatement(HAS_TOKEN_QUERY);
-            stmt.setString(1, instanceId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                throw Utils.createTaskError("Node id already exists: " + instanceId);
-            }
             tokenAcquired = attemptTokenAcquisition(connection, instanceId, groupId.getValue(),
                                                     tokenAcquired, livenessInterval);
             connection.commit();
@@ -179,10 +173,6 @@ public final class TokenAcquisition {
                     if (maxTerm.next()) {
                         currentTerm = maxTerm.getInt(1) + 1;
                     }
-                    PreparedStatement deleteStatement = connection.prepareStatement(DELETE_TOKEN_QUERY);
-                    deleteStatement.setString(1, groupId);
-                    deleteStatement.executeUpdate();
-
                     PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
                     deactivateStmt.setInt(1, currentTerm);
                     deactivateStmt.setString(2, groupId);
