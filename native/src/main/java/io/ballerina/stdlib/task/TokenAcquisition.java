@@ -54,28 +54,25 @@ public final class TokenAcquisition {
     public static final String LAST_HEARTBEAT = "last_heartbeat";
     public static final String ID = "task_id";
     public static final String JDBC_URL = "jdbc:mysql://%s:%d/%s";
-    public static final String HAS_ACTIVE_TOKEN_QUERY =
-            "SELECT task_id FROM token_holder WHERE task_id = ? AND group_id = ? AND is_active = true";
-    public static final String HAS_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE task_id = ?";
-    public static final String CHECK_ACTIVE_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE is_active = true " +
-            "AND group_id = ? AND term = (SELECT MAX(term) as term FROM token_holder WHERE group_id = ?)";
+    public static final String HAS_ACTIVE_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE group_id = ?";
+    public static final String CHECK_ACTIVE_TOKEN_QUERY =
+            "SELECT task_id FROM token_holder " +
+                    "WHERE group_id = ? AND term = (SELECT MAX(term) FROM token_holder WHERE group_id = ?)";
     public static final String INSERT_TOKEN_QUERY =
-            "INSERT INTO token_holder(task_id, group_id, term, is_active) VALUES (?, ?, 1, true) " +
-            "ON DUPLICATE KEY UPDATE group_id = VALUES(group_id), term = 1, is_active = true";
+            "INSERT INTO token_holder(task_id, group_id, term) VALUES (?, ?, 1) ON DUPLICATE KEY UPDATE term = 1";
     public static final String CURRENT_TIMESTAMP_QUERY = "SELECT CURRENT_TIMESTAMP";
-    public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE task_id = ? AND " +
-            "group_id = ? ORDER BY last_heartbeat DESC LIMIT 1";
-    public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false, " +
-            "term = ? WHERE group_id = ? AND task_id != ?";
-    public static final String DELETE_TOKEN_QUERY = "DELETE FROM token_holder WHERE group_id = ? AND is_active = true";
+
+    public static final String HEALTH_CHECK_QUERY =
+            "SELECT last_heartbeat FROM health_check WHERE task_id = ? AND group_id = ? " +
+            "ORDER BY last_heartbeat DESC LIMIT 1";
+
     public static final String UPSERT_VALID_TOKEN_QUERY =
-            "INSERT INTO token_holder(task_id, group_id, term, is_active) " +
-            "VALUES (?, ?, ?, true) ON DUPLICATE KEY UPDATE is_active = true, term = ?";
+            "INSERT INTO token_holder(task_id, group_id, term) VALUES (?, ?, ?) " +
+                    "ON DUPLICATE KEY UPDATE term = VALUES(term)";
+
     public static final String GET_MAX_TERM_QUERY =
             "SELECT COALESCE(MAX(term), 0) FROM token_holder WHERE group_id = ?";
-    public static final String UPSERT_TOKEN = "INSERT INTO token_holder (task_id, group_id, term, is_active) " +
-            "SELECT ?, ?, COALESCE(MAX(term), 0), false FROM token_holder ON DUPLICATE KEY " +
-            "UPDATE is_active = false, term = COALESCE((SELECT MAX(term) FROM token_holder WHERE group_id = ?), 0)";
+
 
     private TokenAcquisition() { }
 
@@ -121,8 +118,7 @@ public final class TokenAcquisition {
 
     public static boolean hasActiveToken(Connection connection, String taskId, String groupId) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement(HAS_ACTIVE_TOKEN_QUERY)) {
-            stmt.setString(1, taskId);
-            stmt.setString(2, groupId);
+            stmt.setString(1, groupId);
             ResultSet rs = stmt.executeQuery();
             return rs.next();
         }
@@ -146,12 +142,6 @@ public final class TokenAcquisition {
             if (existingTokenId.equals(taskId)) {
                 return true;
             }
-            PreparedStatement insertStatement = connection.prepareStatement(UPSERT_TOKEN);
-            insertStatement.setString(1, taskId);
-            insertStatement.setString(2, groupId);
-            insertStatement.setString(3, groupId);
-            insertStatement.executeUpdate();
-
             try (PreparedStatement prepareStatement = connection.prepareStatement(CURRENT_TIMESTAMP_QUERY)) {
                 ResultSet response = prepareStatement.executeQuery();
                 Timestamp timestamp = response.next()
@@ -173,17 +163,10 @@ public final class TokenAcquisition {
                     if (maxTerm.next()) {
                         currentTerm = maxTerm.getInt(1) + 1;
                     }
-                    PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
-                    deactivateStmt.setInt(1, currentTerm);
-                    deactivateStmt.setString(2, groupId);
-                    deactivateStmt.setString(3, taskId);
-                    deactivateStmt.executeUpdate();
-
                     PreparedStatement tokenStatement = connection.prepareStatement(UPSERT_VALID_TOKEN_QUERY);
                     tokenStatement.setString(1, taskId);
                     tokenStatement.setString(2, groupId);
                     tokenStatement.setInt(3, currentTerm);
-                    tokenStatement.setInt(4, currentTerm);
                     tokenStatement.executeUpdate();
                     acquiredToken = true;
                 }
