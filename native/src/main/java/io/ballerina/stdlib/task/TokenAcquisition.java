@@ -67,6 +67,7 @@ public final class TokenAcquisition {
             "group_id = ? ORDER BY last_heartbeat DESC LIMIT 1";
     public static final String INVALIDATE_TOKEN_QUERY = "UPDATE token_holder SET is_active = false, " +
             "term = ? WHERE group_id = ? AND task_id != ?";
+    public static final String DELETE_TOKEN_QUERY = "DELETE FROM token_holder WHERE group_id = ? AND is_active = true";
     public static final String UPSERT_VALID_TOKEN_QUERY =
             "INSERT INTO token_holder(task_id, group_id, term, is_active) " +
             "VALUES (?, ?, ?, true) ON DUPLICATE KEY UPDATE is_active = true, term = ?";
@@ -178,6 +179,10 @@ public final class TokenAcquisition {
                     if (maxTerm.next()) {
                         currentTerm = maxTerm.getInt(1) + 1;
                     }
+                    PreparedStatement deleteStatement = connection.prepareStatement(DELETE_TOKEN_QUERY);
+                    deleteStatement.setString(1, groupId);
+                    deleteStatement.executeUpdate();
+
                     PreparedStatement deactivateStmt = connection.prepareStatement(INVALIDATE_TOKEN_QUERY);
                     deactivateStmt.setInt(1, currentTerm);
                     deactivateStmt.setString(2, groupId);
