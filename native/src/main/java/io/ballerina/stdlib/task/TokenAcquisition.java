@@ -60,7 +60,8 @@ public final class TokenAcquisition {
     public static final String DB_TYPE_MYSQL = "mysql";
     public static final String POSTGRESQL_JDBC_URL = "jdbc:postgresql://%s:%d/%s";
     public static final String MYSQL_JDBC_URL = "jdbc:mysql://%s:%d/%s";
-    public static final String HAS_ACTIVE_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE group_id = ?";
+    public static final String HAS_ACTIVE_TOKEN_QUERY = "SELECT task_id FROM token_holder " +
+            "WHERE task_id = ? AND group_id = ?";
     public static final String GET_CURRENT_TOKEN_QUERY = "SELECT task_id FROM token_holder WHERE group_id = ?";
     public static final String CURRENT_TIMESTAMP_QUERY = "SELECT CURRENT_TIMESTAMP";
     public static final String HEALTH_CHECK_QUERY = "SELECT last_heartbeat FROM health_check WHERE task_id = ? " +
@@ -133,7 +134,8 @@ public final class TokenAcquisition {
 
     public static boolean hasActiveToken(Connection connection, String taskId, String groupId) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement(HAS_ACTIVE_TOKEN_QUERY)) {
-            stmt.setString(1, groupId);
+            stmt.setString(1, taskId);
+            stmt.setString(2, groupId);
             ResultSet rs = stmt.executeQuery();
             return rs.next();
         }
