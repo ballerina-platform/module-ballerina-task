@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static io.ballerina.stdlib.task.TokenAcquisition.JDBC_URL;
+import static io.ballerina.stdlib.task.TokenAcquisition.getJdbcUrl;
 
 /**
  * Scheduler for health check updates.
@@ -36,7 +36,8 @@ public final class HealthCheckScheduler {
     private static final ExecutorService virtualThreadExecutor = Executors.newVirtualThreadPerTaskExecutor();
 
     public static final String HEALTH_CHECK_QUERY = "INSERT INTO health_check(task_id, group_id, last_heartbeat) " +
-            "VALUES (?, ?, CURRENT_TIMESTAMP) ON DUPLICATE KEY UPDATE last_heartbeat = CURRENT_TIMESTAMP";
+            "VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT (task_id, group_id) DO UPDATE " +
+            "SET last_heartbeat = EXCLUDED.last_heartbeat";
 
     private HealthCheckScheduler() { }
 
@@ -50,9 +51,9 @@ public final class HealthCheckScheduler {
     public static void startHealthCheckUpdater(DatabaseConfig dbConfig, String tokenId,
                                                String groupId, int periodInSeconds) {
         Runnable task = () -> {
-            String jdbcUrl = String.format(JDBC_URL, dbConfig.host(), dbConfig.port(), dbConfig.database());
             Connection connection;
             try {
+                String jdbcUrl = getJdbcUrl(dbConfig);
                 connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
             } catch (SQLException e) {
                 throw new RuntimeException("Failed to rollback transaction", e);

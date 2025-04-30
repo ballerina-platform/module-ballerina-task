@@ -37,14 +37,13 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.ballerina.stdlib.task.utils.TaskJob.GROUP_ID;
-
 /**
  * Task manager to handle schedulers in ballerina tasks.
  */
 public class TaskManager {
     public static final String TOKEN_HOLDER = "token_holder";
     public static final String INSTANCE_ID = "instanceId";
+    public static final String GROUP_ID = "groupId";
     public static final String CONNECTION = "connection";
     public static final String LIVENESS_INTERVAL = "livenessInterval";
     public static final String DATABASE_CONFIG = "databaseConfig";

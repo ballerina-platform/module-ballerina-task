@@ -21,11 +21,11 @@ package io.ballerina.stdlib.task;
 /**
  * Represents the configuration required to connect to a database.
  *
- * @param host     The hostname or IP address of the database server.
+ * @param host     The hostname of the database server.
  * @param user     The username for authenticating with the database.
  * @param password The password for authenticating with the database.
  * @param port     The port number on which the database server is listening.
- * @param database The name of the database to connect to.
- * @param options  Additional connection options.
+ * @param database The name of the database to connect to
+ * @param dbType  The type of the database (e.g., MySQL, PostgreSQL).
  */
-public record DatabaseConfig(String host, String user, String password, int port, String database, String options) { }
+public record DatabaseConfig(String host, String user, String password, int port, String database, String dbType) { }
