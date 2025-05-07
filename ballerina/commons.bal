@@ -31,7 +31,7 @@ public configurable time:Seconds globalSchedulerWaitingTime = 5;
 # 
 # + schedule - The schedule configuration for the listener
 public type ListenerConfiguration record {
-    OneTimeConfiguration|RecurringConfiguration schedule;
+  OneTimeConfiguration|RecurringConfiguration schedule;
 };
 
 # Recurring schedule configuration.
@@ -43,11 +43,11 @@ public type ListenerConfiguration record {
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy - The policy, which is used to handle the error and will be waiting during the trigger time
 public type RecurringConfiguration record {|
-    decimal interval;
-    int maxCount = -1;
-    time:Civil startTime?;
-    time:Civil endTime?;
-    TaskPolicy taskPolicy = {};
+  decimal interval;
+  int maxCount = -1;
+  time:Civil startTime?;
+  time:Civil endTime?;
+  TaskPolicy taskPolicy = {};
 |};
 
 # One-time schedule configuration.

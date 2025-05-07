@@ -73,7 +73,7 @@ public class Listener {
     # 
     # + return - An error if the 'listener fails to stop
     public isolated function immediateStop() returns error? {
-        // return immediateStopListener(self);
+        return immediateStopListener(self);
     }
 }
 
@@ -86,5 +86,9 @@ isolated function attachService(Listener 'listener, Service s, string serviceId)
 } external;
 
 isolated function startListener(Listener 'listener) returns error? = @java:Method {
+    'class: "io.ballerina.stdlib.task.listener.ListenerAction"
+} external;
+
+isolated function immediateStopListener(Listener 'listener) returns error? = @java:Method {
     'class: "io.ballerina.stdlib.task.listener.ListenerAction"
 } external;

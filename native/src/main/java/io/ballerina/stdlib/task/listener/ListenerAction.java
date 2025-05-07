@@ -32,12 +32,12 @@ import io.ballerina.stdlib.task.utils.Utils;
 
 public class ListenerAction {
     public static final String NATIVE_LISTENER_KEY = "TASK_NATIVE_LISTENER";
-    public static final BString TRIGGER_TIME = ListenerAction.TRIGGER_TIME;
     public static final BString INTERVAL = StringUtils.fromString("interval");
     public static final BString MAX_COUNT = StringUtils.fromString("maxCount");
     public static final BString START_TIME = StringUtils.fromString("startTime");
     public static final BString END_TIME = StringUtils.fromString("endTime");
     public static final BString TASK_POLICY = StringUtils.fromString("taskPolicy");
+    public static final BString TRIGGER_TIME = StringUtils.fromString("triggerTime");
     public static final String ONE_TIME_CONFIGURATION = "OneTimeConfiguration";
     public static final String LISTENER_NOT_INITIALIZED_ERROR = "Listener not initialized";
     public static final String TIME_CONVERTER_CLASS = "TimeConverter";
@@ -82,6 +82,7 @@ public class ListenerAction {
 
     public static Object attachService(BObject listenerObj, BObject service, BString serviceName) {
         TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
+        service.addNativeData("JobId", serviceName);
         listener.registerService(serviceName.getValue(), service);
         return null;
     }
@@ -89,6 +90,17 @@ public class ListenerAction {
     public static Object detachService(BObject listenerObj, BObject service, BString serviceName) {
         TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
         listener.unregisterService(serviceName.getValue());
+        return null;
+    }
+
+    public static Object immediateStopListener(Environment env, BObject listenerObj) {
+        try {
+            TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
+            TaskListener.getScheduler(env).clear();
+            listener.unregisterAllServices();
+        } catch (Exception e) {
+            return Utils.createTaskError(e.getMessage());
+        }
         return null;
     }
 }
