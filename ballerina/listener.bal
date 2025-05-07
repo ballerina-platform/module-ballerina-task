@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/jballerina.java;
-import ballerina/log;
 import ballerina/uuid;
 
 # Listener for task scheduling.
@@ -36,15 +35,8 @@ public class Listener {
     # + name - The service name
     # + return - An error if the service cannot be attached
     public isolated function attach(Service s, string[]|string? name = ()) returns error? {
-        if name is string[] {
-            foreach string serviceId in name {
-                error? err = attachService(self, s, serviceId);
-                log:printError("Error attaching service: ", err);
-            }
-        } else {
-            string serviceId = name is string ? name : uuid:createRandomUuid();
-            return attachService(self, s, serviceId);
-        }
+        string serviceId = name is string ? name : (name is string[] ? name[0] : uuid:createRandomUuid());
+        return attachService(self, s, serviceId);
     }
     
     # Detaches a service from the 'listener.
