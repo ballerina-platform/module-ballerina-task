@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
+import io.ballerina.stdlib.task.server.TaskServerJob;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -87,6 +88,10 @@ public final class Utils {
 
     public static JobDetail createJob(JobDataMap jobDataMap, String jobId) {
         return JobBuilder.newJob(TaskJob.class).withIdentity(jobId).usingJobData(jobDataMap).build();
+    }
+
+    public static JobDetail createListenerJob(JobDataMap jobDataMap, String jobId) {
+        return JobBuilder.newJob(TaskServerJob.class).withIdentity(jobId).usingJobData(jobDataMap).build();
     }
 
     public static Trigger getOneTimeTrigger(long time, String triggerID) {

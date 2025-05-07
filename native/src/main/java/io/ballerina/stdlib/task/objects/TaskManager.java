@@ -20,6 +20,7 @@ package io.ballerina.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.utils.TaskConstants;
 import io.ballerina.stdlib.task.utils.Utils;
@@ -35,10 +36,18 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.ballerina.stdlib.task.utils.TaskConstants.JOB;
+
 /**
  * Task manager to handle schedulers in ballerina tasks.
  */
 public class TaskManager {
+    public static final String TOKEN_HOLDER = "token_holder";
+    public static final String INSTANCE_ID = "instanceId";
+    public static final String GROUP_ID = "groupId";
+    public static final String CONNECTION = "connection";
+    public static final String LIVENESS_INTERVAL = "livenessInterval";
+    public static final String DATABASE_CONFIG = "databaseConfig";
     private Scheduler scheduler;
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
@@ -117,6 +126,23 @@ public class TaskManager {
     public void scheduleOneTimeJob(JobDataMap jobDataMap, long time, Integer jobId) throws SchedulerException {
         scheduleJob(Utils.createJob(jobDataMap, jobId.toString()),
                 Utils.getOneTimeTrigger(time, TaskConstants.TRIGGER_ID), jobId);
+    }
+
+    public void scheduleOneTimeListenerJob(JobDataMap jobDataMap, long time, Integer
+                                            jobId, BObject job) throws SchedulerException {
+        jobDataMap.put(JOB, job);
+        scheduleJob(Utils.createListenerJob(jobDataMap, jobId.toString()),
+                Utils.getOneTimeTrigger(time, TaskConstants.TRIGGER_ID), jobId);
+    }
+
+    public void scheduleListenerIntervalJob(JobDataMap jobDataMap, long interval, long maxCount, Object startTime,
+                                            Object endTime, String waitingPolicy,
+                                            Integer jobId, BObject service) throws SchedulerException {
+        jobDataMap.put(JOB, service);
+        JobDetail job = Utils.createListenerJob(jobDataMap, jobId.toString());
+        Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
+                TaskConstants.TRIGGER_ID);
+        scheduleJob(job, trigger, jobId);
     }
 
     public void scheduleIntervalJob(JobDataMap jobDataMap, long interval, long maxCount, Object startTime,
