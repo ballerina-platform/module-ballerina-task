@@ -18,7 +18,7 @@ import ballerina/time;
 
 # Represents the task service.
 public type Service distinct service object {
-    remote function onTrigger() returns error?;
+  function onTrigger() returns error?;
 };
 
 # Worker count for the global scheduler
