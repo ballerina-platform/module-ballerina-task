@@ -45,10 +45,6 @@ public class TaskListener {
     private BMap<BString, Object> configs = ValueCreator.createMapValue();
     private Boolean isTaskCoordinator = false;
 
-    public TaskListener() {
-
-    }
-
     public void start(Environment env, BObject job, long time) {
         Utils.disableQuartzLogs();
         try {
