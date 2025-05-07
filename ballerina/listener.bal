@@ -15,8 +15,8 @@
 // under the License.
 
 import ballerina/jballerina.java;
-import ballerina/uuid;
 import ballerina/log;
+import ballerina/uuid;
 
 # Listener for task scheduling.
 public class Listener {
