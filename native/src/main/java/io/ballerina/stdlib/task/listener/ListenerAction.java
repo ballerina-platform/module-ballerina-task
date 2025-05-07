@@ -27,8 +27,11 @@ import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.ModuleUtils;
 import io.ballerina.stdlib.task.utils.Utils;
+
+import java.util.Map;
 
 import static io.ballerina.stdlib.task.utils.TaskConstants.JOB_ID;
 
@@ -102,7 +105,10 @@ public class ListenerAction {
     public static Object immediateStopListener(Environment env, BObject listenerObj) {
         try {
             TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
-            TaskListener.getScheduler(env).clear();
+            Map<String, BObject> services = listener.getServices();
+            for (String entry : services.keySet()) {
+                TaskManager.getInstance().unScheduleJob(entry);
+            }
             listener.unregisterAllServices();
         } catch (Exception e) {
             return Utils.createTaskError(e.getMessage());

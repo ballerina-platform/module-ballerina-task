@@ -24,7 +24,7 @@ isolated int[] concurrentArray = [];
 isolated int[] dataArray = [];
 
 listener Listener runningListener = new(schedule = {
-    triggerTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3))
+    triggerTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 8))
 });
 
 listener Listener oneTimeListener = new(schedule = {

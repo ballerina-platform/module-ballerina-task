@@ -70,10 +70,11 @@ public class TaskManager {
     public void initializeScheduler(Properties properties, Environment env) throws SchedulingException,
             SchedulerException {
         getAllRunningJobs();
+        getAllRunningServices();
         if (this.scheduler != null) {
             this.scheduler.shutdown();
         }
-        if (!triggerInfoMap.isEmpty()) {
+        if (!triggerInfoMap.isEmpty() || !serviceTriggerInfoMap.isEmpty()) {
             configureScheduler(properties, env);
         } else {
             this.properties = properties;
@@ -85,6 +86,13 @@ public class TaskManager {
         startScheduler();
         for (Map.Entry<Integer, Trigger> entry : triggerInfoMap.entrySet()) {
             this.scheduler.scheduleJob(jobInfoMap.get(entry.getKey()), entry.getValue());
+        }
+    }
+
+    public void rescheduleServiceJobs() throws SchedulerException {
+        startScheduler();
+        for (Map.Entry<String, Trigger> entry : serviceTriggerInfoMap.entrySet()) {
+            this.scheduler.scheduleJob(serviceInfoMap.get(entry.getKey()), entry.getValue());
         }
     }
 
@@ -123,6 +131,16 @@ public class TaskManager {
             }
         }
         return this.triggerInfoMap.keySet();
+    }
+
+    public Set<String> getAllRunningServices() throws SchedulerException {
+        for (Map.Entry<String, Trigger> entry : serviceTriggerInfoMap.entrySet()) {
+            Trigger.TriggerState triggerState = scheduler.getTriggerState(entry.getValue().getKey());
+            if (triggerState != null && isTriggerCompleted(triggerState)) {
+                this.serviceTriggerInfoMap.remove(entry.getKey());
+            }
+        }
+        return this.serviceTriggerInfoMap.keySet();
     }
 
     public void scheduleOneTimeJob(JobDataMap jobDataMap, long time, Integer jobId) throws SchedulerException {
@@ -182,6 +200,13 @@ public class TaskManager {
         }
     }
 
+    public void unScheduleJob(String serviceId) throws SchedulerException, SchedulingException {
+        this.scheduler.unscheduleJob(getTrigger(serviceId).getKey());
+        if (getAllRunningServices().isEmpty()) {
+            this.scheduler.shutdown();
+        }
+    }
+
     public void pause() throws SchedulerException {
         this.scheduler.pauseAll();
     }
@@ -209,6 +234,9 @@ public class TaskManager {
         if (!triggerInfoMap.isEmpty()) {
             rescheduleJobs();
         }
+        if (!serviceTriggerInfoMap.isEmpty()) {
+            rescheduleServiceJobs();
+        }
     }
 
     private Trigger getTrigger(Integer jobId) throws SchedulingException {
@@ -216,6 +244,14 @@ public class TaskManager {
             throw new SchedulingException("Invalid job id: " + jobId);
         } else {
             return this.triggerInfoMap.get(jobId);
+        }
+    }
+
+    private Trigger getTrigger(String jobId) throws SchedulingException {
+        if (this.serviceTriggerInfoMap.get(jobId) == null) {
+            throw new SchedulingException("Invalid job id: " + jobId);
+        } else {
+            return this.serviceTriggerInfoMap.get(jobId);
         }
     }
 }
