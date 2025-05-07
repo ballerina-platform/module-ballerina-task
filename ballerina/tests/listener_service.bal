@@ -20,6 +20,12 @@ import ballerina/lang.runtime;
 
 isolated int[] oneTimeResults = [];
 isolated int[] recurringResults = [];
+isolated int[] concurrentArray = [];
+isolated int[] dataArray = [];
+
+listener Listener runningListener = new(schedule = {
+    triggerTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3))
+});
 
 listener Listener oneTimeListener = new(schedule = {
     triggerTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3))
@@ -30,6 +36,30 @@ listener Listener recurringListener = new(schedule = {
     startTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3)),
     maxCount: 4
 });
+
+Service service1 = service object {
+    function onTrigger() {
+        lock {
+            concurrentArray.push(1);
+        }
+    }
+};
+
+Service service2 = service object {
+    function onTrigger() {
+        lock {
+            concurrentArray.push(1);
+        }
+    }
+};
+
+Service service3 = service object {
+    function onTrigger() {
+        lock {
+            dataArray.push(1);
+        }
+    }
+};
 
 Service oneTimeService = service object {
     function onTrigger() {
@@ -50,7 +80,7 @@ Service recurringService = service object {
 @test:Config {
     groups: ["listener"]
 }
-function testOneTimeTask() returns error? {
+function testOneTimeTaskWithListener() returns error? {
     check oneTimeListener.attach(oneTimeService);
     check oneTimeListener.'start();
     runtime:registerListener(oneTimeListener);
@@ -63,7 +93,7 @@ function testOneTimeTask() returns error? {
 @test:Config {
     groups: ["listener"]
 }
-function testRecurringTask() returns error? {
+function testRecurringTaskWithListener() returns error? {
     check recurringListener.attach(recurringService);
     check recurringListener.'start();
     runtime:registerListener(recurringListener);
@@ -73,3 +103,30 @@ function testRecurringTask() returns error? {
     }
 }
 
+@test:Config {
+    groups: ["listener"]
+}
+function testOneTimeTaskWithMultipleServices() returns error? {
+    check oneTimeListener.attach(service1);
+    check oneTimeListener.attach(service2);
+    check oneTimeListener.'start();
+    runtime:registerListener(oneTimeListener);
+    runtime:sleep(10);
+    lock {
+        test:assertEquals(concurrentArray.length(), 2);
+    }
+}
+
+@test:Config {
+    groups: ["listener"]
+}
+function testImmediateStop() returns error? {
+    check runningListener.attach(service3);
+    check runningListener.'start();
+    runtime:registerListener(runningListener);
+    check runningListener.immediateStop();
+    runtime:sleep(10);
+    lock {
+        test:assertEquals(dataArray.length(), 0);
+    }
+}
