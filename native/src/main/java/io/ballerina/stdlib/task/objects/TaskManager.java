@@ -52,6 +52,8 @@ public class TaskManager {
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
     Map<Integer, Trigger> triggerInfoMap = new ConcurrentHashMap<>();
+    Map<String, JobDetail> serviceInfoMap = new HashMap<>();
+    Map<String, Trigger> serviceTriggerInfoMap = new ConcurrentHashMap<>();
     Properties properties;
     boolean isConfiguredSchFactory = false;
 
@@ -128,21 +130,21 @@ public class TaskManager {
                 Utils.getOneTimeTrigger(time, TaskConstants.TRIGGER_ID), jobId);
     }
 
-    public void scheduleOneTimeListenerJob(JobDataMap jobDataMap, long time, Integer
-                                            jobId, BObject job) throws SchedulerException {
+    public void scheduleOneTimeListenerJob(JobDataMap jobDataMap, long time,
+                                           String jobId, BObject job) throws SchedulerException {
         jobDataMap.put(JOB, job);
-        scheduleJob(Utils.createListenerJob(jobDataMap, jobId.toString()),
+        scheduleListenerJob(Utils.createListenerJob(jobDataMap, jobId),
                 Utils.getOneTimeTrigger(time, TaskConstants.TRIGGER_ID), jobId);
     }
 
     public void scheduleListenerIntervalJob(JobDataMap jobDataMap, long interval, long maxCount, Object startTime,
                                             Object endTime, String waitingPolicy,
-                                            Integer jobId, BObject service) throws SchedulerException {
+                                            String jobId, BObject service) throws SchedulerException {
         jobDataMap.put(JOB, service);
-        JobDetail job = Utils.createListenerJob(jobDataMap, jobId.toString());
+        JobDetail job = Utils.createListenerJob(jobDataMap, jobId);
         Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
                 TaskConstants.TRIGGER_ID);
-        scheduleJob(job, trigger, jobId);
+        scheduleListenerJob(job, trigger, jobId);
     }
 
     public void scheduleIntervalJob(JobDataMap jobDataMap, long interval, long maxCount, Object startTime,
@@ -157,6 +159,13 @@ public class TaskManager {
         this.scheduler.scheduleJob(job, trigger);
         this.triggerInfoMap.put(jobId, trigger);
         this.jobInfoMap.put(jobId, job);
+        startScheduler();
+    }
+
+    private void scheduleListenerJob(JobDetail job, Trigger trigger, String jobId) throws SchedulerException {
+        this.scheduler.scheduleJob(job, trigger);
+        this.serviceTriggerInfoMap.put(jobId, trigger);
+        this.serviceInfoMap.put(jobId, job);
         startScheduler();
     }
 

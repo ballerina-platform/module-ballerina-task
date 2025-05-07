@@ -33,7 +33,6 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 
 import java.math.BigDecimal;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,20 +41,18 @@ public class TaskListener {
     private static final String value = "1000";
     private String type;
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
-    private BMap<BString, Object> configs = ValueCreator.createMapValue();
-    private Boolean isTaskCoordinator = false;
+    private final BMap<BString, Object> configs = ValueCreator.createMapValue();
 
     public void start(Environment env, BObject job, long time) {
         Utils.disableQuartzLogs();
         try {
             getScheduler(env);
             for (String serviceName : serviceRegistry.keySet()) {
-                Integer jobId = java.security.SecureRandom.getInstanceStrong().nextInt(bound);
-                JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, String.valueOf(jobId));
+                JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, serviceName);
                 BObject service = serviceRegistry.get(serviceName);
-                TaskManager.getInstance().scheduleOneTimeListenerJob(jobDataMap, time, jobId, service);
+                TaskManager.getInstance().scheduleOneTimeListenerJob(jobDataMap, time, serviceName, service);
             }
-        } catch (SchedulerException | SchedulingException | IllegalArgumentException | NoSuchAlgorithmException e) {
+        } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
         }
     }
 
@@ -64,17 +61,20 @@ public class TaskListener {
         try {
             getScheduler(env);
             for (String serviceName : serviceRegistry.keySet()) {
-                int jobId = java.security.SecureRandom.getInstanceStrong().nextInt(bound);
                 JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
-                        String.valueOf(jobId));
+                        serviceName);
                 BObject service = serviceRegistry.get(serviceName);
                 TaskManager.getInstance().scheduleListenerIntervalJob(jobDataMap,
                         (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
-                        endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), jobId, service);
+                        endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), serviceName, service);
             }
 
         } catch (Exception e) {
         }
+    }
+
+    public Map<String, BObject> getServices() {
+        return serviceRegistry;
     }
 
     public void setConfig(BString key, Object value) {
@@ -93,14 +93,6 @@ public class TaskListener {
         return type;
     }
 
-    public Boolean isTaskCoordinator() {
-        return isTaskCoordinator;
-    }
-
-    public void setTaskCoordinator(Boolean isTaskCoordinator) {
-        this.isTaskCoordinator = isTaskCoordinator;
-    }
-
     public void setType(String type) {
         this.type = type;
     }
@@ -113,11 +105,19 @@ public class TaskListener {
         serviceRegistry.remove(serviceName);
     }
 
+    public void unregisterAllServices() {
+        serviceRegistry.clear();
+    }
+
+    public void detachService(BObject service) {
+        serviceRegistry.values().remove(service);
+    }
+
     public BObject getService(String serviceName) {
         return serviceRegistry.get(serviceName);
     }
 
-    private static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
+    static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
         Utils.disableQuartzLogs();
         return TaskManager.getInstance().getScheduler(Utils.createSchedulerProperties(
                 TaskConstants.QUARTZ_THREAD_COUNT_VALUE, TaskConstants.QUARTZ_THRESHOLD_VALUE), env);
