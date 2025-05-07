@@ -30,6 +30,8 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.utils.ModuleUtils;
 import io.ballerina.stdlib.task.utils.Utils;
 
+import static io.ballerina.stdlib.task.utils.TaskConstants.JOB_ID;
+
 public class ListenerAction {
     public static final String NATIVE_LISTENER_KEY = "TASK_NATIVE_LISTENER";
     public static final BString INTERVAL = StringUtils.fromString("interval");
@@ -62,27 +64,31 @@ public class ListenerAction {
 
     public static Object startListener(Environment environment, BObject listenerObj) {
         TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
-        if (listener != null) {
-            if (listener.getType().equals(ONE_TIME_CONFIGURATION)) {
-                long triggerTime = (long) listener.getConfig().get(TRIGGER_TIME);
-                listener.start(environment, listenerObj, triggerTime);
+        try {
+            if (listener != null) {
+                if (listener.getType().equals(ONE_TIME_CONFIGURATION)) {
+                    long triggerTime = (long) listener.getConfig().get(TRIGGER_TIME);
+                    listener.start(environment, listenerObj, triggerTime);
+                } else {
+                    listener.start(environment, listenerObj,
+                            (BDecimal) listener.getConfig().get(INTERVAL),
+                            (Long) listener.getConfig().get(MAX_COUNT),
+                            listener.getConfig().get(START_TIME),
+                            listener.getConfig().get(END_TIME),
+                            (BMap) listener.getConfig().get(TASK_POLICY));
+                }
             } else {
-                listener.start(environment, listenerObj,
-                        (BDecimal) listener.getConfig().get(INTERVAL),
-                        (Long) listener.getConfig().get(MAX_COUNT),
-                        listener.getConfig().get(START_TIME),
-                        listener.getConfig().get(END_TIME),
-                        (BMap) listener.getConfig().get(TASK_POLICY));
+                return Utils.createTaskError(LISTENER_NOT_INITIALIZED_ERROR);
             }
-        } else {
-            return Utils.createTaskError(LISTENER_NOT_INITIALIZED_ERROR);
+        } catch (Exception e) {
+            return Utils.createTaskError(e.getMessage());
         }
         return null;
     }
 
     public static Object attachService(BObject listenerObj, BObject service, BString serviceName) {
         TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
-        service.addNativeData("JobId", serviceName);
+        service.addNativeData(JOB_ID, serviceName);
         listener.registerService(serviceName.getValue(), service);
         return null;
     }

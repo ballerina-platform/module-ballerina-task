@@ -43,33 +43,26 @@ public class TaskListener {
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
     private final BMap<BString, Object> configs = ValueCreator.createMapValue();
 
-    public void start(Environment env, BObject job, long time) {
+    public void start(Environment env, BObject job, long time) throws Exception {
         Utils.disableQuartzLogs();
-        try {
-            getScheduler(env);
-            for (String serviceName : serviceRegistry.keySet()) {
-                JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, serviceName);
-                BObject service = serviceRegistry.get(serviceName);
-                TaskManager.getInstance().scheduleOneTimeListenerJob(jobDataMap, time, serviceName, service);
-            }
-        } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
+        getScheduler(env);
+        for (String serviceName : serviceRegistry.keySet()) {
+            JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, serviceName);
+            BObject service = serviceRegistry.get(serviceName);
+            TaskManager.getInstance().scheduleOneTimeListenerJob(jobDataMap, time, serviceName, service);
         }
     }
 
     public void start(Environment env, BObject job, BDecimal interval, long maxCount,
-                      Object startTime, Object endTime, BMap<BString, Object> policy) {
-        try {
-            getScheduler(env);
-            for (String serviceName : serviceRegistry.keySet()) {
-                JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
-                        serviceName);
-                BObject service = serviceRegistry.get(serviceName);
-                TaskManager.getInstance().scheduleListenerIntervalJob(jobDataMap,
-                        (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
-                        endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), serviceName, service);
-            }
-
-        } catch (Exception e) {
+                      Object startTime, Object endTime, BMap<BString, Object> policy) throws Exception {
+        getScheduler(env);
+        for (String serviceName : serviceRegistry.keySet()) {
+            JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
+                    serviceName);
+            BObject service = serviceRegistry.get(serviceName);
+            TaskManager.getInstance().scheduleListenerIntervalJob(jobDataMap,
+                    (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
+                    endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), serviceName, service);
         }
     }
 
@@ -107,14 +100,6 @@ public class TaskListener {
 
     public void unregisterAllServices() {
         serviceRegistry.clear();
-    }
-
-    public void detachService(BObject service) {
-        serviceRegistry.values().remove(service);
-    }
-
-    public BObject getService(String serviceName) {
-        return serviceRegistry.get(serviceName);
     }
 
     static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {
