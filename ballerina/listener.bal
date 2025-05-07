@@ -78,13 +78,13 @@ public class Listener {
 }
 
 isolated function initListener(Listener 'listener, ListenerConfiguration config) = @java:Method {
-    'class: "io.ballerina.stdlib.task.listener.TaskListenerActions"
+    'class: "io.ballerina.stdlib.task.listener.ListenerAction"
 } external;
 
 isolated function attachService(Listener 'listener, Service s, string serviceId) returns error? = @java:Method {
-    'class: "io.ballerina.stdlib.task.listener.TaskListenerActions"
+    'class: "io.ballerina.stdlib.task.listener.ListenerAction"
 } external;
 
 isolated function startListener(Listener 'listener) returns error? = @java:Method {
-    'class: "io.ballerina.stdlib.task.listener.TaskListenerActions"
+    'class: "io.ballerina.stdlib.task.listener.ListenerAction"
 } external;
