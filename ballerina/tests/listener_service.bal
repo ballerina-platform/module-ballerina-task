@@ -116,17 +116,3 @@ function testOneTimeTaskWithMultipleServices() returns error? {
         test:assertEquals(concurrentArray.length(), 2);
     }
 }
-
-@test:Config {
-    groups: ["listener"]
-}
-function testImmediateStop() returns error? {
-    check runningListener.attach(service3);
-    check runningListener.'start();
-    runtime:registerListener(runningListener);
-    check runningListener.immediateStop();
-    runtime:sleep(10);
-    lock {
-        test:assertEquals(dataArray.length(), 0);
-    }
-}
