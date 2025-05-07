@@ -44,7 +44,7 @@ public isolated function configureWorkerPool(int workerCount = 5, time:Seconds w
 # + job - Ballerina job, which is to be executed during the trigger
 # + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) returns JobId|Error {
-    int result = check scheduleJob(job, check getTimeInMillies(triggerTime));
+    int result = check scheduleJob(job, check (new TimeConverter()).getTimeInMillies(triggerTime));
     JobId jobId = {id: result};
     return jobId;
 }
@@ -62,20 +62,21 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy -  The policy, which is used to handle the error and will be waiting during the trigger time
+#   When using multiple nodes, the duration must be different from other nodes.
 # + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,  int maxCount = -1,
                                     time:Civil? startTime = (), time:Civil? endTime = (), TaskPolicy taskPolicy = {})
-                                    returns JobId|Error {
+    returns JobId|Error {
     if maxCount != -1 && maxCount < 1 {
         return error Error("The maxCount should be a positive integer.");
     }
     int? sTime = ();
     int? eTime = ();
     if startTime is time:Civil {
-        sTime = check getTimeInMillies(startTime);
+        sTime = check (new TimeConverter()).getTimeInMillies(startTime);
     }
     if endTime is time:Civil {
-        eTime = check getTimeInMillies(endTime);
+        eTime = check (new TimeConverter()).getTimeInMillies(endTime);
     }
     int result = check scheduleIntervalJob(job, interval, maxCount, sTime, eTime, taskPolicy);
     JobId jobId = {id: result};
