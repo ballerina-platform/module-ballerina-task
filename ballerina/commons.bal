@@ -23,7 +23,7 @@ configurable int minIdleConnections = 15;
 
 # Represents the task service.
 public type Service distinct service object {
-  function onTrigger() returns error?;
+  isolated function onTrigger() returns error?;
 };
 
 # Represents the configuration required to connect to a database related to task coordination.
