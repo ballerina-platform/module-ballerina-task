@@ -17,9 +17,3 @@
 # Represents the error type of the `ballerina/task` module. This error type represents any error that can occur during
 # the execution of the task APIs.
 public type Error distinct error;
-
-# Represents an error that occurs when a task scheduling operation fails.
-public type SchedulingError distinct Error;
-
-# Represents an error that occurs when a task execution operation fails.
-public type ExecutionError distinct Error;
