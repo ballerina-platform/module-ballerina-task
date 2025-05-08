@@ -36,22 +36,22 @@ import java.util.Map;
 import static io.ballerina.stdlib.task.utils.TaskConstants.JOB_ID;
 
 public class ListenerAction {
-    public static final String NATIVE_LISTENER_KEY = "TASK_NATIVE_LISTENER";
-    public static final BString INTERVAL = StringUtils.fromString("interval");
-    public static final BString MAX_COUNT = StringUtils.fromString("maxCount");
-    public static final BString START_TIME = StringUtils.fromString("startTime");
-    public static final BString END_TIME = StringUtils.fromString("endTime");
-    public static final BString TASK_POLICY = StringUtils.fromString("taskPolicy");
-    public static final BString TRIGGER_TIME = StringUtils.fromString("triggerTime");
-    public static final String ONE_TIME_CONFIGURATION = "OneTimeConfiguration";
-    public static final String LISTENER_NOT_INITIALIZED_ERROR = "Listener not initialized";
-    public static final String TIME_CONVERTER_CLASS = "TimeConverter";
-    public static final String GET_TIME_IN_MILLIES = "getTimeInMillies";
-    public static final BString WARM_BACKUP_CONFIG = StringUtils.fromString("warmBackupConfig");
-    public static final long WORKER_COUNT = 5;
-    public static final long WAITING_TIME_IN_MILLISECONDS = 5;
-    public static final BString SCHEDULE = StringUtils.fromString("schedule");
+    private static final String NATIVE_LISTENER_KEY = "TASK_NATIVE_LISTENER";
+    private static final String ONE_TIME_CONFIGURATION = "OneTimeConfiguration";
+    private static final String LISTENER_NOT_INITIALIZED_ERROR = "Listener not initialized";
 
+    private static final String TIME_CONVERTER_CLASS = "TimeConverter";
+    private static final String GET_TIME_IN_MILLIES = "getTimeInMillies";
+    private static final long WORKER_COUNT = 5;
+    private static final long WAITING_TIME_IN_MILLISECONDS = 5;
+
+    private static final BString SCHEDULE = StringUtils.fromString("schedule");
+    private static final BString INTERVAL = StringUtils.fromString("interval");
+    private static final BString MAX_COUNT = StringUtils.fromString("maxCount");
+    private static final BString START_TIME = StringUtils.fromString("startTime");
+    private static final BString END_TIME = StringUtils.fromString("endTime");
+    private static final BString TASK_POLICY = StringUtils.fromString("taskPolicy");
+    private static final BString TRIGGER_TIME = StringUtils.fromString("triggerTime");
 
     public static Object initListener(Environment env, BObject listener,
                                     BMap<BString, Object> listenerConfig) {

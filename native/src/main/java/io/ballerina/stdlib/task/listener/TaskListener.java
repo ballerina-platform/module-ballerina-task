@@ -37,12 +37,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TaskListener {
+    private static final String VALUE = "1000";
     private final TaskManager taskManager;
-    private String type;
-    private static final int bound = 1000000;
-    private static final String value = "1000";
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
     private final BMap<BString, Object> configs = ValueCreator.createMapValue();
+    private String type;
 
     public TaskListener(TaskManager taskManager, String type) {
         this.taskManager = taskManager;
@@ -71,7 +70,7 @@ public class TaskListener {
                     serviceName);
             BObject service = serviceRegistry.get(serviceName);
             this.taskManager.scheduleListenerIntervalJob(jobDataMap,
-                    (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
+                    (interval.decimalValue().multiply(new BigDecimal(VALUE))).longValue(), maxCount, startTime,
                     endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), serviceName, service);
         }
     }
