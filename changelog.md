@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- [Add task coordination support](https://github.com/ballerina-platform/module-ballerina-task/pull/535)
+
+## [2.10.0]
+
+### Added
 - [Add listener support](https://github.com/ballerina-platform/module-ballerina-task/pull/534)
 
 ## [2.3.5]
