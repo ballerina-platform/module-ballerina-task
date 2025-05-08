@@ -70,7 +70,6 @@ public class TaskServerJob implements Job {
         });
     }
 
-
     private void  processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
                                              boolean isTokenHolder, String taskId, String groupId,
                                              String jdbcUrl, DatabaseConfig dbConfig) {
@@ -124,12 +123,14 @@ public class TaskServerJob implements Job {
     }
 
     private void executeJob(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext) {
-        Object result = runtime.callMethod(service, TaskConstants.EXECUTE, metadata);
+        ObjectType type = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(job));
+        boolean isConcurrentSafe = type.isIsolated() && type.isIsolated(TaskConstants.ON_TRIGGER);
+        StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
+        Object result = runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
         if (result instanceof BError error) {
             Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(error));
         }
     }
-
     public static void handleRollback(Connection connection) throws SQLException {
         if (connection != null) {
             connection.rollback();
