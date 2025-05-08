@@ -43,6 +43,7 @@ public class TaskConstants {
     public static final String TRIGGER_ID = "trigger";
     public static final String LOG_AND_IGNORE = "LOG_AND_IGNORE";
     public static final String EXECUTE = "execute";
+    public static final String ON_TRIGGER = "onTrigger";
     public static final String LOG = "log";
     public static final String LOG_AND_TERMINATE = "LOG_AND_TERMINATE";
     public static final String LOG_AND_CONTINUE = "LOG_AND_CONTINUE";
