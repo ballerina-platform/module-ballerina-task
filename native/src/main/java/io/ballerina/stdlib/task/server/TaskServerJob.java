@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -38,7 +39,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static io.ballerina.stdlib.task.coordination.TokenAcquisition.GROUP_ID;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.attemptTokenAcquisition;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.hasActiveToken;
 import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;

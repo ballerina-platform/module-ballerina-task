@@ -46,9 +46,17 @@ public class TaskListener {
     public static final BString GROUP_ID = StringUtils.fromString("groupId");
     public static final BString LIVENESS_CHECK_INTERVAL = StringUtils.fromString("livenessCheckInterval");
     public static final BString HEARTBEAT_FREQUENCY = StringUtils.fromString("heartbeatFrequency");
-    private String type;
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
     private final BMap<BString, Object> configs = ValueCreator.createMapValue();
+
+    public TaskListener(TaskManager taskManager, String type) {
+        this.taskManager = taskManager;
+        this.type = type;
+    }
+
+    public TaskManager getTaskManager() {
+        return taskManager;
+    }
 
     public TaskListener(TaskManager taskManager) {
         this.taskManager = taskManager;
@@ -72,28 +80,25 @@ public class TaskListener {
     }
 
     public void start(Environment env, BObject job, BDecimal interval, long maxCount,
-                      Object startTime, Object endTime, BMap<BString, Object> policy, BMap warmBackupConfig) {
-        try {
-            getScheduler(env);
-            for (String serviceName : serviceRegistry.keySet()) {
-                int jobId = java.security.SecureRandom.getInstanceStrong().nextInt(bound);
-                JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
-                        String.valueOf(jobId));
-                BObject service = serviceRegistry.get(serviceName);
-                BMap<Object, Object> databaseConfig = warmBackupConfig.getMapValue(DATABASE_CONFIG);
-                BString id = warmBackupConfig.getStringValue(TASK_ID);
-                BString groupId = warmBackupConfig.getStringValue(GROUP_ID);
-                int livenessInterval = ((Long) warmBackupConfig.get(LIVENESS_CHECK_INTERVAL)).intValue();
-                int heartbeatFrequency = ((Long) warmBackupConfig.get(HEARTBEAT_FREQUENCY)).intValue();
-                BMap response = (BMap) TokenAcquisition.acquireToken(databaseConfig, id, groupId, false,
-                                                                     livenessInterval, heartbeatFrequency);
-                TaskManager.getInstance().scheduleListenerIntervalJobWithTokenCheck(jobDataMap,
-                        (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
-                        endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(),
-                        jobId, response, service);
-            }
-        } catch (Exception e) {
-
+                      Object startTime, Object endTime, BMap<BString, Object> policy,
+                      BMap warmBackupConfig) throws Exception {
+        getScheduler(env);
+        for (String serviceName : serviceRegistry.keySet()) {
+            int jobId = java.security.SecureRandom.getInstanceStrong().nextInt(bound);
+            JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
+                    String.valueOf(jobId));
+            BObject service = serviceRegistry.get(serviceName);
+            BMap<Object, Object> databaseConfig = warmBackupConfig.getMapValue(DATABASE_CONFIG);
+            BString id = warmBackupConfig.getStringValue(TASK_ID);
+            BString groupId = warmBackupConfig.getStringValue(GROUP_ID);
+            int livenessInterval = ((Long) warmBackupConfig.get(LIVENESS_CHECK_INTERVAL)).intValue();
+            int heartbeatFrequency = ((Long) warmBackupConfig.get(HEARTBEAT_FREQUENCY)).intValue();
+            BMap response = (BMap) TokenAcquisition.acquireToken(databaseConfig, id, groupId, false,
+                    livenessInterval, heartbeatFrequency);
+            this.taskManager.scheduleListenerIntervalJobWithTokenCheck(jobDataMap,
+                    (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
+                    endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(),
+                    jobId, response, service);
         }
     }
 
