@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -38,7 +39,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static io.ballerina.stdlib.task.coordination.TokenAcquisition.GROUP_ID;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.attemptTokenAcquisition;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.hasActiveToken;
 import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;
@@ -126,7 +126,9 @@ public class TaskServerJob implements Job {
 
     private void executeJob(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext) {
         try {
-            StrandMetadata metadata = new StrandMetadata(true, null);
+            ObjectType type = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(job));
+            boolean isConcurrentSafe = type.isIsolated() && type.isIsolated(TaskConstants.ON_TRIGGER);
+            StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
             runtime.callMethod(job, TaskConstants.ON_TRIGGER, metadata);
         } catch (BError error) {
             Utils.notifyFailure(jobExecutionContext, error);
