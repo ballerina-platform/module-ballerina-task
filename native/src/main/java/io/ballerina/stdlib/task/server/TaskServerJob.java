@@ -21,14 +21,33 @@ package io.ballerina.stdlib.task.server;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.types.ObjectType;
+import io.ballerina.runtime.api.utils.StringUtils;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.task.coordination.DatabaseConfig;
+import io.ballerina.stdlib.task.coordination.TokenAcquisition;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.TaskConstants;
 import io.ballerina.stdlib.task.utils.Utils;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+import static io.ballerina.stdlib.task.coordination.TokenAcquisition.GROUP_ID;
+import static io.ballerina.stdlib.task.coordination.TokenAcquisition.attemptTokenAcquisition;
+import static io.ballerina.stdlib.task.coordination.TokenAcquisition.hasActiveToken;
+import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;
+import static io.ballerina.stdlib.task.objects.TaskManager.INSTANCE_ID;
+import static io.ballerina.stdlib.task.objects.TaskManager.LIVENESS_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.TOKEN_HOLDER;
+
 public class TaskServerJob implements Job {
+    public static final String GROUP_ID = "groupId";
 
     public TaskServerJob() {
     }
@@ -37,13 +56,88 @@ public class TaskServerJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) {
         Thread.startVirtualThread(() -> {
             Runtime runtime = TaskManager.getInstance().getRuntime();
+            Boolean isTokenHolder = (Boolean) jobExecutionContext.getMergedJobDataMap().get(TOKEN_HOLDER);
             BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
-            try {
-                StrandMetadata metadata = new StrandMetadata(true, null);
-                runtime.callMethod(job, TaskConstants.ON_TRIGGER, metadata);
-            } catch (Throwable t) {
-                Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
+            if (isTokenHolder == null) {
+                executeJob(job, runtime, jobExecutionContext);
+                return;
             }
+            DatabaseConfig dbConfig = (DatabaseConfig) jobExecutionContext.getMergedJobDataMap().get(DATABASE_CONFIG);
+            String taskId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
+            String groupId = ((BString) jobExecutionContext.getMergedJobDataMap().get(GROUP_ID)).getValue();
+            String jdbcUrl = TokenAcquisition.getJdbcUrl(dbConfig);
+            processJobWithCoordination(job, runtime, jobExecutionContext, isTokenHolder,
+                    taskId, groupId, jdbcUrl, dbConfig);
         });
+    }
+
+
+    private void  processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
+                                             boolean isTokenHolder, String taskId, String groupId,
+                                             String jdbcUrl, DatabaseConfig dbConfig) {
+        Connection connection = null;
+        boolean deadStatus = false;
+        try {
+            connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+        } catch (Exception e) {
+            deadStatus = true;
+        }
+        try {
+            if (!deadStatus) {
+                connection.setAutoCommit(false);
+                boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext, taskId,
+                        groupId, isTokenHolder, dbConfig);
+                connection.commit();
+                if (shouldExecuteJob) {
+                    executeJob(job, runtime, jobExecutionContext);
+                }
+            }
+        } catch (SQLException e) {
+            handleExecutionException(connection, jobExecutionContext,
+                    ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
+        } catch (BError error) {
+            handleExecutionException(connection, jobExecutionContext, error);
+        } catch (Throwable t) {
+            handleExecutionException(connection, jobExecutionContext, ErrorCreator.createError(t));
+        }
+    }
+
+    private boolean checkAndUpdateTokenStatus(Connection connection, JobExecutionContext jobExecutionContext,
+                                              String taskId, String groupId, boolean isTokenHolder,
+                                              DatabaseConfig dbConfig)
+            throws SQLException {
+        if (isTokenHolder) {
+            return hasActiveToken(connection, taskId, groupId);
+        }
+        int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
+        return attemptTokenAcquisition(connection, taskId, groupId, false,
+                livenessInterval, dbConfig.dbType());
+    }
+
+    private void handleExecutionException(Connection connection,
+                                          JobExecutionContext jobExecutionContext, BError error) {
+        try {
+            handleRollback(connection);
+            Utils.notifyFailure(jobExecutionContext, error);
+        } catch (SQLException e) {
+            Utils.notifyFailure(jobExecutionContext, error);
+        }
+    }
+
+    private void executeJob(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext) {
+        try {
+            StrandMetadata metadata = new StrandMetadata(true, null);
+            runtime.callMethod(job, TaskConstants.ON_TRIGGER, metadata);
+        } catch (BError error) {
+            Utils.notifyFailure(jobExecutionContext, error);
+        } catch (Throwable t) {
+            Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
+        }
+    }
+
+    public static void handleRollback(Connection connection) throws SQLException {
+        if (connection != null) {
+            connection.rollback();
+        }
     }
 }

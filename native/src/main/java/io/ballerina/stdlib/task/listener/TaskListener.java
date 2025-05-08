@@ -20,10 +20,12 @@ package io.ballerina.stdlib.task.listener;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ValueCreator;
+import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.task.coordination.TokenAcquisition;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.TaskConstants;
@@ -39,6 +41,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TaskListener {
     private static final int bound = 1000000;
     private static final String value = "1000";
+    public static final BString DATABASE_CONFIG = StringUtils.fromString("databaseConfig");
+    public static final BString TASK_ID = StringUtils.fromString("taskId");
+    public static final BString GROUP_ID = StringUtils.fromString("groupId");
+    public static final BString LIVENESS_CHECK_INTERVAL = StringUtils.fromString("livenessCheckInterval");
+    public static final BString HEARTBEAT_FREQUENCY = StringUtils.fromString("heartbeatFrequency");
     private String type;
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
     private final BMap<BString, Object> configs = ValueCreator.createMapValue();
@@ -63,6 +70,32 @@ public class TaskListener {
             TaskManager.getInstance().scheduleListenerIntervalJob(jobDataMap,
                     (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
                     endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), serviceName, service);
+        }
+    }
+
+    public void start(Environment env, BObject job, BDecimal interval, long maxCount,
+                      Object startTime, Object endTime, BMap<BString, Object> policy, BMap warmBackupConfig) {
+        try {
+            getScheduler(env);
+            for (String serviceName : serviceRegistry.keySet()) {
+                int jobId = java.security.SecureRandom.getInstanceStrong().nextInt(bound);
+                JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
+                        String.valueOf(jobId));
+                BObject service = serviceRegistry.get(serviceName);
+                BMap<Object, Object> databaseConfig = warmBackupConfig.getMapValue(DATABASE_CONFIG);
+                BString id = warmBackupConfig.getStringValue(TASK_ID);
+                BString groupId = warmBackupConfig.getStringValue(GROUP_ID);
+                int livenessInterval = ((Long) warmBackupConfig.get(LIVENESS_CHECK_INTERVAL)).intValue();
+                int heartbeatFrequency = ((Long) warmBackupConfig.get(HEARTBEAT_FREQUENCY)).intValue();
+                BMap response = (BMap) TokenAcquisition.acquireToken(databaseConfig, id, groupId, false,
+                                                                     livenessInterval, heartbeatFrequency);
+                TaskManager.getInstance().scheduleListenerIntervalJobWithTokenCheck(jobDataMap,
+                        (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
+                        endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(),
+                        jobId, response, service);
+            }
+        } catch (Exception e) {
+
         }
     }
 

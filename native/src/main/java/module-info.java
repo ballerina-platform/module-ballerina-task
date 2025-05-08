@@ -21,6 +21,7 @@ module io.ballerina.stdlib.task {
     requires quartz;
     requires java.logging;
     requires io.ballerina.lang;
+    requires java.sql;
     exports io.ballerina.stdlib.task.actions;
     exports io.ballerina.stdlib.task.exceptions;
     exports io.ballerina.stdlib.task.objects;
