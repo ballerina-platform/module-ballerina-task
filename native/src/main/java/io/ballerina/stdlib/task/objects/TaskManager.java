@@ -178,7 +178,7 @@ public class TaskManager {
 
     public void scheduleListenerIntervalJobWithTokenCheck(JobDataMap jobDataMap, long interval, long maxCount,
                                                           Object startTime, Object endTime, String waitingPolicy,
-                                                          Integer jobId, BMap response, BObject service)
+                                                          String jobId, BMap response, BObject service)
             throws SchedulerException {
         jobDataMap.put(JOB, service);
         jobDataMap.put(TOKEN_HOLDER, response.getBooleanValue(TokenAcquisition.TOKEN_HOLDER));
@@ -186,10 +186,10 @@ public class TaskManager {
         jobDataMap.put(GROUP_ID, response.getStringValue(TokenAcquisition.GROUP_ID));
         jobDataMap.put(DATABASE_CONFIG, response.get(TokenAcquisition.DATABASE_CONFIG));
         jobDataMap.put(LIVENESS_INTERVAL, response.get(TokenAcquisition.LIVENESS_INTERVAL));
-        JobDetail job = Utils.createListenerJob(jobDataMap, jobId.toString());
+        JobDetail job = Utils.createListenerJob(jobDataMap, jobId);
         Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
                 TaskConstants.TRIGGER_ID);
-        scheduleJob(job, trigger, jobId);
+        scheduleListenerJob(job, trigger, jobId);
     }
 
     private void startScheduler () throws SchedulerException {
