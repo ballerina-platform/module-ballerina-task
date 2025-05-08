@@ -94,26 +94,19 @@ public enum WaitingPolicy {
   LOG_AND_IGNORE
 }
 
-class TimeConverter {
-
-  # Gets time in milliseconds of the given `time:Civil`.
-  #
-  # + time - The Ballerina `time:Civil`
-  # + return - Time in milliseconds or else `task:Error` if the process failed due to any reason
-  public isolated function getTimeInMillies(time:Civil time) returns int|Error {
-      if time["utcOffset"] == () {
-          time:ZoneOffset zoneOffset = {hours: 0, minutes: 0};
-          time.utcOffset = zoneOffset;
-      }
-      time:Utc|time:Error utc = time:utcFromCivil(time);
-      if utc is time:Utc {
-          if utc > time:utcNow() {
-              return <int> decimal:round((<decimal>utc[0] + utc[1]) * 1000);
-          }
-          return error Error(
-                      string `Invalid time: ${time.toString()}. Scheduled time should be greater than the current time`);
-      } else {
-          return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);
-      }
-  }
+public isolated function getTimeInMillies(time:Civil time) returns int|Error {
+    if time["utcOffset"] == () {
+        time:ZoneOffset zoneOffset = {hours: 0, minutes: 0};
+        time.utcOffset = zoneOffset;
+    }
+    time:Utc|time:Error utc = time:utcFromCivil(time);
+    if utc is time:Utc {
+        if utc > time:utcNow() {
+            return <int> decimal:round((<decimal>utc[0] + utc[1]) * 1000);
+        }
+        return error Error(
+                    string `Invalid time: ${time.toString()}. Scheduled time should be greater than the current time`);
+    } else {
+        return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);
+    }
 }
