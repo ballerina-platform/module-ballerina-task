@@ -71,7 +71,6 @@ public class TaskServerJob implements Job {
         });
     }
 
-
     private void  processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
                                              boolean isTokenHolder, String taskId, String groupId,
                                              String jdbcUrl, DatabaseConfig dbConfig) {
@@ -125,18 +124,15 @@ public class TaskServerJob implements Job {
     }
 
     private void executeJob(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext) {
-        try {
-            ObjectType type = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(job));
-            boolean isConcurrentSafe = type.isIsolated() && type.isIsolated(TaskConstants.ON_TRIGGER);
-            StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
-            runtime.callMethod(job, TaskConstants.ON_TRIGGER, metadata);
-        } catch (BError error) {
-            Utils.notifyFailure(jobExecutionContext, error);
-        } catch (Throwable t) {
-            Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
+        ObjectType type = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(job));
+        boolean isConcurrentSafe = type.isIsolated() && type.isIsolated(TaskConstants.ON_TRIGGER);
+        StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
+
+        Object result = runtime.callMethod(job, TaskConstants.ON_TRIGGER, metadata);
+        if (result instanceof BError) {
+            Utils.notifyFailure(jobExecutionContext, (BError) result);
         }
     }
-
     public static void handleRollback(Connection connection) throws SQLException {
         if (connection != null) {
             connection.rollback();

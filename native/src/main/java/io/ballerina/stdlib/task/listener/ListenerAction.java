@@ -23,6 +23,7 @@ import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BDecimal;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -44,7 +45,6 @@ public class ListenerAction {
     public static final BString TRIGGER_TIME = StringUtils.fromString("triggerTime");
     public static final String ONE_TIME_CONFIGURATION = "OneTimeConfiguration";
     public static final String LISTENER_NOT_INITIALIZED_ERROR = "Listener not initialized";
-    public static final String TIME_CONVERTER_CLASS = "TimeConverter";
     public static final String GET_TIME_IN_MILLIES = "getTimeInMillies";
     public static final BString WARM_BACKUP_CONFIG = StringUtils.fromString("warmBackupConfig");
     public static final long WORKER_COUNT = 5;
@@ -66,9 +66,11 @@ public class ListenerAction {
         if (TypeUtils.getType(schedule).getName().contains(ONE_TIME_CONFIGURATION)) {
             Object time = schedule.get(TRIGGER_TIME);
             StrandMetadata metadata = new StrandMetadata(true, null);
-            long triggerTime =
-                    (long) env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLIES, metadata, time);
-            taskListener.setConfig(TRIGGER_TIME, triggerTime);
+            Object result = env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLIES, metadata, time);
+            if (result instanceof BError) {
+                return Utils.createTaskError(((BError) result).getMessage());
+            }
+            taskListener.setConfig(TRIGGER_TIME, result);
         } else {
             taskListener.setConfigs(schedule);
         }
