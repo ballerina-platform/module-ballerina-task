@@ -24,9 +24,9 @@ public class Listener {
     # Initializes the task 'listener.
     # 
     # + config - The 'listener configuration
-    public isolated function init(*ListenerConfiguration config) {
+    public isolated function init(*ListenerConfiguration config) returns error? {
         self.config = config;
-        initListener(self, config);
+        check initListener(self, config);
     }
     
     # Attaches a service to the 'listener.
@@ -58,18 +58,18 @@ public class Listener {
     # 
     # + return - An error if the 'listener fails to stop
     public isolated function gracefulStop() returns error? {
-        // return gracefulStopListener(self);
+        return gracefulStopListener(self);
     }
     
     # Stops the 'listener immediately.
     # 
     # + return - An error if the 'listener fails to stop
     public isolated function immediateStop() returns error? {
-        return immediateStopListener(self);
+        return gracefulStopListener(self); // immediate stop is not handled
     }
 }
 
-isolated function initListener(Listener 'listener, ListenerConfiguration config) = @java:Method {
+isolated function initListener(Listener 'listener, ListenerConfiguration config) returns error? = @java:Method {
     'class: "io.ballerina.stdlib.task.listener.ListenerAction"
 } external;
 
@@ -81,6 +81,6 @@ isolated function startListener(Listener 'listener) returns error? = @java:Metho
     'class: "io.ballerina.stdlib.task.listener.ListenerAction"
 } external;
 
-isolated function immediateStopListener(Listener 'listener) returns error? = @java:Method {
+isolated function gracefulStopListener(Listener 'listener) returns error? = @java:Method {
     'class: "io.ballerina.stdlib.task.listener.ListenerAction"
 } external;
