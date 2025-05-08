@@ -16,6 +16,47 @@
 
 import ballerina/time;
 
+# Represents the task service.
+public type Service distinct service object {
+  isolated function onTrigger() returns error?;
+};
+
+# Worker count for the global scheduler
+public configurable int globalSchedulerWorkerCount = 5;
+
+# Waiting time for the global scheduler
+public configurable time:Seconds globalSchedulerWaitingTime = 5;
+
+# Listener configuration.
+# 
+# + schedule - The schedule configuration for the listener
+public type ListenerConfiguration record {
+  OneTimeConfiguration|RecurringConfiguration schedule;
+};
+
+# Recurring schedule configuration.
+# 
+# + interval - The duration of the trigger (in seconds), which is used to run the job frequently
+# + maxCount - The maximum number of trigger counts
+# + startTime - The trigger start time in Ballerina `time:Civil`. If it is not provided, a trigger will
+#               start immediately
+# + endTime - The trigger end time in Ballerina `time:Civil`
+# + taskPolicy - The policy, which is used to handle the error and will be waiting during the trigger time
+public type RecurringConfiguration record {|
+  decimal interval;
+  int maxCount = -1;
+  time:Civil startTime?;
+  time:Civil endTime?;
+  TaskPolicy taskPolicy = {};
+|};
+
+# One-time schedule configuration.
+# 
+# + triggerTime - The specific time in Ballerina `time:Civil` to trigger only one time
+public type OneTimeConfiguration record {|
+  time:Civil triggerTime;
+|};
+
 # A read-only record consisting of a unique identifier for a created job.
 public type JobId readonly & record {|
    int id;
@@ -53,12 +94,8 @@ public enum WaitingPolicy {
   LOG_AND_IGNORE
 }
 
-# Gets time in milliseconds of the given `time:Civil`.
-#
-# + time - The Ballerina `time:Civil`
-# + return - Time in milliseconds or else `task:Error` if the process failed due to any reason
 public isolated function getTimeInMillies(time:Civil time) returns int|Error {
-    if time[UTC_OFF_SET] == () {
+    if time["utcOffset"] == () {
         time:ZoneOffset zoneOffset = {hours: 0, minutes: 0};
         time.utcOffset = zoneOffset;
     }
@@ -73,5 +110,3 @@ public isolated function getTimeInMillies(time:Civil time) returns int|Error {
         return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);
     }
 }
-
-const string UTC_OFF_SET = "utcOffset";

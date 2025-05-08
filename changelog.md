@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- [Add listener support](https://github.com/ballerina-platform/module-ballerina-task/pull/534)
+
+## [2.3.5]
+
 ### Changed
 - [Enable non-quartz logs](https://github.com/ballerina-platform/ballerina-standard-library/issues/4282)
 - [Make some of the Java classes proper utility classes](https://github.com/ballerina-platform/ballerina-standard-library/issues/5052)
