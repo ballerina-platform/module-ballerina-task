@@ -37,11 +37,26 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TaskListener {
+    private final TaskManager taskManager;
+    private String type;
     private static final int bound = 1000000;
     private static final String value = "1000";
-    private String type;
+    public static final BString DATABASE_CONFIG = StringUtils.fromString("databaseConfig");
+    public static final BString TASK_ID = StringUtils.fromString("taskId");
+    public static final BString GROUP_ID = StringUtils.fromString("groupId");
+    public static final BString LIVENESS_CHECK_INTERVAL = StringUtils.fromString("livenessCheckInterval");
+    public static final BString HEARTBEAT_FREQUENCY = StringUtils.fromString("heartbeatFrequency");
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
     private final BMap<BString, Object> configs = ValueCreator.createMapValue();
+
+    public TaskListener(TaskManager taskManager, String type) {
+        this.taskManager = taskManager;
+        this.type = type;
+    }
+
+    public TaskManager getTaskManager() {
+        return taskManager;
+    }
 
     public void start(Environment env, BObject job, long time) throws Exception {
         Utils.disableQuartzLogs();
@@ -49,7 +64,7 @@ public class TaskListener {
         for (String serviceName : serviceRegistry.keySet()) {
             JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, serviceName);
             BObject service = serviceRegistry.get(serviceName);
-            TaskManager.getInstance().scheduleOneTimeListenerJob(jobDataMap, time, serviceName, service);
+            this.taskManager.scheduleOneTimeListenerJob(jobDataMap, time, serviceName, service);
         }
     }
 
@@ -60,7 +75,7 @@ public class TaskListener {
             JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
                     serviceName);
             BObject service = serviceRegistry.get(serviceName);
-            TaskManager.getInstance().scheduleListenerIntervalJob(jobDataMap,
+            this.taskManager.scheduleListenerIntervalJob(jobDataMap,
                     (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
                     endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), serviceName, service);
         }

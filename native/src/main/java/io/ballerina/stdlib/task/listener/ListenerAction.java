@@ -27,9 +27,11 @@ import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
+import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.ModuleUtils;
 import io.ballerina.stdlib.task.utils.Utils;
+import org.quartz.SchedulerException;
 
 import java.util.Map;
 
@@ -47,11 +49,23 @@ public class ListenerAction {
     public static final String LISTENER_NOT_INITIALIZED_ERROR = "Listener not initialized";
     public static final String TIME_CONVERTER_CLASS = "TimeConverter";
     public static final String GET_TIME_IN_MILLIES = "getTimeInMillies";
+    public static final BString WARM_BACKUP_CONFIG = StringUtils.fromString("warmBackupConfig");
+    public static final long WORKER_COUNT = 5;
+    public static final long WAITING_TIME_IN_MILLISECONDS = 5;
+    public static final BString SCHEDULE = StringUtils.fromString("schedule");
 
-    public static void initListener(Environment env, BObject listener, BMap<BString, Object> listenerConfig) {
-        TaskListener taskListener = new TaskListener();
-        BMap<?, ?> schedule = listenerConfig.getMapValue(StringUtils.fromString("schedule"));
-        taskListener.setType(TypeUtils.getType(schedule).getName());
+
+    public static Object initListener(Environment env, BObject listener,
+                                    BMap<BString, Object> listenerConfig) {
+        BMap<?, ?> schedule = listenerConfig.getMapValue(SCHEDULE);
+        TaskManager taskManager = TaskManager.getInstance();
+        try {
+            taskManager.initializeScheduler(Utils.createSchedulerProperties(
+                    String.valueOf(WORKER_COUNT), String.valueOf(WAITING_TIME_IN_MILLISECONDS)), env);
+        } catch (Exception e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+        TaskListener taskListener = new TaskListener(taskManager, TypeUtils.getType(schedule).getName());
         if (TypeUtils.getType(schedule).getName().contains(ONE_TIME_CONFIGURATION)) {
             Object time = schedule.get(TRIGGER_TIME);
             StrandMetadata metadata = new StrandMetadata(true, null);
@@ -63,6 +77,7 @@ public class ListenerAction {
             taskListener.setConfigs(schedule);
         }
         listener.addNativeData(NATIVE_LISTENER_KEY, taskListener);
+        return null;
     }
 
     public static Object startListener(Environment environment, BObject listenerObj) {
@@ -102,12 +117,12 @@ public class ListenerAction {
         return null;
     }
 
-    public static Object immediateStopListener(Environment env, BObject listenerObj) {
+    public static Object gracefulStopListener(BObject listenerObj) {
         try {
             TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
             Map<String, BObject> services = listener.getServices();
             for (String entry : services.keySet()) {
-                TaskManager.getInstance().unScheduleJob(entry);
+                listener.getTaskManager().unScheduleJob(entry);
             }
             listener.unregisterAllServices();
         } catch (Exception e) {

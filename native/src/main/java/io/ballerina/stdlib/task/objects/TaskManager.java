@@ -200,10 +200,12 @@ public class TaskManager {
         }
     }
 
-    public void unScheduleJob(String serviceId) throws SchedulerException, SchedulingException {
-        this.scheduler.unscheduleJob(getTrigger(serviceId).getKey());
-        if (getAllRunningServices().isEmpty()) {
-            this.scheduler.shutdown();
+    public void unScheduleJob(String serviceId) throws SchedulerException {
+        if (this.serviceTriggerInfoMap.containsKey(serviceId)) {
+            this.scheduler.unscheduleJob(this.serviceTriggerInfoMap.get(serviceId).getKey());
+            if (getAllRunningServices().isEmpty()) {
+                this.scheduler.shutdown();
+            }
         }
     }
 
@@ -244,14 +246,6 @@ public class TaskManager {
             throw new SchedulingException("Invalid job id: " + jobId);
         } else {
             return this.triggerInfoMap.get(jobId);
-        }
-    }
-
-    private Trigger getTrigger(String jobId) throws SchedulingException {
-        if (this.serviceTriggerInfoMap.get(jobId) == null) {
-            throw new SchedulingException("Invalid job id: " + jobId);
-        } else {
-            return this.serviceTriggerInfoMap.get(jobId);
         }
     }
 }
