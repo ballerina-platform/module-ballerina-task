@@ -18,61 +18,61 @@ import ballerina/lang.runtime;
 import ballerina/test;
 import ballerina/time;
 
-isolated int[] oneTimeResults = [];
-isolated int[] recurringResults = [];
-isolated int[] concurrentArray = [];
-isolated int[] dataArray = [];
+isolated int[] oneTimeEventResults = [];
+isolated int[] recurringEventResults = [];
+isolated int[] multiServiceEventCounts = [];
+isolated int[] taskExecutionCounts = [];
 
-listener Listener runningListener = new (schedule = {
+listener Listener singleListener = new (schedule = {
     triggerTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 8))
 });
 
-listener Listener oneTimeListener = new (schedule = {
+listener Listener singleEventListener = new (schedule = {
     triggerTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3))
 });
 
-listener Listener recurringListener = new (schedule = {
+listener Listener periodicEventListener = new (schedule = {
     interval: 2,
     startTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3)),
     maxCount: 4
 });
 
-Service service1 = service object {
+Service firstConcurrentService = service object {
     isolated function onTrigger() {
         lock {
-            concurrentArray.push(1);
+            multiServiceEventCounts.push(1);
         }
     }
 };
 
-Service service2 = service object {
+Service secondConcurrentService = service object {
     isolated function onTrigger() {
         lock {
-            concurrentArray.push(1);
+            multiServiceEventCounts.push(1);
         }
     }
 };
 
-Service service3 = service object {
+Service taskExecutionService = service object {
     isolated function onTrigger() {
         lock {
-            dataArray.push(1);
+            taskExecutionCounts.push(1);
         }
     }
 };
 
-Service oneTimeService = service object {
+Service singleEventService = service object {
     isolated function onTrigger() {
         lock {
-            oneTimeResults.push(1);
+            oneTimeEventResults.push(1);
         }
     }
 };
 
-Service recurringService = service object {
+Service periodicEventService = service object {
     isolated function onTrigger() {
         lock {
-            recurringResults.push(recurringResults.length() + 1);
+            recurringEventResults.push(recurringEventResults.length() + 1);
         }
     }
 };
@@ -81,46 +81,46 @@ Service recurringService = service object {
     groups: ["listener"]
 }
 function testOneTimeTaskWithListener() returns error? {
-    check oneTimeListener.attach(oneTimeService);
-    check oneTimeListener.'start();
-    runtime:registerListener(oneTimeListener);
+    check singleEventListener.attach(singleEventService);
+    check singleEventListener.'start();
+    runtime:registerListener(singleEventListener);
     runtime:sleep(10);
     lock {
-        test:assertEquals(oneTimeResults.length(), 1);
+        test:assertEquals(oneTimeEventResults.length(), 1);
     }
-    check oneTimeListener.gracefulStop();
+    check singleEventListener.gracefulStop();
 }
 
 @test:Config {
     groups: ["listener"]
 }
 function testRecurringTaskWithListener() returns error? {
-    check recurringListener.attach(recurringService);
-    check recurringListener.'start();
-    runtime:registerListener(recurringListener);
+    check periodicEventListener.attach(periodicEventService);
+    check periodicEventListener.'start();
+    runtime:registerListener(periodicEventListener);
     runtime:sleep(15);
     lock {
-        test:assertEquals(recurringResults.length(), 4);
+        test:assertEquals(recurringEventResults.length(), 4);
     }
-    check recurringListener.gracefulStop();
+    check periodicEventListener.gracefulStop();
 }
 
 @test:Config {
-    groups: ["listener2"]
+    groups: ["listener"]
 }
 function testOneTimeTaskWithMultipleServices() returns error? {
     lock {
-        concurrentArray = [];
+        multiServiceEventCounts = [];
     }
-    check oneTimeListener.attach(service1);
-    check oneTimeListener.attach(service2);
-    check oneTimeListener.'start();
-    runtime:registerListener(oneTimeListener);
+    check singleEventListener.attach(firstConcurrentService);
+    check singleEventListener.attach(secondConcurrentService);
+    check singleEventListener.'start();
+    runtime:registerListener(singleEventListener);
     runtime:sleep(10);
     lock {
-        test:assertEquals(concurrentArray.length(), 2);
+        test:assertEquals(multiServiceEventCounts.length(), 2);
     }
-    check oneTimeListener.gracefulStop();
+    check singleEventListener.gracefulStop();
 }
 
 @test:Config {
@@ -128,20 +128,20 @@ function testOneTimeTaskWithMultipleServices() returns error? {
 }
 function testGracefulStop() returns error? {
     lock {
-        concurrentArray = [];
+        multiServiceEventCounts = [];
     }
-    check recurringListener.attach(service1);
-    check recurringListener.attach(service2);
-    check recurringListener.'start();
-    runtime:registerListener(recurringListener);
-    check recurringListener.gracefulStop();
+    check singleListener.attach(firstConcurrentService);
+    check singleListener.attach(secondConcurrentService);
+    check singleListener.'start();
+    runtime:registerListener(singleListener);
+    check singleListener.gracefulStop();
     runtime:sleep(5);
-    int value;
+    int eventCountAfterStop;
     lock {
-        value = concurrentArray.length();
+        eventCountAfterStop = multiServiceEventCounts.length();
     }
     runtime:sleep(5);
     lock {
-        test:assertEquals(value, concurrentArray.length());
+        test:assertEquals(eventCountAfterStop, multiServiceEventCounts.length());
     }
 }
