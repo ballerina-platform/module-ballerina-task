@@ -20,7 +20,9 @@ package io.ballerina.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.task.coordination.TokenAcquisition;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.utils.TaskConstants;
 import io.ballerina.stdlib.task.utils.Utils;
@@ -172,6 +174,22 @@ public class TaskManager {
         this.serviceTriggerInfoMap.put(jobId, trigger);
         this.serviceInfoMap.put(jobId, job);
         startScheduler();
+    }
+
+    public void scheduleListenerIntervalJobWithTokenCheck(JobDataMap jobDataMap, long interval, long maxCount,
+                                                          Object startTime, Object endTime, String waitingPolicy,
+                                                          Integer jobId, BMap response, BObject service)
+            throws SchedulerException {
+        jobDataMap.put(JOB, service);
+        jobDataMap.put(TOKEN_HOLDER, response.getBooleanValue(TokenAcquisition.TOKEN_HOLDER));
+        jobDataMap.put(INSTANCE_ID, response.getStringValue(TokenAcquisition.TASK_ID));
+        jobDataMap.put(GROUP_ID, response.getStringValue(TokenAcquisition.GROUP_ID));
+        jobDataMap.put(DATABASE_CONFIG, response.get(TokenAcquisition.DATABASE_CONFIG));
+        jobDataMap.put(LIVENESS_INTERVAL, response.get(TokenAcquisition.LIVENESS_INTERVAL));
+        JobDetail job = Utils.createListenerJob(jobDataMap, jobId.toString());
+        Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
+                TaskConstants.TRIGGER_ID);
+        scheduleJob(job, trigger, jobId);
     }
 
     private void startScheduler () throws SchedulerException {
