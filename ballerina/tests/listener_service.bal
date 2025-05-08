@@ -14,31 +14,31 @@
 // specific language governing permissions and limitations
 // under the License.
 
-import ballerina/time;
-import ballerina/test;
 import ballerina/lang.runtime;
+import ballerina/test;
+import ballerina/time;
 
 isolated int[] oneTimeResults = [];
 isolated int[] recurringResults = [];
 isolated int[] concurrentArray = [];
 isolated int[] dataArray = [];
 
-listener Listener runningListener = new(schedule = {
+listener Listener runningListener = new (schedule = {
     triggerTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 8))
 });
 
-listener Listener oneTimeListener = new(schedule = {
+listener Listener oneTimeListener = new (schedule = {
     triggerTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3))
 });
 
-listener Listener recurringListener = new(schedule = {
+listener Listener recurringListener = new (schedule = {
     interval: 2,
     startTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3)),
     maxCount: 4
 });
 
 Service service1 = service object {
-    function onTrigger() {
+    isolated function onTrigger() {
         lock {
             concurrentArray.push(1);
         }
@@ -46,7 +46,7 @@ Service service1 = service object {
 };
 
 Service service2 = service object {
-    function onTrigger() {
+    isolated function onTrigger() {
         lock {
             concurrentArray.push(1);
         }
@@ -54,7 +54,7 @@ Service service2 = service object {
 };
 
 Service service3 = service object {
-    function onTrigger() {
+    isolated function onTrigger() {
         lock {
             dataArray.push(1);
         }
@@ -62,7 +62,7 @@ Service service3 = service object {
 };
 
 Service oneTimeService = service object {
-    function onTrigger() {
+    isolated function onTrigger() {
         lock {
             oneTimeResults.push(1);
         }
@@ -70,7 +70,7 @@ Service oneTimeService = service object {
 };
 
 Service recurringService = service object {
-    function onTrigger() {
+    isolated function onTrigger() {
         lock {
             recurringResults.push(recurringResults.length() + 1);
         }
@@ -88,6 +88,7 @@ function testOneTimeTaskWithListener() returns error? {
     lock {
         test:assertEquals(oneTimeResults.length(), 1);
     }
+    check oneTimeListener.gracefulStop();
 }
 
 @test:Config {
@@ -101,12 +102,16 @@ function testRecurringTaskWithListener() returns error? {
     lock {
         test:assertEquals(recurringResults.length(), 4);
     }
+    check recurringListener.gracefulStop();
 }
 
 @test:Config {
-    groups: ["listener"]
+    groups: ["listener2"]
 }
 function testOneTimeTaskWithMultipleServices() returns error? {
+    lock {
+        concurrentArray = [];
+    }
     check oneTimeListener.attach(service1);
     check oneTimeListener.attach(service2);
     check oneTimeListener.'start();
@@ -114,5 +119,29 @@ function testOneTimeTaskWithMultipleServices() returns error? {
     runtime:sleep(10);
     lock {
         test:assertEquals(concurrentArray.length(), 2);
+    }
+    check oneTimeListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener"]
+}
+function testGracefulStop() returns error? {
+    lock {
+        concurrentArray = [];
+    }
+    check recurringListener.attach(service1);
+    check recurringListener.attach(service2);
+    check recurringListener.'start();
+    runtime:registerListener(recurringListener);
+    check recurringListener.gracefulStop();
+    runtime:sleep(5);
+    int value;
+    lock {
+        value = concurrentArray.length();
+    }
+    runtime:sleep(5);
+    lock {
+        test:assertEquals(value, concurrentArray.length());
     }
 }
