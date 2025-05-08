@@ -44,7 +44,7 @@ public isolated function configureWorkerPool(int workerCount = 5, time:Seconds w
 # + job - Ballerina job, which is to be executed during the trigger
 # + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) returns JobId|Error {
-    int result = check scheduleJob(job, check (new TimeConverter()).getTimeInMillies(triggerTime));
+    int result = check scheduleJob(job, check getTimeInMillies(triggerTime));
     JobId jobId = {id: result};
     return jobId;
 }
@@ -73,10 +73,10 @@ public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,
     int? sTime = ();
     int? eTime = ();
     if startTime is time:Civil {
-        sTime = check (new TimeConverter()).getTimeInMillies(startTime);
+        sTime = check getTimeInMillies(startTime);
     }
     if endTime is time:Civil {
-        eTime = check (new TimeConverter()).getTimeInMillies(endTime);
+        eTime = check getTimeInMillies(endTime);
     }
     int result = check scheduleIntervalJob(job, interval, maxCount, sTime, eTime, taskPolicy);
     JobId jobId = {id: result};

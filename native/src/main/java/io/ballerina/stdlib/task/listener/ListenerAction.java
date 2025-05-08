@@ -20,7 +20,6 @@ package io.ballerina.stdlib.task.listener;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.concurrent.StrandMetadata;
-import io.ballerina.runtime.api.creators.ValueCreator;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BDecimal;
@@ -67,9 +66,8 @@ public class ListenerAction {
         if (TypeUtils.getType(schedule).getName().contains(ONE_TIME_CONFIGURATION)) {
             Object time = schedule.get(TRIGGER_TIME);
             StrandMetadata metadata = new StrandMetadata(true, null);
-            BObject timeConverter =
-                    ValueCreator.createObjectValue(ModuleUtils.getModule(), TIME_CONVERTER_CLASS);
-            long triggerTime = (long) env.getRuntime().callMethod(timeConverter, GET_TIME_IN_MILLIES, metadata, time);
+            long triggerTime =
+                    (long) env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLIES, metadata, time);
             taskListener.setConfig(TRIGGER_TIME, triggerTime);
         } else {
             taskListener.setConfigs(schedule);
