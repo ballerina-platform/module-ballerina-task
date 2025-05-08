@@ -27,11 +27,9 @@ import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
-import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.ModuleUtils;
 import io.ballerina.stdlib.task.utils.Utils;
-import org.quartz.SchedulerException;
 
 import java.util.Map;
 
