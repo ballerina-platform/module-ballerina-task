@@ -41,11 +41,6 @@ public class TaskListener {
     private String type;
     private static final int bound = 1000000;
     private static final String value = "1000";
-    public static final BString DATABASE_CONFIG = StringUtils.fromString("databaseConfig");
-    public static final BString TASK_ID = StringUtils.fromString("taskId");
-    public static final BString GROUP_ID = StringUtils.fromString("groupId");
-    public static final BString LIVENESS_CHECK_INTERVAL = StringUtils.fromString("livenessCheckInterval");
-    public static final BString HEARTBEAT_FREQUENCY = StringUtils.fromString("heartbeatFrequency");
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
     private final BMap<BString, Object> configs = ValueCreator.createMapValue();
 
