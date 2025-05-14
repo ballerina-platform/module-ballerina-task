@@ -73,12 +73,9 @@ public class ListenerAction {
                     long triggerTime = (long) listener.getConfig().get(SCHEDULED_TIME);
                     listener.start(environment, listenerObj, triggerTime);
                 } else {
-                    listener.start(environment, listenerObj,
-                            (BDecimal) listener.getConfig().get(INTERVAL),
-                            (Long) listener.getConfig().get(MAX_COUNT),
-                            listener.getConfig().get(START_TIME),
-                            listener.getConfig().get(END_TIME),
-                            (BMap) listener.getConfig().get(TASK_POLICY));
+                    listener.start(environment, listenerObj, (BDecimal) listener.getConfig().get(INTERVAL),
+                                   (Long) listener.getConfig().get(MAX_COUNT), listener.getConfig().get(START_TIME),
+                                   listener.getConfig().get(END_TIME), (BMap) listener.getConfig().get(TASK_POLICY));
                 }
             } else {
                 return Utils.createTaskError(LISTENER_NOT_INITIALIZED_ERROR);
