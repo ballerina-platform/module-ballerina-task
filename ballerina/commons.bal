@@ -18,8 +18,8 @@ import ballerina/time;
 
 # Represents the task service that provides functionality to manage and execute scheduled tasks.
 public type Service distinct service object {
-    isolated function execute();
-    isolated function onError();
+    isolated function execute() returns error?;
+    isolated function onError() returns error?;
 };
 
 # Listener configuration.
