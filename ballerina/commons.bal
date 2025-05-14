@@ -82,8 +82,12 @@ public enum WaitingPolicy {
   LOG_AND_IGNORE
 }
 
+# Gets time in milliseconds of the given `time:Civil`.
+#
+# + time - The Ballerina `time:Civil`
+# + return - Time in milliseconds or else `task:Error` if the process failed due to any reason
 public isolated function getTimeInMillies(time:Civil time) returns int|Error {
-    if time["utcOffset"] == () {
+    if time[UTC_OFF_SET] == () {
         time:ZoneOffset zoneOffset = {hours: 0, minutes: 0};
         time.utcOffset = zoneOffset;
     }
@@ -98,3 +102,5 @@ public isolated function getTimeInMillies(time:Civil time) returns int|Error {
         return error Error(string `Couldn't convert given time to milli seconds: ${utc.message()}.`);
     }
 }
+
+const string UTC_OFF_SET = "utcOffset";
