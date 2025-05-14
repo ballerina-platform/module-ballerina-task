@@ -142,13 +142,6 @@ public class TaskManager {
                 Utils.getOneTimeTrigger(time, TaskConstants.TRIGGER_ID), jobId);
     }
 
-    public void scheduleOneTimeListenerJob(JobDataMap jobDataMap, long time,
-                                           String jobId, BObject job) throws SchedulerException {
-        jobDataMap.put(JOB, job);
-        scheduleListenerJob(Utils.createListenerJob(jobDataMap, jobId),
-                Utils.getOneTimeTrigger(time, TaskConstants.TRIGGER_ID), jobId);
-    }
-
     public void scheduleListenerIntervalJob(JobDataMap jobDataMap, long interval, long maxCount, Object startTime,
                                             Object endTime, String waitingPolicy,
                                             String jobId, BObject service) throws SchedulerException {

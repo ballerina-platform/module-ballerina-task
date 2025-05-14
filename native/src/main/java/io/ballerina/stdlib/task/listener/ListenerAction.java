@@ -20,7 +20,6 @@ package io.ballerina.stdlib.task.listener;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.utils.StringUtils;
-import io.ballerina.runtime.api.utils.TypeUtils;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -45,7 +44,7 @@ public class ListenerAction {
 
     public static Object initListener(Environment env, BObject listener, BMap<BString, Object> listenerConfig) {
         BMap<?, ?> configs = listenerConfig.getMapValue(TRIGGER);
-        TaskListener taskListener = new TaskListener(TaskManager.getInstance(), TypeUtils.getType(configs).getName());
+        TaskListener taskListener = new TaskListener(TaskManager.getInstance());
         taskListener.setConfigs(configs);
         listener.addNativeData(NATIVE_LISTENER_KEY, taskListener);
         return null;

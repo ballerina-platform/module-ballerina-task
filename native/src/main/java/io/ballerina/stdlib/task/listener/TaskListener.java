@@ -41,11 +41,9 @@ public class TaskListener {
     private final TaskManager taskManager;
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
     private final BMap<BString, Object> configs = ValueCreator.createMapValue();
-    private String type;
 
-    public TaskListener(TaskManager taskManager, String type) {
+    public TaskListener(TaskManager taskManager) {
         this.taskManager = taskManager;
-        this.type = type;
     }
 
     public TaskManager getTaskManager() {
@@ -70,24 +68,12 @@ public class TaskListener {
         return serviceRegistry;
     }
 
-    public void setConfig(BString key, Object value) {
-        configs.put(key, value);
-    }
-
     public void setConfigs(BMap<?, ?> values) {
         configs.merge(values, false);
     }
 
     public BMap<BString, Object> getConfig() {
         return configs;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public void registerService(String serviceName, BObject service) {
