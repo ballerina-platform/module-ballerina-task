@@ -168,6 +168,25 @@ function testOneTimeTaskWithMultipleServices() returns error? {
 @test:Config {
     groups: ["listener"]
 }
+function testDetachInListener() returns error? {
+    lock {
+        multiServiceEventCounts = [];
+    }
+    check singleEventListener.attach(firstConcurrentService);
+    check singleEventListener.attach(secondConcurrentService);
+    check singleEventListener.detach(firstConcurrentService);
+    check singleEventListener.'start();
+    runtime:registerListener(singleEventListener);
+    runtime:sleep(10);
+    lock {
+        test:assertEquals(multiServiceEventCounts.length(), 1);
+    }
+    check singleEventListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener"]
+}
 function testGracefulStop() returns error? {
     lock {
         multiServiceEventCounts = [];
