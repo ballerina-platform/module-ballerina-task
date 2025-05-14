@@ -27,6 +27,12 @@ public configurable int globalSchedulerWorkerCount = 5;
 # Waiting time for the global scheduler
 public configurable time:Seconds globalSchedulerWaitingTime = 5;
 
+# Represents the task service that provides functionality to manage and execute scheduled tasks.
+public type Service distinct service object {
+    isolated function onTrigger();
+    isolated function onError();
+};
+
 # Listener configuration.
 # 
 # + schedule - The schedule configuration for the listener
