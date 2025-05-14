@@ -57,7 +57,7 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 #
 # + job - Ballerina job, which is to be executed by the scheduler
 # + interval - The duration of the trigger (in seconds), which is used to run the job frequently
-# + maxCount - The maximum number of trigger counts
+# + maxCount - The maximum number of trigger counts. If set to -1, job will run indefinitely
 # + startTime - The trigger start time in Ballerina `time:Civil`. If it is not provided, a trigger will
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`

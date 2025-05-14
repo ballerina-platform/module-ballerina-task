@@ -16,11 +16,6 @@
 
 import ballerina/time;
 
-# Represents the task service.
-public type Service distinct service object {
-  isolated function onTrigger() returns error?;
-};
-
 # Worker count for the global scheduler
 public configurable int globalSchedulerWorkerCount = 5;
 
@@ -37,30 +32,23 @@ public type Service distinct service object {
 # 
 # + schedule - The schedule configuration for the listener
 public type ListenerConfiguration record {
-  OneTimeConfiguration|RecurringConfiguration schedule;
+    time:Civil|RecurringConfiguration schedule;
 };
 
 # Recurring schedule configuration.
 # 
 # + interval - The duration of the trigger (in seconds), which is used to run the job frequently
-# + maxCount - The maximum number of trigger counts
+# + maxCount - The maximum number of trigger counts. If set to -1, job will run indefinitely
 # + startTime - The trigger start time in Ballerina `time:Civil`. If it is not provided, a trigger will
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy - The policy, which is used to handle the error and will be waiting during the trigger time
 public type RecurringConfiguration record {|
-  decimal interval;
-  int maxCount = -1;
-  time:Civil startTime?;
-  time:Civil endTime?;
-  TaskPolicy taskPolicy = {};
-|};
-
-# One-time schedule configuration.
-# 
-# + triggerTime - The specific time in Ballerina `time:Civil` to trigger only one time
-public type OneTimeConfiguration record {|
-  time:Civil triggerTime;
+    decimal interval;
+    int maxCount = -1;
+    time:Civil startTime?;
+    time:Civil endTime?;
+    TaskPolicy taskPolicy = {};
 |};
 
 # A read-only record consisting of a unique identifier for a created job.

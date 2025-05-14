@@ -42,12 +42,6 @@ import static io.ballerina.stdlib.task.utils.TaskConstants.JOB;
  * Task manager to handle schedulers in ballerina tasks.
  */
 public class TaskManager {
-    public static final String TOKEN_HOLDER = "token_holder";
-    public static final String INSTANCE_ID = "instanceId";
-    public static final String GROUP_ID = "groupId";
-    public static final String CONNECTION = "connection";
-    public static final String LIVENESS_INTERVAL = "livenessInterval";
-    public static final String DATABASE_CONFIG = "databaseConfig";
     private Scheduler scheduler;
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
@@ -221,7 +215,15 @@ public class TaskManager {
         this.scheduler.pauseJob(getTrigger(jobId).getJobKey());
     }
 
+    public void pauseJob(String jobId) throws SchedulerException, SchedulingException {
+        this.scheduler.pauseJob(getTrigger(jobId).getJobKey());
+    }
+
     public void resumeJob(Integer jobId) throws SchedulerException, SchedulingException {
+        this.scheduler.resumeJob(getTrigger(jobId).getJobKey());
+    }
+
+    public void resumeJob(String jobId) throws SchedulerException, SchedulingException {
         this.scheduler.resumeJob(getTrigger(jobId).getJobKey());
     }
 
@@ -246,6 +248,14 @@ public class TaskManager {
             throw new SchedulingException("Invalid job id: " + jobId);
         } else {
             return this.triggerInfoMap.get(jobId);
+        }
+    }
+
+    private Trigger getTrigger(String serviceId) throws SchedulingException {
+        if (this.serviceTriggerInfoMap.get(serviceId) == null) {
+            throw new SchedulingException("Invalid job id: " + serviceId);
+        } else {
+            return this.serviceTriggerInfoMap.get(serviceId);
         }
     }
 }

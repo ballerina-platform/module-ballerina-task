@@ -38,6 +38,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 
 import static io.ballerina.runtime.api.creators.ValueCreator.createArrayValue;
+import static java.security.SecureRandom.getInstanceStrong;
 
 /**
  * Class to handle ballerina external functions in Task library.
@@ -70,7 +71,7 @@ public final class TaskActions {
     public static Object scheduleJob(Environment env, BObject job, long time) {
         Utils.disableQuartzLogs();
         try {
-            Integer jobId = java.security.SecureRandom.getInstanceStrong().nextInt(bound);
+            Integer jobId = getInstanceStrong().nextInt(bound);
             JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, String.valueOf(jobId));
             getScheduler(env);
             TaskManager.getInstance().scheduleOneTimeJob(jobDataMap, time, jobId);
@@ -84,7 +85,7 @@ public final class TaskActions {
                                              Object startTime, Object endTime, BMap<BString, Object> policy) {
         Utils.disableQuartzLogs();
         try {
-            int jobId = java.security.SecureRandom.getInstanceStrong().nextInt(bound);
+            int jobId = getInstanceStrong().nextInt(bound);
             JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
                     String.valueOf(jobId));
             getScheduler(env);

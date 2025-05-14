@@ -103,8 +103,18 @@ public class TaskListener {
         serviceRegistry.put(serviceName, service);
     }
 
-    public void unregisterService(String serviceName) {
-        serviceRegistry.remove(serviceName);
+    public void unregisterService(Object service) throws SchedulerException {
+        String serviceId = null;
+        for (Map.Entry<String, BObject> entry : serviceRegistry.entrySet()) {
+            if (entry.getValue().equals(service)) {
+                serviceId = entry.getKey();
+                break;
+            }
+        }
+        if (serviceId != null) {
+            serviceRegistry.remove(serviceId);
+            taskManager.unScheduleJob(serviceId);
+        }
     }
 
     public void unregisterAllServices() {

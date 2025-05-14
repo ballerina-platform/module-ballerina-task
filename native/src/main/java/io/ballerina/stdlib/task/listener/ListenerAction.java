@@ -29,6 +29,7 @@ import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.ModuleUtils;
 import io.ballerina.stdlib.task.utils.Utils;
+import org.quartz.SchedulerException;
 
 import java.util.Map;
 
@@ -36,39 +37,27 @@ import static io.ballerina.stdlib.task.utils.TaskConstants.JOB_ID;
 
 public class ListenerAction {
     private static final String NATIVE_LISTENER_KEY = "TASK_NATIVE_LISTENER";
-    private static final String ONE_TIME_CONFIGURATION = "OneTimeConfiguration";
+    private static final String TIME_CONFIGURATION = "Civil";
     private static final String LISTENER_NOT_INITIALIZED_ERROR = "Listener not initialized";
-
-    private static final String TIME_CONVERTER_CLASS = "TimeConverter";
     private static final String GET_TIME_IN_MILLIES = "getTimeInMillies";
     private static final long WORKER_COUNT = 5;
     private static final long WAITING_TIME_IN_MILLISECONDS = 5;
-
     private static final BString SCHEDULE = StringUtils.fromString("schedule");
     private static final BString INTERVAL = StringUtils.fromString("interval");
     private static final BString MAX_COUNT = StringUtils.fromString("maxCount");
     private static final BString START_TIME = StringUtils.fromString("startTime");
     private static final BString END_TIME = StringUtils.fromString("endTime");
     private static final BString TASK_POLICY = StringUtils.fromString("taskPolicy");
-    private static final BString TRIGGER_TIME = StringUtils.fromString("triggerTime");
+    private static final BString SCHEDULED_TIME = StringUtils.fromString("timeCivil");
 
-    public static Object initListener(Environment env, BObject listener,
-                                    BMap<BString, Object> listenerConfig) {
+    public static Object initListener(Environment env, BObject listener, BMap<BString, Object> listenerConfig) {
         BMap<?, ?> schedule = listenerConfig.getMapValue(SCHEDULE);
-        TaskManager taskManager = TaskManager.getInstance();
-        try {
-            taskManager.initializeScheduler(Utils.createSchedulerProperties(
-                    String.valueOf(WORKER_COUNT), String.valueOf(WAITING_TIME_IN_MILLISECONDS)), env);
-        } catch (Exception e) {
-            return Utils.createTaskError(e.getMessage());
-        }
-        TaskListener taskListener = new TaskListener(taskManager, TypeUtils.getType(schedule).getName());
-        if (TypeUtils.getType(schedule).getName().contains(ONE_TIME_CONFIGURATION)) {
-            Object time = schedule.get(TRIGGER_TIME);
+        TaskListener taskListener = new TaskListener(TaskManager.getInstance(), TypeUtils.getType(schedule).getName());
+        if (TypeUtils.getType(schedule).getName().contains(TIME_CONFIGURATION)) {
             StrandMetadata metadata = new StrandMetadata(true, null);
-            long triggerTime =
-                    (long) env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLIES, metadata, time);
-            taskListener.setConfig(TRIGGER_TIME, triggerTime);
+            long scheduledTime = (long) env.getRuntime()
+                    .callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLIES, metadata, schedule);
+            taskListener.setConfig(SCHEDULED_TIME, scheduledTime);
         } else {
             taskListener.setConfigs(schedule);
         }
@@ -76,12 +65,12 @@ public class ListenerAction {
         return null;
     }
 
-    public static Object startListener(Environment environment, BObject listenerObj) {
+    public static Object start(Environment environment, BObject listenerObj) {
         TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
         try {
             if (listener != null) {
-                if (listener.getType().equals(ONE_TIME_CONFIGURATION)) {
-                    long triggerTime = (long) listener.getConfig().get(TRIGGER_TIME);
+                if (listener.getType().equals(TIME_CONFIGURATION)) {
+                    long triggerTime = (long) listener.getConfig().get(SCHEDULED_TIME);
                     listener.start(environment, listenerObj, triggerTime);
                 } else {
                     listener.start(environment, listenerObj,
@@ -107,13 +96,17 @@ public class ListenerAction {
         return null;
     }
 
-    public static Object detachService(BObject listenerObj, BObject service, BString serviceName) {
-        TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
-        listener.unregisterService(serviceName.getValue());
-        return null;
+    public static Object detach(BObject listenerObj, BObject service) {
+        try {
+            TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
+            listener.unregisterService(service);
+            return null;
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
     }
 
-    public static Object gracefulStopListener(BObject listenerObj) {
+    public static Object gracefulStop(BObject listenerObj) {
         try {
             TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
             Map<String, BObject> services = listener.getServices();
@@ -125,6 +118,50 @@ public class ListenerAction {
             return Utils.createTaskError(e.getMessage());
         }
         return null;
+    }
+
+    public static Object pauseAllJobs() {
+        try {
+            TaskManager.getInstance().pause();
+            return null;
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+    }
+
+    public static Object resumeAllJobs() {
+        try {
+            TaskManager.getInstance().resume();
+            return null;
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+    }
+
+    public static Object pauseService(BString serviceId) {
+        try {
+            TaskManager.getInstance().pauseJob(serviceId.getValue());
+            return null;
+        } catch (Exception e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+    }
+
+    public static Object resumeService(BString serviceId) {
+        try {
+            TaskManager.getInstance().resumeJob(serviceId.getValue());
+            return null;
+        } catch (Exception e) {
+            return Utils.createTaskError(e.getMessage());
+        }
+    }
+
+    public static Object getRunningServices() {
+        try {
+            return TaskManager.getInstance().getAllRunningServices();
+        } catch (SchedulerException e) {
+            return Utils.createTaskError(e.getMessage());
+        }
     }
 }
 
