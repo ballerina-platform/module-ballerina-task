@@ -52,23 +52,13 @@ public class TaskListener {
         return taskManager;
     }
 
-    public void start(Environment env, BObject job, long time) throws Exception {
-        Utils.disableQuartzLogs();
-        getScheduler(env);
-        for (String serviceName : serviceRegistry.keySet()) {
-            JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, serviceName);
-            BObject service = serviceRegistry.get(serviceName);
-            this.taskManager.scheduleOneTimeListenerJob(jobDataMap, time, serviceName, service);
-        }
-    }
-
     public void start(Environment env, BObject job, BDecimal interval, long maxCount,
                       Object startTime, Object endTime, BMap<BString, Object> policy) throws Exception {
         Utils.disableQuartzLogs();
         getScheduler(env);
         for (String serviceName : serviceRegistry.keySet()) {
-            JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
-                    serviceName);
+            JobDataMap jobDataMap =
+                    getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(), serviceName);
             BObject service = serviceRegistry.get(serviceName);
             this.taskManager.scheduleListenerIntervalJob(jobDataMap,
                     (interval.decimalValue().multiply(new BigDecimal(VALUE))).longValue(), maxCount, startTime,

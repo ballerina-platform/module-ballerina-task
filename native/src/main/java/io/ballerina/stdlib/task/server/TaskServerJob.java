@@ -37,13 +37,13 @@ public class TaskServerJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) {
         Thread.startVirtualThread(() -> {
             Runtime runtime = TaskManager.getInstance().getRuntime();
-            BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
+            BObject service = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
             StrandMetadata metadata = new StrandMetadata(true, null);
             try {
-                runtime.callMethod(job, TaskConstants.ON_TRIGGER, metadata);
+                runtime.callMethod(service, TaskConstants.EXECUTE, metadata);
             } catch (Throwable t) {
                 Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
-                runtime.callMethod(job, TaskConstants.ON_ERROR, metadata);
+                runtime.callMethod(service, TaskConstants.ON_ERROR, metadata);
             }
         });
     }

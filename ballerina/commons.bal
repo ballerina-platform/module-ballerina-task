@@ -16,23 +16,17 @@
 
 import ballerina/time;
 
-# Worker count for the global scheduler
-public configurable int globalSchedulerWorkerCount = 5;
-
-# Waiting time for the global scheduler
-public configurable time:Seconds globalSchedulerWaitingTime = 5;
-
 # Represents the task service that provides functionality to manage and execute scheduled tasks.
 public type Service distinct service object {
-    isolated function onTrigger();
+    isolated function execute();
     isolated function onError();
 };
 
 # Listener configuration.
 # 
-# + schedule - The schedule configuration for the listener
+# + trigger - The trigger configuration for the listener
 public type ListenerConfiguration record {
-    time:Civil|RecurringConfiguration schedule;
+    TriggerConfiguration trigger;
 };
 
 # Recurring schedule configuration.
@@ -43,7 +37,7 @@ public type ListenerConfiguration record {
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy - The policy, which is used to handle the error and will be waiting during the trigger time
-public type RecurringConfiguration record {|
+public type TriggerConfiguration record {|
     decimal interval;
     int maxCount = -1;
     time:Civil startTime?;

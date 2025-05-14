@@ -25,17 +25,23 @@ isolated int[] multiServiceEventCounts = [];
 isolated int[] taskExecutionCounts = [];
 isolated int[] errorCount = [];
 
-listener Listener singleListener = new (schedule = time:utcToCivil(time:utcAddSeconds(time:utcNow(), 8)));
-listener Listener singleEventListener = new (schedule = time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3)));
+listener Listener singleListener = new (trigger = {
+    interval: 1,
+    maxCount: 1
+});
+listener Listener singleEventListener = new (trigger = {
+    interval: 1,
+    maxCount: 1
+});
 
-listener Listener periodicEventListener = new (schedule = {
+listener Listener periodicEventListener = new (trigger = {
     interval: 2,
     startTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3)),
     maxCount: 4
 });
 
 Service firstConcurrentService = service object {
-    isolated function onTrigger() {
+    isolated function execute() {
         lock {
             multiServiceEventCounts.push(1);
         }
@@ -47,7 +53,7 @@ Service firstConcurrentService = service object {
 };
 
 Service secondConcurrentService = service object {
-    isolated function onTrigger() {
+    isolated function execute() {
         lock {
             multiServiceEventCounts.push(1);
         }
@@ -59,7 +65,7 @@ Service secondConcurrentService = service object {
 };
 
 Service taskExecutionService = service object {
-    isolated function onTrigger() {
+    isolated function execute() {
         lock {
             taskExecutionCounts.push(1);
         }
@@ -71,7 +77,7 @@ Service taskExecutionService = service object {
 };
 
 Service singleEventService = service object {
-    isolated function onTrigger() {
+    isolated function execute() {
         lock {
             oneTimeEventResults.push(1);
         }
@@ -83,7 +89,7 @@ Service singleEventService = service object {
 };
 
 Service errorService = service object {
-    isolated function onTrigger() {
+    isolated function execute() {
         panic error("Error occurred in the service");
     }
 
@@ -95,7 +101,7 @@ Service errorService = service object {
 };
 
 Service periodicEventService = service object {
-    isolated function onTrigger() {
+    isolated function execute() {
         lock {
             recurringEventResults.push(recurringEventResults.length() + 1);
         }

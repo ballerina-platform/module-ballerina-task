@@ -66,43 +66,6 @@ public class Listener {
         name: "gracefulStop",
         'class: "io.ballerina.stdlib.task.listener.ListenerAction"
     } external;
-
-    # Pauses all the jobs.
-    #
-    # + return - An error if the jobs cannot be paused
-    public isolated function pauseAllJobs() returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.task.listener.ListenerAction"
-    } external;
-
-    # Resumes all the jobs.
-    #
-    # + return - An error if the jobs cannot be resumed
-    public isolated function resumeAllJobs() returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.task.listener.ListenerAction"
-    } external;
-
-    # Pauses a specific service.
-    #
-    # + id - The service ID to be paused
-    # + return - An error if the service cannot be paused
-    public isolated function pauseService(string id) returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.task.listener.ListenerAction"
-    } external;
-
-    # Resumes a specific service.
-    #
-    # + id - The service ID to be resumed
-    # + return - An error if the service cannot be resumed
-    public isolated function resumeService(string id) returns Error? = @java:Method {
-        'class: "io.ballerina.stdlib.task.listener.ListenerAction"
-    } external;
-
-    # Returns the list of running services.
-    #
-    # + return - A string array of running service IDs or an error
-    public isolated function getRunningServices() returns string[]|Error = @java:Method {
-        'class: "io.ballerina.stdlib.task.listener.ListenerAction"
-    } external;
 }
 
 isolated function initListener(Listener 'listener, ListenerConfiguration config) returns Error? = @java:Method {
