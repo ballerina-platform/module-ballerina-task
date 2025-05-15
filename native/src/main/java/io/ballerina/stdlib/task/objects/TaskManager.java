@@ -208,15 +208,7 @@ public class TaskManager {
         this.scheduler.pauseJob(getTrigger(jobId).getJobKey());
     }
 
-    public void pauseJob(String jobId) throws SchedulerException, SchedulingException {
-        this.scheduler.pauseJob(getTrigger(jobId).getJobKey());
-    }
-
     public void resumeJob(Integer jobId) throws SchedulerException, SchedulingException {
-        this.scheduler.resumeJob(getTrigger(jobId).getJobKey());
-    }
-
-    public void resumeJob(String jobId) throws SchedulerException, SchedulingException {
         this.scheduler.resumeJob(getTrigger(jobId).getJobKey());
     }
 
@@ -241,14 +233,6 @@ public class TaskManager {
             throw new SchedulingException("Invalid job id: " + jobId);
         } else {
             return this.triggerInfoMap.get(jobId);
-        }
-    }
-
-    private Trigger getTrigger(String serviceId) throws SchedulingException {
-        if (this.serviceTriggerInfoMap.get(serviceId) == null) {
-            throw new SchedulingException("Invalid job id: " + serviceId);
-        } else {
-            return this.serviceTriggerInfoMap.get(serviceId);
         }
     }
 }
