@@ -20,7 +20,6 @@ package io.ballerina.stdlib.task.listener;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.creators.ValueCreator;
-import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
@@ -38,31 +37,17 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.ballerina.stdlib.task.coordination.TokenAcquisition.DATABASE_CONFIG;
+import static io.ballerina.stdlib.task.coordination.TokenAcquisition.GROUP_ID;
+import static io.ballerina.stdlib.task.coordination.TokenAcquisition.HEARTBEAT_FREQUENCY;
+import static io.ballerina.stdlib.task.coordination.TokenAcquisition.LIVENESS_CHECK_INTERVAL;
+import static io.ballerina.stdlib.task.coordination.TokenAcquisition.TASK_ID;
+
 public class TaskListener {
     private static final String VALUE = "1000";
     private final TaskManager taskManager;
-    public static final BString DATABASE_CONFIG = StringUtils.fromString("databaseConfig");
-    public static final BString TASK_ID = StringUtils.fromString("taskId");
-    public static final BString GROUP_ID = StringUtils.fromString("groupId");
-    public static final BString LIVENESS_CHECK_INTERVAL = StringUtils.fromString("livenessCheckInterval");
-    public static final BString HEARTBEAT_FREQUENCY = StringUtils.fromString("heartbeatFrequency");
-
-    private static final String VALUE = "1000";
-
-    private final TaskManager taskManager;
     private final Map<String, BObject> serviceRegistry = new ConcurrentHashMap<>();
     private final BMap<BString, Object> configs = ValueCreator.createMapValue();
-
-    private String type;
-
-    public TaskListener(TaskManager taskManager, String type) {
-        this.taskManager = taskManager;
-        this.type = type;
-    }
-
-    public TaskManager getTaskManager() {
-        return taskManager;
-    }
 
     public TaskListener(TaskManager taskManager) {
         this.taskManager = taskManager;
@@ -109,6 +94,10 @@ public class TaskListener {
 
     public Map<String, BObject> getServices() {
         return serviceRegistry;
+    }
+
+    public void setConfig(BString key, Object value) {
+        configs.put(key, value);
     }
 
     public void setConfigs(BMap<?, ?> values) {

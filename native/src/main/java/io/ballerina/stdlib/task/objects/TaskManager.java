@@ -44,6 +44,11 @@ import static io.ballerina.stdlib.task.utils.TaskConstants.JOB;
  * Task manager to handle schedulers in ballerina tasks.
  */
 public class TaskManager {
+    public static final String TOKEN_HOLDER = "tokenholder";
+    public static final String TASK_ID = "taskId";
+    public static final String GROUP_ID = "groupId";
+    public static final String DATABASE_CONFIG = "databaseConfig";
+    public static final String LIVENESS_CHECK_INTERVAL = "livenessCheckInterval";
     private Scheduler scheduler;
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
@@ -182,10 +187,10 @@ public class TaskManager {
             throws SchedulerException {
         jobDataMap.put(JOB, service);
         jobDataMap.put(TOKEN_HOLDER, response.getBooleanValue(TokenAcquisition.TOKEN_HOLDER));
-        jobDataMap.put(INSTANCE_ID, response.getStringValue(TokenAcquisition.TASK_ID));
+        jobDataMap.put(TASK_ID, response.getStringValue(TokenAcquisition.TASK_ID));
         jobDataMap.put(GROUP_ID, response.getStringValue(TokenAcquisition.GROUP_ID));
         jobDataMap.put(DATABASE_CONFIG, response.get(TokenAcquisition.DATABASE_CONFIG));
-        jobDataMap.put(LIVENESS_INTERVAL, response.get(TokenAcquisition.LIVENESS_INTERVAL));
+        jobDataMap.put(LIVENESS_CHECK_INTERVAL, response.get(TokenAcquisition.LIVENESS_CHECK_INTERVAL));
         JobDetail job = Utils.createListenerJob(jobDataMap, jobId);
         Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
                 TaskConstants.TRIGGER_ID);

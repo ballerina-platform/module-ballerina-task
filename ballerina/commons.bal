@@ -188,10 +188,10 @@ public configurable time:Seconds globalSchedulerWaitingTime = 5;
 
 # Listener configuration.
 # 
-# + schedule - The schedule configuration for the listener
+# + trigger - The trigger configuration for the listener
 # + warmBackupConfig - The configuration related to task coordination
 public type ListenerConfiguration record {
-  OneTimeConfiguration|RecurringConfiguration schedule;
+  TriggerConfiguration trigger;
   WarmBackupConfig? warmBackupConfig = ();
 };
 

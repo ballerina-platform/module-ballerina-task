@@ -42,8 +42,8 @@ import java.sql.SQLException;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.attemptTokenAcquisition;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.hasActiveToken;
 import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;
-import static io.ballerina.stdlib.task.objects.TaskManager.INSTANCE_ID;
-import static io.ballerina.stdlib.task.objects.TaskManager.LIVENESS_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.LIVENESS_CHECK_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.TASK_ID;
 import static io.ballerina.stdlib.task.objects.TaskManager.TOKEN_HOLDER;
 
 public class TaskServerJob implements Job {
@@ -53,8 +53,6 @@ public class TaskServerJob implements Job {
     public void execute(JobExecutionContext jobExecutionContext) {
         Thread.startVirtualThread(() -> {
             Runtime runtime = TaskManager.getInstance().getRuntime();
-            BObject service = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
-            StrandMetadata metadata = new StrandMetadata(true, null);
             Boolean isTokenHolder = (Boolean) jobExecutionContext.getMergedJobDataMap().get(TOKEN_HOLDER);
             BObject job = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
             if (isTokenHolder == null) {
@@ -62,7 +60,7 @@ public class TaskServerJob implements Job {
                 return;
             }
             DatabaseConfig dbConfig = (DatabaseConfig) jobExecutionContext.getMergedJobDataMap().get(DATABASE_CONFIG);
-            String taskId = ((BString) jobExecutionContext.getMergedJobDataMap().get(INSTANCE_ID)).getValue();
+            String taskId = ((BString) jobExecutionContext.getMergedJobDataMap().get(TASK_ID)).getValue();
             String groupId = ((BString) jobExecutionContext.getMergedJobDataMap().get(GROUP_ID)).getValue();
             String jdbcUrl = TokenAcquisition.getJdbcUrl(dbConfig);
             processJobWithCoordination(job, runtime, jobExecutionContext, isTokenHolder,
@@ -107,7 +105,7 @@ public class TaskServerJob implements Job {
         if (isTokenHolder) {
             return hasActiveToken(connection, taskId, groupId);
         }
-        int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_INTERVAL);
+        int livenessInterval = (int) jobExecutionContext.getMergedJobDataMap().get(LIVENESS_CHECK_INTERVAL);
         return attemptTokenAcquisition(connection, taskId, groupId, false,
                 livenessInterval, dbConfig.dbType());
     }

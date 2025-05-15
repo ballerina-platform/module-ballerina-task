@@ -52,7 +52,8 @@ public final class TokenAcquisition {
     public static final BString TASK_ID = StringUtils.fromString("taskId");
     public static final BString GROUP_ID = StringUtils.fromString("groupId");
     public static final BString TOKEN_HOLDER = StringUtils.fromString("tokenholder");
-    public static final BString LIVENESS_INTERVAL = StringUtils.fromString("livenessInterval");
+    public static final BString HEARTBEAT_FREQUENCY = StringUtils.fromString("heartbeatFrequency");
+    public static final BString LIVENESS_CHECK_INTERVAL = StringUtils.fromString("livenessCheckInterval");
     public static final String LAST_HEARTBEAT = "last_heartbeat";
     public static final String ID = "task_id";
 
@@ -128,7 +129,7 @@ public final class TokenAcquisition {
         response.put(GROUP_ID, StringUtils.fromString(groupId));
         response.put(TOKEN_HOLDER, tokenAcquired);
         response.put(DATABASE_CONFIG, databaseConfig);
-        response.put(LIVENESS_INTERVAL, interval);
+        response.put(LIVENESS_CHECK_INTERVAL, interval);
         return response;
     }
 
