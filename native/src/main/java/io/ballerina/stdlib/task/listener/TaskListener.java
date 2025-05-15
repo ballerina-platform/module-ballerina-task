@@ -80,7 +80,7 @@ public class TaskListener {
         serviceRegistry.put(serviceName, service);
     }
 
-    public void unregisterService(Object service) throws SchedulerException {
+    public void unregisterService(Object service) throws Exception {
         String serviceId = null;
         for (Map.Entry<String, BObject> entry : serviceRegistry.entrySet()) {
             if (entry.getValue().equals(service)) {
@@ -91,6 +91,8 @@ public class TaskListener {
         if (serviceId != null) {
             serviceRegistry.remove(serviceId);
             taskManager.unScheduleJob(serviceId);
+        } else {
+            throw new Exception("Service is not found in the listener");
         }
     }
 

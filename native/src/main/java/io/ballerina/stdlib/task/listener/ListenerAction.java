@@ -26,7 +26,6 @@ import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.Utils;
-import org.quartz.SchedulerException;
 
 import java.util.Map;
 
@@ -78,7 +77,7 @@ public class ListenerAction {
             TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
             listener.unregisterService(service);
             return null;
-        } catch (SchedulerException e) {
+        } catch (Exception e) {
             return Utils.createTaskError(e.getMessage());
         }
     }
