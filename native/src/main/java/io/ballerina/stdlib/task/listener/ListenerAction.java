@@ -41,7 +41,9 @@ public class ListenerAction {
     private static final BString END_TIME = StringUtils.fromString("endTime");
     private static final BString TASK_POLICY = StringUtils.fromString("taskPolicy");
 
-    public static Object initListener(Environment env, BObject listener, BMap<BString, Object> listenerConfig) {
+    private ListenerAction() { }
+
+    public static Object initListener(BObject listener, BMap<BString, Object> listenerConfig) {
         BMap<?, ?> configs = listenerConfig.getMapValue(TRIGGER);
         TaskListener taskListener = new TaskListener(TaskManager.getInstance());
         taskListener.setConfigs(configs);

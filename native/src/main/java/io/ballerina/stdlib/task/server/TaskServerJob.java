@@ -30,9 +30,6 @@ import org.quartz.JobExecutionContext;
 
 public class TaskServerJob implements Job {
 
-    public TaskServerJob() {
-    }
-
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
         Thread.startVirtualThread(() -> {
