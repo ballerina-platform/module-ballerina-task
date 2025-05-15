@@ -174,7 +174,7 @@ function testOneTimeTaskWithMultipleServices() returns error? {
 @test:Config {
     groups: ["listener"]
 }
-function testDetachInListener() returns error? {
+function testDetachListener() returns error? {
     lock {
         multiServiceEventCounts = [];
     }
@@ -188,6 +188,18 @@ function testDetachInListener() returns error? {
         test:assertEquals(multiServiceEventCounts.length(), 1);
     }
     check singleEventListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener"]
+}
+function testDetachInvalidListener() returns error? {
+    lock {
+        multiServiceEventCounts = [];
+    }
+    check singleEventListener.gracefulStop();
+    Error? result = singleEventListener.detach(firstConcurrentService);
+    test:assertTrue(result is Error);
 }
 
 @test:Config {
@@ -211,4 +223,42 @@ function testGracefulStop() returns error? {
     lock {
         test:assertEquals(eventCountAfterStop, multiServiceEventCounts.length());
     }
+}
+
+@test:Config {
+    groups: ["listener"]
+}
+function testImmediateStop() returns error? {
+    lock {
+        multiServiceEventCounts = [];
+    }
+    check singleListener.attach(firstConcurrentService);
+    check singleListener.attach(secondConcurrentService);
+    check singleListener.'start();
+    runtime:registerListener(singleListener);
+    check singleListener.immediateStop();
+    runtime:sleep(5);
+    int eventCountAfterStop;
+    lock {
+        eventCountAfterStop = multiServiceEventCounts.length();
+    }
+    runtime:sleep(5);
+    lock {
+        test:assertEquals(eventCountAfterStop, multiServiceEventCounts.length());
+    }
+}
+
+@test:Config {
+    groups: ["listener"]
+}
+function testConfigureWorkerPoolWithListeners() returns error? {
+    lock {
+        multiServiceEventCounts = [];
+    }
+    check singleListener.attach(firstConcurrentService);
+    check singleListener.'start();
+    runtime:registerListener(singleListener);
+    Error? result = configureWorkerPool(10, 100);
+    test:assertTrue(result !is Error);
+    check singleListener.gracefulStop();
 }
