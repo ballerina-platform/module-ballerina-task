@@ -9,7 +9,7 @@ Every scheduling job in Ballerina needs to be represented by a `Job` object. The
 The `task` package has the following two scheduling systems to schedule the job:
 
 - One-time job execution
-- Frequency-based job execution 
+- Frequency-based job execution
 
 #### One-time job execution
 
@@ -51,7 +51,7 @@ time:Civil time = {
 task:JobId result = check task:scheduleOneTimeJob(new Job("Hi"), time);
 ```
 
-##### Frequency-based job execution
+#### Frequency-based job execution
 
 This API provides the functionality to schedule jobs on a specific interval either once or periodically by configuring the configuration such as start time, end time, and maximum count.
 
@@ -91,3 +91,29 @@ task:JobId result = check task:scheduleJobRecurByFrequency(new Job("Hi"), 2.5, m
 ```
 
 For information on the operations, which you can perform with the task module, see the below **Functions**.
+
+### Listener-based job execution
+
+This approach enables you to schedule and execute recurring and one-time jobs as services with configurable trigger settings on the attached listener. This allows users to deploy a scheduled task as a service without the need of a thread sleep.
+
+The following code snippet shows how to schedule a job by using the listener based approach.
+
+```ballerina
+listener task:Listener taskListener = new (
+    trigger = {
+        interval: 2,
+        maxCount: 5
+    }
+);
+
+service "job-1" on taskListener {
+    private int i = 1;
+
+    isolated function execute() returns error? {
+        lock {
+            io:println("Counter: ", self.i);
+            self.i += 1;
+        }
+    }
+}
+```
