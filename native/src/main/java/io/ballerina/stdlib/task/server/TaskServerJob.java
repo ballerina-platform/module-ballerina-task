@@ -129,6 +129,7 @@ public class TaskServerJob implements Job {
             Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(error));
         }
     }
+
     public static void handleRollback(Connection connection) throws SQLException {
         if (connection != null) {
             connection.rollback();
