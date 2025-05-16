@@ -20,6 +20,7 @@ package io.ballerina.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.utils.TaskConstants;
 import io.ballerina.stdlib.task.utils.Utils;
@@ -35,6 +36,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static io.ballerina.stdlib.task.utils.TaskConstants.JOB;
+
 /**
  * Task manager to handle schedulers in ballerina tasks.
  */
@@ -43,6 +46,8 @@ public class TaskManager {
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
     Map<Integer, Trigger> triggerInfoMap = new ConcurrentHashMap<>();
+    Map<String, JobDetail> serviceInfoMap = new HashMap<>();
+    Map<String, Trigger> serviceTriggerInfoMap = new ConcurrentHashMap<>();
     Properties properties;
     boolean isConfiguredSchFactory = false;
 
@@ -59,10 +64,11 @@ public class TaskManager {
     public void initializeScheduler(Properties properties, Environment env) throws SchedulingException,
             SchedulerException {
         getAllRunningJobs();
+        getAllRunningServices();
         if (this.scheduler != null) {
             this.scheduler.shutdown();
         }
-        if (!triggerInfoMap.isEmpty()) {
+        if (!triggerInfoMap.isEmpty() || !serviceTriggerInfoMap.isEmpty()) {
             configureScheduler(properties, env);
         } else {
             this.properties = properties;
@@ -74,6 +80,13 @@ public class TaskManager {
         startScheduler();
         for (Map.Entry<Integer, Trigger> entry : triggerInfoMap.entrySet()) {
             this.scheduler.scheduleJob(jobInfoMap.get(entry.getKey()), entry.getValue());
+        }
+    }
+
+    public void rescheduleServiceJobs() throws SchedulerException {
+        startScheduler();
+        for (Map.Entry<String, Trigger> entry : serviceTriggerInfoMap.entrySet()) {
+            this.scheduler.scheduleJob(serviceInfoMap.get(entry.getKey()), entry.getValue());
         }
     }
 
@@ -114,9 +127,29 @@ public class TaskManager {
         return this.triggerInfoMap.keySet();
     }
 
+    public Set<String> getAllRunningServices() throws SchedulerException {
+        for (Map.Entry<String, Trigger> entry : serviceTriggerInfoMap.entrySet()) {
+            Trigger.TriggerState triggerState = scheduler.getTriggerState(entry.getValue().getKey());
+            if (triggerState != null && isTriggerCompleted(triggerState)) {
+                this.serviceTriggerInfoMap.remove(entry.getKey());
+            }
+        }
+        return this.serviceTriggerInfoMap.keySet();
+    }
+
     public void scheduleOneTimeJob(JobDataMap jobDataMap, long time, Integer jobId) throws SchedulerException {
         scheduleJob(Utils.createJob(jobDataMap, jobId.toString()),
                 Utils.getOneTimeTrigger(time, TaskConstants.TRIGGER_ID), jobId);
+    }
+
+    public void scheduleListenerIntervalJob(JobDataMap jobDataMap, long interval, long maxCount, Object startTime,
+                                            Object endTime, String waitingPolicy,
+                                            String jobId, BObject service) throws SchedulerException {
+        jobDataMap.put(JOB, service);
+        JobDetail job = Utils.createListenerJob(jobDataMap, jobId);
+        Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
+                TaskConstants.TRIGGER_ID);
+        scheduleListenerJob(job, trigger, jobId);
     }
 
     public void scheduleIntervalJob(JobDataMap jobDataMap, long interval, long maxCount, Object startTime,
@@ -134,6 +167,13 @@ public class TaskManager {
         startScheduler();
     }
 
+    private void scheduleListenerJob(JobDetail job, Trigger trigger, String jobId) throws SchedulerException {
+        this.scheduler.scheduleJob(job, trigger);
+        this.serviceTriggerInfoMap.put(jobId, trigger);
+        this.serviceInfoMap.put(jobId, job);
+        startScheduler();
+    }
+
     private void startScheduler () throws SchedulerException {
         if (!this.scheduler.isStarted()) {
             this.scheduler.start();
@@ -144,6 +184,15 @@ public class TaskManager {
         this.scheduler.unscheduleJob(getTrigger(jobId).getKey());
         if (getAllRunningJobs().isEmpty()) {
             this.scheduler.shutdown();
+        }
+    }
+
+    public void unScheduleJob(String serviceId) throws SchedulerException {
+        if (this.serviceTriggerInfoMap.containsKey(serviceId)) {
+            this.scheduler.unscheduleJob(this.serviceTriggerInfoMap.get(serviceId).getKey());
+            if (getAllRunningServices().isEmpty()) {
+                this.scheduler.shutdown();
+            }
         }
     }
 
@@ -173,6 +222,9 @@ public class TaskManager {
         setRuntime(env.getRuntime());
         if (!triggerInfoMap.isEmpty()) {
             rescheduleJobs();
+        }
+        if (!serviceTriggerInfoMap.isEmpty()) {
+            rescheduleServiceJobs();
         }
     }
 

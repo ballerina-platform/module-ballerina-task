@@ -19,4 +19,7 @@ version = "@toml.version@"
 path = "../native/build/libs/task-native-@project.version@.jar"
 
 [[platform.java21.dependency]]
+groupId="org.quartz-scheduler"
+artifactId="quartz"
+version="@quartz.version@"
 path = "./lib/quartz-@quartz.version@.jar"

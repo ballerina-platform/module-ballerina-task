@@ -16,6 +16,37 @@
 
 import ballerina/time;
 
+# Represents the task service that provides functionality to manage and execute scheduled tasks.
+public type Service distinct service object {
+    isolated function execute() returns error?;
+};
+
+# Listener configuration.
+# 
+# + trigger - The trigger configuration for the listener
+public type ListenerConfiguration record {
+    TriggerConfiguration trigger;
+};
+
+# Recurring schedule configuration.
+# 
+# + interval - The duration of the trigger (in seconds), which is used to run the job frequently
+# + maxCount - The maximum number of trigger counts. If set to -1, job will run indefinitely
+# + startTime - The trigger start time in Ballerina `time:Civil`. If it is not provided, a trigger will
+#               start immediately
+# + endTime - The trigger end time in Ballerina `time:Civil`
+# + taskPolicy - The policy, which is used to handle the error and will be waiting during the trigger time
+public type TriggerConfiguration record {|
+    decimal interval;
+    int maxCount = -1;
+    time:Civil startTime?;
+    time:Civil endTime?;
+    TaskPolicy taskPolicy = {
+        errorPolicy: LOG_AND_TERMINATE,
+        waitingPolicy: WAIT
+    };
+|};
+
 # A read-only record consisting of a unique identifier for a created job.
 public type JobId readonly & record {|
    int id;

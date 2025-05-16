@@ -57,7 +57,7 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 #
 # + job - Ballerina job, which is to be executed by the scheduler
 # + interval - The duration of the trigger (in seconds), which is used to run the job frequently
-# + maxCount - The maximum number of trigger counts
+# + maxCount - The maximum number of trigger counts. If set to -1, job will run indefinitely
 # + startTime - The trigger start time in Ballerina `time:Civil`. If it is not provided, a trigger will
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
@@ -65,7 +65,7 @@ public isolated function scheduleOneTimeJob(Job job, time:Civil triggerTime) ret
 # + return - A `task:JobId` or else a `task:Error` if the process failed due to any reason
 public isolated function scheduleJobRecurByFrequency(Job job,  decimal interval,  int maxCount = -1,
                                     time:Civil? startTime = (), time:Civil? endTime = (), TaskPolicy taskPolicy = {})
-                                    returns JobId|Error {
+    returns JobId|Error {
     if maxCount != -1 && maxCount < 1 {
         return error Error("The maxCount should be a positive integer.");
     }

@@ -34,10 +34,11 @@ import org.quartz.SchedulerException;
 
 import java.io.PrintStream;
 import java.math.BigDecimal;
-import java.util.Random;
+import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 
 import static io.ballerina.runtime.api.creators.ValueCreator.createArrayValue;
+import static java.security.SecureRandom.getInstanceStrong;
 
 /**
  * Class to handle ballerina external functions in Task library.
@@ -69,32 +70,32 @@ public final class TaskActions {
 
     public static Object scheduleJob(Environment env, BObject job, long time) {
         Utils.disableQuartzLogs();
-        Integer jobId = new Random().nextInt(bound);
-        JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, String.valueOf(jobId));
         try {
+            Integer jobId = getInstanceStrong().nextInt(bound);
+            JobDataMap jobDataMap = getJobDataMap(job, TaskConstants.LOG_AND_CONTINUE, String.valueOf(jobId));
             getScheduler(env);
             TaskManager.getInstance().scheduleOneTimeJob(jobDataMap, time, jobId);
-        } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
+            return jobId;
+        } catch (SchedulerException | SchedulingException | IllegalArgumentException | NoSuchAlgorithmException e) {
             return Utils.createTaskError(e.getMessage());
         }
-        return jobId;
     }
 
     public static Object scheduleIntervalJob(Environment env, BObject job, BDecimal interval, long maxCount,
                                              Object startTime, Object endTime, BMap<BString, Object> policy) {
         Utils.disableQuartzLogs();
-        int jobId = new Random().nextInt(bound);
-        JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
-                String.valueOf(jobId));
         try {
+            int jobId = getInstanceStrong().nextInt(bound);
+            JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
+                    String.valueOf(jobId));
             getScheduler(env);
             TaskManager.getInstance().scheduleIntervalJob(jobDataMap,
                     (interval.decimalValue().multiply(new BigDecimal(value))).longValue(), maxCount, startTime,
                     endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(), jobId);
-        } catch (SchedulerException | SchedulingException | IllegalArgumentException e) {
+            return jobId;
+        } catch (SchedulerException | SchedulingException | IllegalArgumentException | NoSuchAlgorithmException e) {
             return Utils.createTaskError(e.getMessage());
         }
-        return jobId;
     }
 
     private static Scheduler getScheduler(Environment env) throws SchedulingException, SchedulerException {

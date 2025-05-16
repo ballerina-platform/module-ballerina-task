@@ -72,5 +72,15 @@
         ]
       }
     ]
+  },
+  {
+    "name": "io.ballerina.stdlib.task.server.TaskServerJob",
+    "queryAllPublicMethods": true,
+    "methods": [
+      {
+        "name": "<init>",
+        "parameterTypes": []
+      }
+    ]
   }
 ]
