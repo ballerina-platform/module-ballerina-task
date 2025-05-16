@@ -15,7 +15,6 @@
 // under the License.
 
 import ballerina/time;
-import ballerina/crypto;
 
 # Represents the task service that provides functionality to manage and execute scheduled tasks.
 public type Service distinct service object {
@@ -32,14 +31,12 @@ public type DatabaseConfig MysqlConfig|PostgresqlConfig;
 # + password - The password for the database connection
 # + port - The port number of the database server
 # + database - The name of the database to connect to
-# + options - Additional options for the database connection
 public type MysqlConfig record {
   string host = "localhost";
   string? user = ();
   string? password = ();
   int port = 3306;
   string? database = ();
-  Options? options = ();
 };
 
 # Represents the configuration required to connect to a database related to task coordination.
@@ -49,93 +46,13 @@ public type MysqlConfig record {
 # + password - The password for the database connection
 # + port - The port number of the database server
 # + database - The name of the database to connect to
-# + options - Additional options for the database connection
 public type PostgresqlConfig record {
   string host = "localhost";
   string? user = ();
   string? password = ();
   int port = 5432;
   string? database = ();
-  Options? options = ();
 };
-
-# Provides a set of additional configurations related to the database connection.
-#
-# + ssl - SSL configurations to be used
-# + failoverConfig - Server failover configurations to be used
-# + useXADatasource - Flag to enable or disable XADatasource
-# + connectTimeout - Timeout (in seconds) to be used when establishing a connection to the database server
-# + socketTimeout - Socket timeout (in seconds) to be used during the read/write operations with the database server
-#                   (0 means no socket timeout)
-# + serverTimezone - Configures the connection time zone, which is used by the `Connector/J` if the conversion between a Ballerina
-#                    application and a target time zone is required when preserving instant temporal values
-# + noAccessToProcedureBodies - With this option the user is allowed to invoke procedures with access to metadata restricted
-public type Options record {|
-    SecureSocket ssl?;
-    FailoverConfig failoverConfig?;
-    boolean useXADatasource = false;
-    decimal connectTimeout = 30;
-    decimal socketTimeout = 0;
-    string serverTimezone?;
-    boolean noAccessToProcedureBodies = false;
-|};
-
-public type SecureSocket record {|
-    SSLMode mode = SSL_PREFERRED;
-    crypto:KeyStore key?;
-    crypto:TrustStore cert?;
-    boolean allowPublicKeyRetrieval = false;
-|};
-
-# Establish an encrypted connection if the server supports encrypted connections. Falls back to an unencrypted
-# connection if an encrypted connection cannot be established.
-public const SSL_PREFERRED = "PREFERRED";
-
-# Establish an encrypted connection if the server supports encrypted connections. The connection attempt fails if
-# an encrypted connection cannot be established.
-public const SSL_REQUIRED = "REQUIRED";
-
-# Establish an encrypted connection if the server supports encrypted connections. The connection attempt fails if
-# an encrypted connection cannot be established. Additionally, verifies the server Certificate Authority (CA)
-# certificate against the configured CA certificates. The connection attempt fails if no valid matching CA
-# certificates are found.
-public const SSL_VERIFY_CA = "VERIFY_CA";
-
-# Establish an encrypted connection if the server supports encrypted connections and verifies the server
-# Certificate Authority (CA) certificate against the configured CA certificates. The connection attempt fails if an
-# encrypted connection cannot be established or no valid matching CA certificates are found. Also, performs hostname
-# identity verification by checking the hostname the client uses for connecting to the server against the identity
-# in the certificate that the server sends to the client.
-public const SSL_VERIFY_IDENTITY = "VERIFY_IDENTITY";
-
-# Establish an unencrypted connection to the server. If the server supports encrypted connections, the connection
-# attempt fails.
-public const SSL_DISABLED = "DISABLED";
-
-# `SSLMode` as a union of available SSL modes.
-public type SSLMode SSL_PREFERRED|SSL_REQUIRED|SSL_VERIFY_CA|SSL_VERIFY_IDENTITY|SSL_DISABLED;
-
-# Configuration to be used for server failover.
-#
-# + failoverServers - Array of `FailoverServer` for the secondary servers
-# + timeBeforeRetry - Time the driver waits before attempting to fall back to the primary host
-# + queriesBeforeRetry - Number of queries that are executed before the driver attempts to fall back to the primary host
-# + failoverReadOnly - Open connection to secondary host with READ ONLY mode.
-public type FailoverConfig record {|
-    FailoverServer[] failoverServers;
-    int timeBeforeRetry?;
-    int queriesBeforeRetry?;
-    boolean failoverReadOnly = true;
-|};
-
-# Configuration for failover servers
-#
-# + host - Hostname of the secondary server
-# + port - Port of the secondary server
-public type FailoverServer record {|
-    string host;
-    int port;
-|};
 
 # Represents the configuration required for task coordination.
 #
