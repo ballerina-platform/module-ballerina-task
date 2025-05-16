@@ -52,7 +52,6 @@ public class TaskListener {
 
     public void start(Environment env, BObject job, BDecimal interval, long maxCount,
                       Object startTime, Object endTime, BMap<BString, Object> policy) throws Exception {
-        Utils.disableQuartzLogs();
         getScheduler(env);
         for (String serviceName : serviceRegistry.keySet()) {
             JobDataMap jobDataMap =

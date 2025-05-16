@@ -21,6 +21,7 @@ package io.ballerina.stdlib.task.server;
 import io.ballerina.runtime.api.Runtime;
 import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.creators.ErrorCreator;
+import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.TaskConstants;
@@ -30,17 +31,18 @@ import org.quartz.JobExecutionContext;
 
 public class TaskServerJob implements Job {
 
+    public TaskServerJob() {
+    }
+
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
         Thread.startVirtualThread(() -> {
             Runtime runtime = TaskManager.getInstance().getRuntime();
             BObject service = (BObject) jobExecutionContext.getMergedJobDataMap().get(TaskConstants.JOB);
             StrandMetadata metadata = new StrandMetadata(true, null);
-            try {
-                runtime.callMethod(service, TaskConstants.EXECUTE, metadata);
-            } catch (Throwable t) {
-                Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(t));
-                runtime.callMethod(service, TaskConstants.ON_ERROR, metadata);
+            Object result = runtime.callMethod(service, TaskConstants.EXECUTE, metadata);
+            if (result instanceof BError error) {
+                Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(error));
             }
         });
     }
