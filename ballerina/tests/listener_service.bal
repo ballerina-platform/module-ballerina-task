@@ -26,11 +26,9 @@ isolated int[] errorResult = [];
 
 listener Listener singleListener = new (trigger = {
     interval: 1,
-    maxCount: 1,
-    taskPolicy: {
-        errorPolicy: LOG_AND_TERMINATE
-    }
+    maxCount: 1
 });
+
 listener Listener singleEventListener = new (trigger = {
     interval: 1,
     maxCount: 1
