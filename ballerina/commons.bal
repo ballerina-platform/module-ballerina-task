@@ -21,11 +21,68 @@ public type Service distinct service object {
     isolated function execute() returns error?;
 };
 
+# Represents the configuration required to connect to a database related to task coordination.
+public type DatabaseConfig MysqlConfig|PostgresqlConfig;
+
+# Represents the configuration required to connect to a database related to task coordination.
+#
+# + host - The hostname of the database server
+# + user - The username for the database connection
+# + password - The password for the database connection
+# + port - The port number of the database server
+# + database - The name of the database to connect to
+public type MysqlConfig record {
+  string host = "localhost";
+  string? user = ();
+  string? password = ();
+  int port = 3306;
+  string? database = ();
+};
+
+# Represents the configuration required to connect to a database related to task coordination.
+#
+# + host - The hostname of the database server
+# + user - The username for the database connection
+# + password - The password for the database connection
+# + port - The port number of the database server
+# + database - The name of the database to connect to
+public type PostgresqlConfig record {
+  string host = "localhost";
+  string? user = ();
+  string? password = ();
+  int port = 5432;
+  string? database = ();
+};
+
+# Represents the configuration required for task coordination.
+#
+# + databaseConfig - The database configuration for task coordination
+# + livenessCheckInterval - The interval (in seconds) to check the liveness of the job. Default is 30 seconds.
+# + taskId - Unique identifier for the current task
+# + groupId - The identifier for the group of tasks. This is used to identify the group of tasks that are
+#             coordinating the task. It is recommended to use a unique identifier for each group of tasks.
+# + heartbeatFrequency - The interval (in seconds) for the node to update its heartbeat. Default is one second.
+public type WarmBackupConfig record {
+    DatabaseConfig databaseConfig = <MysqlConfig>{};
+    int livenessCheckInterval = 30;
+    string taskId;
+    string groupId;
+    int heartbeatFrequency = 1;
+};
+
+# Worker count for the global scheduler
+public configurable int globalSchedulerWorkerCount = 5;
+
+# Waiting time for the global scheduler
+public configurable time:Seconds globalSchedulerWaitingTime = 5;
+
 # Listener configuration.
 # 
 # + trigger - The trigger configuration for the listener
+# + warmBackupConfig - The configuration related to task coordination
 public type ListenerConfiguration record {
-    TriggerConfiguration trigger;
+  TriggerConfiguration trigger;
+  WarmBackupConfig? warmBackupConfig = ();
 };
 
 # Recurring schedule configuration.
