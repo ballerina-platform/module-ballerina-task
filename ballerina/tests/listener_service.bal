@@ -17,17 +17,19 @@
 import ballerina/lang.runtime;
 import ballerina/test;
 import ballerina/time;
-import ballerina/io;
 
 isolated int[] oneTimeEventResults = [];
 isolated int[] recurringEventResults = [];
 isolated int[] multiServiceEventCounts = [];
 isolated int[] taskExecutionCounts = [];
-isolated int[] errorCount = [];
+isolated int[] errorResult = [];
 
 listener Listener singleListener = new (trigger = {
     interval: 1,
-    maxCount: 1
+    maxCount: 1,
+    taskPolicy: {
+        errorPolicy: LOG_AND_TERMINATE
+    }
 });
 listener Listener singleEventListener = new (trigger = {
     interval: 1,
@@ -46,10 +48,6 @@ Service firstConcurrentService = service object {
             multiServiceEventCounts.push(1);
         }
     }
-
-    isolated function onError() {
-        io:println("Error occurred in the service");
-    }
 };
 
 Service secondConcurrentService = service object {
@@ -57,10 +55,6 @@ Service secondConcurrentService = service object {
         lock {
             multiServiceEventCounts.push(1);
         }
-    }
-
-    isolated function onError() {
-        io:println("Error occurred in the service");
     }
 };
 
@@ -70,10 +64,6 @@ Service taskExecutionService = service object {
             taskExecutionCounts.push(1);
         }
     }
-
-    isolated function onError() {
-        io:println("Error occurred in the service");
-    }
 };
 
 Service singleEventService = service object {
@@ -82,21 +72,14 @@ Service singleEventService = service object {
             oneTimeEventResults.push(1);
         }
     }
-
-    isolated function onError() {
-        io:println("Error occurred in the service");
-    }
 };
 
 Service errorService = service object {
-    isolated function execute() {
-        panic error("Error occurred in the service");
-    }
-
-    isolated function onError() {
+    isolated function execute() returns error? {
         lock {
-            errorCount.push(1);
+            errorResult.push(1);
         }
+        return error("Error occurred in the service");
     }
 };
 
@@ -105,10 +88,6 @@ Service periodicEventService = service object {
         lock {
             recurringEventResults.push(recurringEventResults.length() + 1);
         }
-    }
-
-    isolated function onError() {
-        io:println("Error occurred in the service");
     }
 };
 
@@ -130,13 +109,14 @@ function testOneTimeTaskWithListener() returns error? {
     groups: ["listener"]
 }
 function testErrorsWithListener() returns error? {
-    check singleEventListener.attach(errorService);
-    check singleEventListener.'start();
-    runtime:registerListener(singleEventListener);
-    runtime:sleep(10);
+    check periodicEventListener.attach(errorService);
+    check periodicEventListener.'start();
+    runtime:registerListener(periodicEventListener);
+    runtime:sleep(3);
     lock {
-        test:assertEquals(errorCount.length(), 1);
+        test:assertEquals(errorResult.length(), 1);
     }
+    check periodicEventListener.gracefulStop();
 }
 
 @test:Config {
