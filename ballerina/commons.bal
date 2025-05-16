@@ -41,7 +41,10 @@ public type TriggerConfiguration record {|
     int maxCount = -1;
     time:Civil startTime?;
     time:Civil endTime?;
-    TaskPolicy taskPolicy = {};
+    TaskPolicy taskPolicy = {
+        errorPolicy: LOG_AND_TERMINATE,
+        waitingPolicy: WAIT
+    };
 |};
 
 # A read-only record consisting of a unique identifier for a created job.
