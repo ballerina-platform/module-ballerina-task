@@ -18,13 +18,13 @@ import ballerina/jballerina.java;
 import ballerina/uuid;
 
 # Listener for task scheduling.
-public class Listener {
+public isolated class Listener {
     
     # Initializes the task 'listener.
     # 
     # + config - The 'listener configuration
     public isolated function init(*ListenerConfiguration config) returns Error? {
-        check initListener(self, config);
+        check self.initListener(config);
     }
     
     # Attaches a service to the 'listener.
@@ -66,11 +66,11 @@ public class Listener {
         name: "gracefulStop",
         'class: "io.ballerina.stdlib.task.listener.ListenerAction"
     } external;
-}
 
-isolated function initListener(Listener 'listener, ListenerConfiguration config) returns Error? = @java:Method {
-    'class: "io.ballerina.stdlib.task.listener.ListenerAction"
-} external;
+    isolated function initListener(ListenerConfiguration config) returns Error? = @java:Method {
+        'class: "io.ballerina.stdlib.task.listener.ListenerAction"
+    } external;
+}
 
 isolated function attachService(Listener 'listener, Service s, string serviceId) returns Error? = @java:Method {
     'class: "io.ballerina.stdlib.task.listener.ListenerAction"
