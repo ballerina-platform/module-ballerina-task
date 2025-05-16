@@ -122,7 +122,7 @@ public class TaskServerJob implements Job {
 
     private void executeJob(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext) {
         ObjectType type = (ObjectType) TypeUtils.getReferredType(TypeUtils.getType(job));
-        boolean isConcurrentSafe = type.isIsolated() && type.isIsolated(TaskConstants.ON_TRIGGER);
+        boolean isConcurrentSafe = type.isIsolated() && type.isIsolated(TaskConstants.EXECUTE);
         StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
         Object result = runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
         if (result instanceof BError error) {
