@@ -1,7 +1,7 @@
 [package]
 org = "ballerina"
 name = "task"
-version = "2.12.0"
+version = "2.10.0"
 authors = ["Ballerina"]
 keywords = ["task", "job", "schedule"]
 repository = "https://github.com/ballerina-platform/module-ballerina-task"
@@ -15,8 +15,8 @@ graalvmCompatible = true
 [[platform.java21.dependency]]
 groupId = "io.ballerina.stdlib"
 artifactId = "task-native"
-version = "2.12.0"
-path = "../native/build/libs/task-native-2.12.0-SNAPSHOT.jar"
+version = "2.10.0"
+path = "../native/build/libs/task-native-2.10.0-SNAPSHOT.jar"
 
 [[platform.java21.dependency]]
 groupId="org.quartz-scheduler"
