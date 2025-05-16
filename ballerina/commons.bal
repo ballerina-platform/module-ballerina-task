@@ -17,10 +17,6 @@
 import ballerina/time;
 import ballerina/crypto;
 
-configurable int maxOpenConnections = 15;
-configurable decimal maxConnectionLifeTime = 1800.0;
-configurable int minIdleConnections = 15;
-
 # Represents the task service that provides functionality to manage and execute scheduled tasks.
 public type Service distinct service object {
     isolated function execute() returns error?;
@@ -37,7 +33,6 @@ public type DatabaseConfig MysqlConfig|PostgresqlConfig;
 # + port - The port number of the database server
 # + database - The name of the database to connect to
 # + options - Additional options for the database connection
-# + connectionPool - The connection pool configuration
 public type MysqlConfig record {
   string host = "localhost";
   string? user = ();
@@ -45,7 +40,6 @@ public type MysqlConfig record {
   int port = 3306;
   string? database = ();
   Options? options = ();
-  ConnectionPool? connectionPool = ();
 };
 
 # Represents the configuration required to connect to a database related to task coordination.
@@ -56,7 +50,6 @@ public type MysqlConfig record {
 # + port - The port number of the database server
 # + database - The name of the database to connect to
 # + options - Additional options for the database connection
-# + connectionPool - The connection pool configuration
 public type PostgresqlConfig record {
   string host = "localhost";
   string? user = ();
@@ -64,27 +57,7 @@ public type PostgresqlConfig record {
   int port = 5432;
   string? database = ();
   Options? options = ();
-  ConnectionPool? connectionPool = ();
 };
-
-# Represents the properties, which are used to configure a DB connection pool.
-# Default values of the fields can be set through the configuration API.
-#
-# + maxOpenConnections - The maximum number of open connections that the pool is allowed to have.
-#                        Includes both idle and in-use connections. The default value is 15. This can be changed through
-#                        the configuration API with the `ballerina.sql.maxOpenConnections` key
-# + maxConnectionLifeTime - The maximum lifetime (in seconds) of a connection in the pool. The default value is 1800
-#                           seconds (30 minutes). A value of 0 indicates an unlimited maximum lifetime (infinite lifetime).
-#                           The minimum allowed value is 30 seconds. This can be changed through the configuration API
-#                           with the `ballerina.sql.maxConnectionLifeTime` key.
-# + minIdleConnections - The minimum number of idle connections that the pool tries to maintain. The default value
-#                        is the same as `maxOpenConnections` and it can be changed through the configuration
-#                        API with the `ballerina.sql.minIdleConnections` key
-public type ConnectionPool record {|
-    int maxOpenConnections = maxOpenConnections;
-    decimal maxConnectionLifeTime = maxConnectionLifeTime;
-    int minIdleConnections = minIdleConnections;
-|};
 
 # Provides a set of additional configurations related to the database connection.
 #
