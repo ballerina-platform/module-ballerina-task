@@ -20,7 +20,9 @@ package io.ballerina.stdlib.task.objects;
 
 import io.ballerina.runtime.api.Environment;
 import io.ballerina.runtime.api.Runtime;
+import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
+import io.ballerina.stdlib.task.coordination.TokenAcquisition;
 import io.ballerina.stdlib.task.exceptions.SchedulingException;
 import io.ballerina.stdlib.task.utils.TaskConstants;
 import io.ballerina.stdlib.task.utils.Utils;
@@ -42,6 +44,11 @@ import static io.ballerina.stdlib.task.utils.TaskConstants.JOB;
  * Task manager to handle schedulers in ballerina tasks.
  */
 public class TaskManager {
+    public static final String TOKEN_HOLDER = "tokenholder";
+    public static final String TASK_ID = "taskId";
+    public static final String GROUP_ID = "groupId";
+    public static final String DATABASE_CONFIG = "databaseConfig";
+    public static final String LIVENESS_CHECK_INTERVAL = "livenessCheckInterval";
     private Scheduler scheduler;
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
@@ -172,6 +179,22 @@ public class TaskManager {
         this.serviceTriggerInfoMap.put(jobId, trigger);
         this.serviceInfoMap.put(jobId, job);
         startScheduler();
+    }
+
+    public void scheduleListenerIntervalJobWithTokenCheck(JobDataMap jobDataMap, long interval, long maxCount,
+                                                          Object startTime, Object endTime, String waitingPolicy,
+                                                          String jobId, BMap response, BObject service)
+            throws SchedulerException {
+        jobDataMap.put(JOB, service);
+        jobDataMap.put(TOKEN_HOLDER, response.getBooleanValue(TokenAcquisition.TOKEN_HOLDER));
+        jobDataMap.put(TASK_ID, response.getStringValue(TokenAcquisition.TASK_ID));
+        jobDataMap.put(GROUP_ID, response.getStringValue(TokenAcquisition.GROUP_ID));
+        jobDataMap.put(DATABASE_CONFIG, response.get(TokenAcquisition.DATABASE_CONFIG));
+        jobDataMap.put(LIVENESS_CHECK_INTERVAL, response.get(TokenAcquisition.LIVENESS_CHECK_INTERVAL));
+        JobDetail job = Utils.createListenerJob(jobDataMap, jobId);
+        Trigger trigger = Utils.getIntervalTrigger(interval, maxCount, startTime, endTime, waitingPolicy,
+                TaskConstants.TRIGGER_ID);
+        scheduleListenerJob(job, trigger, jobId);
     }
 
     private void startScheduler () throws SchedulerException {
