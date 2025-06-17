@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS token_holder;
 CREATE TABLE token_holder (
     task_id VARCHAR(255) NOT NULL,
