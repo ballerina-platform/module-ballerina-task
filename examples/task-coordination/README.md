@@ -141,9 +141,10 @@ Ensure your PostgreSQL or MySQL database is set up and accessible from all nodes
    cd examples/task-coordination
    ```
 
-2. Start the PostgreSQL server.
+2. Start the PostgreSQL server
 
    ```bash
+   cd resources
    docker compose up
    ```
 
@@ -156,16 +157,18 @@ Ensure your PostgreSQL or MySQL database is set up and accessible from all nodes
    livenessCheckInterval = 6
 
    [databaseConfig]
-    host = "localhost"
-    user = "root"
-    password = "password"
-    port = 5432
-    database = "testdb"
+   host = "localhost"
+   user = "root"
+   password = "password"
+   port = 5432
+   database = "testdb"
    ```
 
-4. Clone the Ballerina application (`orders-task`) on multiple nodes and set unique values for the task id.
+4. Clone the Ballerina program on multiple nodes.
 
-5. Run the application
+5. Make sure to set unique values for the task id on each node.
+
+6. Start each task listener on every node.
 
    ```bash
    bal run
