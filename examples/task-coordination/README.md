@@ -1,4 +1,4 @@
-# Task Coordination in Ballerina
+# Task coordination in Ballerina
 
 ## Overview
 
@@ -31,7 +31,7 @@ public type WarmBackupConfig record {
 public type DatabaseConfig MysqlConfig|PostgresqlConfig;
 ```
 
-### Configuration Parameters
+### Configuration parameters
 
 | Parameter | Description |
 |-----------|-------------|
@@ -41,7 +41,7 @@ public type DatabaseConfig MysqlConfig|PostgresqlConfig;
 | **groupId** | Identifier for the group of nodes coordinating the task |
 | **heartbeatFrequency** | Interval (in seconds) for the node to update its heartbeat |
 
-### Database Configuration
+### Database configuration
 
 The `databaseConfig` can be either MySQL or PostgreSQL. This is defined using a union type as `DatabaseConfig`. Users can choose either `task:MysqlConfig` or `task:PostgresqlConfig` based on their preferred database.
 
@@ -69,9 +69,9 @@ type MysqlConfig record {
 };
 ```
 
-### Setting Up Task Coordination
+### Setting Up task coordination
 
-1. **Create a Task Listener**
+1. **Create a task listener**
 
    First, set up a task listener with both scheduling parameters and coordination configuration:
 
@@ -91,7 +91,7 @@ type MysqlConfig record {
    );
    ```
 
-2. **Implement Service Logic**
+2. **Implement service logic**
 
    Create a service with your business logic in the `execute` method.
 
@@ -107,7 +107,7 @@ type MysqlConfig record {
 
 On a different node, deploy the same code but with a different value for `taskId`:
 
-### Database Schema
+### Database schema
 
 The task coordination system requires two essential tables that must be created before starting your application.
 
