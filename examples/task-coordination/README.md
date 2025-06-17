@@ -2,9 +2,9 @@
 
 ## Overview
 
-This repository demonstrates the task coordination capabilities in Ballerina, designed for distributed systems where high availability is necessary. The coordination mechanism ensures that when tasks are running on multiple nodes, only one node is active while others remain on standby. If the active node fails, one of the standby nodes automatically takes over, maintaining system availability.
+This example demonstrates the task coordination capabilities in Ballerina, designed for distributed systems where high availability is necessary. The coordination mechanism ensures that when tasks are running on multiple nodes, only one node is active while others remain on standby. If the active node fails, one of the standby nodes automatically takes over, maintaining system availability.
 
-This repository implements an RDBMS-based coordination system that handles system availability across multiple nodes, improving the reliability and uptime of distributed applications.
+This example implements an RDBMS-based coordination system that handles system availability across multiple nodes, improving the reliability and uptime of distributed applications.
 
 ## Design
 

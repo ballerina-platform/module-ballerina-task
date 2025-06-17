@@ -20,6 +20,12 @@ import ballerina/time;
 import ballerinax/postgresql;
 import ballerinax/postgresql.driver as _;
 
+configurable decimal interval = ?;
+configurable int maxCount = ?;
+configurable time:Civil startTime = ?;
+configurable time:Civil endTime = ?;
+configurable task:TaskPolicy taskPolicy = ?;
+
 configurable task:PostgresqlConfig databaseConfig = ?;
 configurable int livenessCheckInterval = ?;
 configurable int heartbeatFrequency = ?;
@@ -32,11 +38,11 @@ final postgresql:Client dbClient = check new (username = databaseConfig.user, pa
 
 listener task:Listener taskListener = new (
     trigger = {
-        interval: 4,
-        maxCount: 20,
-        startTime: time:utcToCivil(time:utcAddSeconds(currentUtc, 5)),
-        endTime: time:utcToCivil(time:utcAddSeconds(currentUtc, 60)),
-        taskPolicy: {}
+        interval,
+        maxCount,
+        startTime,
+        endTime,
+        taskPolicy
     },
     warmBackupConfig = {
         databaseConfig,
