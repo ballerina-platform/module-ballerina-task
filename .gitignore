@@ -39,4 +39,5 @@ velocity.log*
 *Ballerina.lock
 
 # examples Files
+Config.toml
 *Dependencies.toml
