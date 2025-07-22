@@ -23,6 +23,7 @@ isolated int[] recurringEventResults = [];
 isolated int[] multiServiceEventCounts = [];
 isolated int[] taskExecutionCounts = [];
 isolated int[] errorResult = [];
+isolated int[] eventResults = [];
 
 listener Listener singleListener = new (trigger = {
     interval: 1,
@@ -82,12 +83,54 @@ Service errorService = service object {
 };
 
 Service periodicEventService = service object {
-    isolated function execute() {
+    isolated function execute() returns error? {
         lock {
             recurringEventResults.push(recurringEventResults.length() + 1);
         }
     }
 };
+
+Service periodicEventServiceWithErrors = service object {
+    isolated function execute() returns error? {
+        lock {
+            eventResults.push(eventResults.length() + 1);
+            return error("STANDARD_ERROR");
+        }
+    }
+};
+
+listener Listener retryOneTimeListener = new (trigger = {
+    interval: 1,
+    maxCount: 1,
+    retryConfig: {
+        maxAttempts: 5, 
+        backoffStrategy: EXPONENTIAL, 
+        retryInterval: 1, 
+        maxInterval: 20
+    }
+});
+
+listener Listener retryListener = new (trigger = {
+    interval: 25,
+    maxCount: 2,
+    retryConfig: {
+        maxAttempts: 5, 
+        backoffStrategy: FIXED, 
+        retryInterval: 1, 
+        maxInterval: 20
+    }
+});
+
+listener Listener retryListenerWithShortInterval = new (trigger = {
+    interval: 1,
+    maxCount: 2,
+    retryConfig: {
+        maxAttempts: 5, 
+        backoffStrategy: EXPONENTIAL, 
+        retryInterval: 2, 
+        maxInterval: 20
+    }
+});
 
 @test:Config {
     groups: ["listener"]
@@ -239,4 +282,49 @@ function testConfigureWorkerPoolWithListeners() returns error? {
     Error? result = configureWorkerPool(10, 100);
     test:assertTrue(result !is Error);
     check singleListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testRetryConfigurationsWithListeners() returns error? {
+    check retryOneTimeListener.attach(periodicEventServiceWithErrors);
+    check retryOneTimeListener.'start();
+    runtime:registerListener(retryOneTimeListener);
+    runtime:sleep(5);
+    lock {
+        test:assertEquals(eventResults.length(), 1);
+        eventResults = [];
+    }
+    check retryOneTimeListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testRetryConfigurationsWithListenersMultipleTimes() returns error? {
+    check retryListener.attach(periodicEventServiceWithErrors);
+    check retryListener.'start();
+    runtime:registerListener(retryListener);
+    runtime:sleep(15);
+    lock {
+        test:assertEquals(eventResults.length(), 6);
+        eventResults = [];
+    }
+    check retryListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testRetryConfigurationsWithListenersWithShortInterval() returns error? {
+    check retryListenerWithShortInterval.attach(periodicEventServiceWithErrors);
+    check retryListenerWithShortInterval.'start();
+    runtime:registerListener(retryListenerWithShortInterval);
+    runtime:sleep(5);
+    lock {
+        test:assertEquals(eventResults.length(), 1);
+        eventResults = [];
+    }
+    check retryListenerWithShortInterval.gracefulStop();
 }
