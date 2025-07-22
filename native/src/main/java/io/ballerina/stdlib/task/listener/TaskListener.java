@@ -42,6 +42,12 @@ import static io.ballerina.stdlib.task.coordination.TokenAcquisition.GROUP_ID;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.HEARTBEAT_FREQUENCY;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.LIVENESS_CHECK_INTERVAL;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.TASK_ID;
+import static io.ballerina.stdlib.task.objects.TaskManager.BACKOFF_STRATEGY;
+import static io.ballerina.stdlib.task.objects.TaskManager.BASE_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.MAX_ATTEMPTS;
+import static io.ballerina.stdlib.task.objects.TaskManager.MAX_COUNT;
+import static io.ballerina.stdlib.task.objects.TaskManager.MAX_INTERVAL;
 
 public class TaskListener {
     private static final String VALUE = "1000";
@@ -58,11 +64,20 @@ public class TaskListener {
     }
 
     public void start(Environment env, BObject job, BDecimal interval, long maxCount,
-                      Object startTime, Object endTime, BMap<BString, Object> policy) throws Exception {
+                      Object startTime, Object endTime, BMap<BString, Object> policy,
+                      Object retryConfig) throws Exception {
         getScheduler(env);
         for (String serviceName : serviceRegistry.keySet()) {
             JobDataMap jobDataMap =
                     getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(), serviceName);
+            if (retryConfig instanceof BMap<?, ?> config) {
+                jobDataMap.put(MAX_ATTEMPTS, config.getIntValue(ListenerAction.MAX_ATTEMPTS));
+                jobDataMap.put(BACKOFF_STRATEGY, config.getStringValue(ListenerAction.BACKOFF_STRATEGY));
+                jobDataMap.put(BASE_INTERVAL, config.getIntValue(ListenerAction.BASE_INTERVAL));
+                jobDataMap.put(MAX_INTERVAL, config.getIntValue(ListenerAction.MAX_INTERVAL));
+            }
+            jobDataMap.put(MAX_COUNT, maxCount);
+            jobDataMap.put(INTERVAL, interval);
             BObject service = serviceRegistry.get(serviceName);
             this.taskManager.scheduleListenerIntervalJob(jobDataMap,
                     (interval.decimalValue().multiply(new BigDecimal(VALUE))).longValue(), maxCount, startTime,
@@ -72,11 +87,19 @@ public class TaskListener {
 
     public void start(Environment env, BObject job, BDecimal interval, long maxCount,
                       Object startTime, Object endTime, BMap<BString, Object> policy,
-                      BMap warmBackupConfig) throws Exception {
+                      BMap warmBackupConfig, Object retryConfig) throws Exception {
         getScheduler(env);
         for (String serviceName : serviceRegistry.keySet()) {
             JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
                     serviceName);
+            if (retryConfig instanceof BMap<?, ?> config) {
+                jobDataMap.put(MAX_ATTEMPTS, config.getIntValue(ListenerAction.MAX_ATTEMPTS));
+                jobDataMap.put(BACKOFF_STRATEGY, config.getStringValue(ListenerAction.BACKOFF_STRATEGY));
+                jobDataMap.put(BASE_INTERVAL, config.getIntValue(ListenerAction.BASE_INTERVAL));
+                jobDataMap.put(MAX_INTERVAL, config.getIntValue(ListenerAction.MAX_INTERVAL));
+            }
+            jobDataMap.put(MAX_COUNT, maxCount);
+            jobDataMap.put(INTERVAL, interval);
             BObject service = serviceRegistry.get(serviceName);
             BMap<Object, Object> databaseConfig = warmBackupConfig.getMapValue(DATABASE_CONFIG);
             BString id = warmBackupConfig.getStringValue(TASK_ID);
