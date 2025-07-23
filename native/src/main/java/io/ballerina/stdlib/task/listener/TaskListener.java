@@ -70,14 +70,7 @@ public class TaskListener {
         for (String serviceName : serviceRegistry.keySet()) {
             JobDataMap jobDataMap =
                     getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(), serviceName);
-            if (retryConfig instanceof BMap<?, ?> config) {
-                jobDataMap.put(MAX_ATTEMPTS, config.getIntValue(ListenerAction.MAX_ATTEMPTS));
-                jobDataMap.put(BACKOFF_STRATEGY, config.getStringValue(ListenerAction.BACKOFF_STRATEGY));
-                jobDataMap.put(BASE_INTERVAL, config.getIntValue(ListenerAction.BASE_INTERVAL));
-                jobDataMap.put(MAX_INTERVAL, config.getIntValue(ListenerAction.MAX_INTERVAL));
-            }
-            jobDataMap.put(MAX_COUNT, maxCount);
-            jobDataMap.put(INTERVAL, interval);
+            extractRetryConfigs(interval, maxCount, retryConfig, jobDataMap);
             BObject service = serviceRegistry.get(serviceName);
             this.taskManager.scheduleListenerIntervalJob(jobDataMap,
                     (interval.decimalValue().multiply(new BigDecimal(VALUE))).longValue(), maxCount, startTime,
@@ -92,14 +85,7 @@ public class TaskListener {
         for (String serviceName : serviceRegistry.keySet()) {
             JobDataMap jobDataMap = getJobDataMap(job, ((BString) policy.get(TaskConstants.ERR_POLICY)).getValue(),
                     serviceName);
-            if (retryConfig instanceof BMap<?, ?> config) {
-                jobDataMap.put(MAX_ATTEMPTS, config.getIntValue(ListenerAction.MAX_ATTEMPTS));
-                jobDataMap.put(BACKOFF_STRATEGY, config.getStringValue(ListenerAction.BACKOFF_STRATEGY));
-                jobDataMap.put(BASE_INTERVAL, config.getIntValue(ListenerAction.BASE_INTERVAL));
-                jobDataMap.put(MAX_INTERVAL, config.getIntValue(ListenerAction.MAX_INTERVAL));
-            }
-            jobDataMap.put(MAX_COUNT, maxCount);
-            jobDataMap.put(INTERVAL, interval);
+            extractRetryConfigs(interval, maxCount, retryConfig, jobDataMap);
             BObject service = serviceRegistry.get(serviceName);
             BMap<Object, Object> databaseConfig = warmBackupConfig.getMapValue(DATABASE_CONFIG);
             BString id = warmBackupConfig.getStringValue(TASK_ID);
@@ -113,6 +99,18 @@ public class TaskListener {
                     endTime, ((BString) policy.get(TaskConstants.WAITING_POLICY)).getValue(),
                     serviceName, response, service);
         }
+    }
+
+    private static void extractRetryConfigs(BDecimal interval,
+                                            long maxCount, Object retryConfig, JobDataMap jobDataMap) {
+        if (retryConfig instanceof BMap<?, ?> config) {
+            jobDataMap.put(MAX_ATTEMPTS, config.getIntValue(ListenerAction.MAX_ATTEMPTS));
+            jobDataMap.put(BACKOFF_STRATEGY, config.getStringValue(ListenerAction.BACKOFF_STRATEGY));
+            jobDataMap.put(BASE_INTERVAL, config.getIntValue(ListenerAction.BASE_INTERVAL));
+            jobDataMap.put(MAX_INTERVAL, config.getIntValue(ListenerAction.MAX_INTERVAL));
+        }
+        jobDataMap.put(MAX_COUNT, maxCount);
+        jobDataMap.put(INTERVAL, interval);
     }
 
     public Map<String, BObject> getServices() {
