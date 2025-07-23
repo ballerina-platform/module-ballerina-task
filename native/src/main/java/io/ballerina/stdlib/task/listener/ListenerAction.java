@@ -44,7 +44,7 @@ public class ListenerAction {
     public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
     public static final BString MAX_ATTEMPTS = StringUtils.fromString("maxAttempts");
     public static final BString BACKOFF_STRATEGY = StringUtils.fromString("backoffStrategy");
-    public static final BString BASE_INTERVAL = StringUtils.fromString("retryInterval");
+    public static final BString RETRY_INTERVAL = StringUtils.fromString("retryInterval");
     public static final BString MAX_INTERVAL = StringUtils.fromString("maxInterval");
 
     private ListenerAction() { }

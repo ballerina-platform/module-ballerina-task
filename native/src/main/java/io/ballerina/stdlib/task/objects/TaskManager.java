@@ -53,7 +53,7 @@ public class TaskManager {
     public static final String MAX_COUNT = "maxCount";
     public static final String MAX_ATTEMPTS = "maxAttempts";
     public static final String BACKOFF_STRATEGY = "backoffStrategy";
-    public static final String BASE_INTERVAL = "retryInterval";
+    public static final String RETRY_INTERVAL = "retryInterval";
     public static final String MAX_INTERVAL = "maxInterval";
 
     private Scheduler scheduler;

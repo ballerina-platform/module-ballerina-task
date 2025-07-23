@@ -43,7 +43,7 @@ import static io.ballerina.stdlib.task.coordination.TokenAcquisition.HEARTBEAT_F
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.LIVENESS_CHECK_INTERVAL;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.TASK_ID;
 import static io.ballerina.stdlib.task.objects.TaskManager.BACKOFF_STRATEGY;
-import static io.ballerina.stdlib.task.objects.TaskManager.BASE_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.RETRY_INTERVAL;
 import static io.ballerina.stdlib.task.objects.TaskManager.INTERVAL;
 import static io.ballerina.stdlib.task.objects.TaskManager.MAX_ATTEMPTS;
 import static io.ballerina.stdlib.task.objects.TaskManager.MAX_COUNT;
@@ -106,7 +106,7 @@ public class TaskListener {
         if (retryConfig instanceof BMap<?, ?> config) {
             jobDataMap.put(MAX_ATTEMPTS, config.getIntValue(ListenerAction.MAX_ATTEMPTS));
             jobDataMap.put(BACKOFF_STRATEGY, config.getStringValue(ListenerAction.BACKOFF_STRATEGY));
-            jobDataMap.put(BASE_INTERVAL, config.getIntValue(ListenerAction.BASE_INTERVAL));
+            jobDataMap.put(RETRY_INTERVAL, config.getIntValue(ListenerAction.RETRY_INTERVAL));
             jobDataMap.put(MAX_INTERVAL, config.getIntValue(ListenerAction.MAX_INTERVAL));
         }
         jobDataMap.put(MAX_COUNT, maxCount);

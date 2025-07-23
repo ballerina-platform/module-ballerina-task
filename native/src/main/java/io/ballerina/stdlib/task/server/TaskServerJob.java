@@ -44,15 +44,21 @@ import java.util.Map;
 
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.attemptTokenAcquisition;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.hasActiveToken;
+import static io.ballerina.stdlib.task.objects.TaskManager.BACKOFF_STRATEGY;
 import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;
 import static io.ballerina.stdlib.task.objects.TaskManager.INTERVAL;
 import static io.ballerina.stdlib.task.objects.TaskManager.LIVENESS_CHECK_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.MAX_ATTEMPTS;
 import static io.ballerina.stdlib.task.objects.TaskManager.MAX_COUNT;
+import static io.ballerina.stdlib.task.objects.TaskManager.MAX_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.RETRY_INTERVAL;
 import static io.ballerina.stdlib.task.objects.TaskManager.TASK_ID;
 import static io.ballerina.stdlib.task.objects.TaskManager.TOKEN_HOLDER;
 
 public class TaskServerJob implements Job {
     public static final String GROUP_ID = "groupId";
+    public static final String EXPONENTIAL_STRATEGY = "EXPONENTIAL";
+    public static final String LINEAR_STRATEGY = "LINEAR";
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
@@ -145,10 +151,10 @@ public class TaskServerJob implements Job {
 
     private Object executeWithRetry(BObject job, Runtime runtime,
                                     Map<String, Object> jobDataMap, StrandMetadata metadata) {
-        Long maxAttempts = (Long) jobDataMap.get("maxAttempts");
-        String backoffStrategy = jobDataMap.get("backoffStrategy").toString();
-        Long retryInterval = (Long) jobDataMap.get("retryInterval");
-        Long maxInterval = (Long) jobDataMap.get("maxInterval");
+        Long maxAttempts = (Long) jobDataMap.get(MAX_ATTEMPTS);
+        String backoffStrategy = jobDataMap.get(BACKOFF_STRATEGY).toString();
+        Long retryInterval = (Long) jobDataMap.get(RETRY_INTERVAL);
+        Long maxInterval = (Long) jobDataMap.get(MAX_INTERVAL);
         Object result = null;
         long currentInterval = retryInterval;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
@@ -159,7 +165,7 @@ public class TaskServerJob implements Job {
             if (attempt < maxAttempts) {
                 setTimeout(currentInterval);
                 currentInterval = calculateNextInterval(backoffStrategy, currentInterval, retryInterval, maxInterval);
-                BDecimal taskInterval = (BDecimal) jobDataMap.get("interval");
+                BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
                 if (currentInterval > taskInterval.intValue()) {
                     break;
                 }
@@ -171,8 +177,8 @@ public class TaskServerJob implements Job {
     private long calculateNextInterval(String backoffStrategy,
                                        long currentInterval, long retryInterval, long maxInterval) {
         return switch (backoffStrategy) {
-            case "EXPONENTIAL" -> Math.min(currentInterval * 2, maxInterval);
-            case "LINEAR" -> currentInterval + retryInterval;
+            case EXPONENTIAL_STRATEGY -> Math.min(currentInterval * 2, maxInterval);
+            case LINEAR_STRATEGY -> currentInterval + retryInterval;
             default -> currentInterval;
         };
     }
@@ -183,14 +189,14 @@ public class TaskServerJob implements Job {
             return false;
         }
         BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
-        if (!jobDataMap.containsKey("retryInterval")) {
+        if (!jobDataMap.containsKey(RETRY_INTERVAL)) {
             return false;
         }
-        Long retryInterval = (Long) jobDataMap.get("retryInterval");
+        Long retryInterval = (Long) jobDataMap.get(RETRY_INTERVAL);
         if (retryInterval > taskInterval.intValue()) {
             return false;
         }
-        Long maxAttempts = (Long) jobDataMap.get("maxAttempts");
+        Long maxAttempts = (Long) jobDataMap.get(MAX_ATTEMPTS);
         return maxAttempts != null && maxAttempts > 0;
     }
 
