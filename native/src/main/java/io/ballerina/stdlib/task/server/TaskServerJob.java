@@ -156,18 +156,23 @@ public class TaskServerJob implements Job {
         Long retryInterval = (Long) jobDataMap.get(RETRY_INTERVAL);
         Long maxInterval = (Long) jobDataMap.get(MAX_INTERVAL);
         Object result = null;
+        long totalElapsedTime = 0;
         long currentInterval = retryInterval;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
+            setTimeout(currentInterval);
+            totalElapsedTime += currentInterval;
             if (currentInterval > maxInterval || currentInterval >= taskInterval.intValue()) {
                 break;
             }
-            setTimeout(currentInterval);
+            if (totalElapsedTime >= maxInterval) {
+                break;
+            }
             result = runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
+            currentInterval = calculateNextInterval(backoffStrategy, currentInterval, retryInterval, maxInterval);
             if (!(result instanceof BError)) {
                 break;
             }
-            currentInterval = calculateNextInterval(backoffStrategy, currentInterval, retryInterval, maxInterval);
         }
         return result;
     }
@@ -176,8 +181,7 @@ public class TaskServerJob implements Job {
                                        long currentInterval, long retryInterval, long maxInterval) {
         return switch (backoffStrategy) {
             case EXPONENTIAL_STRATEGY -> Math.min(currentInterval * 2, maxInterval);
-            case FIXED_STRATEGY -> retryInterval;
-            default -> currentInterval;
+            default -> retryInterval;
         };
     }
 
