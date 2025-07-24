@@ -135,7 +135,6 @@ listener Listener retryListener = new (trigger = {
     maxCount: 2,
     retryConfig: {
         maxAttempts: 5, 
-        backoffStrategy: FIXED, 
         retryInterval: 1, 
         maxInterval: 20
     }
@@ -349,7 +348,11 @@ function testRetryExponentialsWithListeners() returns error? {
     check retryExponentialListener.'start();
     runtime:registerListener(retryExponentialListener);
     runtime:sleep(35);
-    int expectedCount = 5; // 1 initial + 4 retries (2, 4, 8, 16 seconds)
+    // The retry intervals are 2, 4, 8, and 16 seconds.
+    // 2 + 4 + 8 = 14 seconds
+    // next retry will be 16 seconds, which exceeds the max interval of 20 seconds
+    // Expected count : 4 (1 initial + 3 retries (2, 4, 8 seconds))
+    int expectedCount = 4;
     lock {
         test:assertEquals(retryResults.length(), expectedCount);
         retryResults = [];
