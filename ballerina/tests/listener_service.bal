@@ -24,6 +24,8 @@ isolated int[] multiServiceEventCounts = [];
 isolated int[] taskExecutionCounts = [];
 isolated int[] errorResult = [];
 isolated int[] eventResults = [];
+isolated int[] retryResults = [];
+isolated int[] singleRetryResults = [];
 
 listener Listener singleListener = new (trigger = {
     interval: 1,
@@ -99,6 +101,24 @@ Service periodicEventServiceWithErrors = service object {
     }
 };
 
+Service singleEventServiceWithErrors = service object {
+    isolated function execute() returns error? {
+        lock {
+            singleRetryResults.push(singleRetryResults.length() + 1);
+            return error("STANDARD_ERROR");
+        }
+    }
+};
+
+Service retryServiceWithErrors = service object {
+    isolated function execute() returns error? {
+        lock {
+            retryResults.push(retryResults.length() + 1);
+            return error("STANDARD_ERROR");
+        }
+    }
+};
+
 listener Listener retryOneTimeListener = new (trigger = {
     interval: 1,
     maxCount: 1,
@@ -128,6 +148,28 @@ listener Listener retryListenerWithShortInterval = new (trigger = {
         maxAttempts: 5, 
         backoffStrategy: EXPONENTIAL, 
         retryInterval: 2, 
+        maxInterval: 20
+    }
+});
+
+listener Listener retryExponentialListener = new (trigger = {
+    interval: 300,
+    maxCount: 1,
+    retryConfig: {
+        maxAttempts: 5, 
+        backoffStrategy: EXPONENTIAL, 
+        retryInterval: 2, 
+        maxInterval: 20
+    }
+});
+
+listener Listener retryExceedingIntervalListener = new (trigger = {
+    interval: 300,
+    maxCount: 1,
+    retryConfig: {
+        maxAttempts: 5, 
+        backoffStrategy: EXPONENTIAL, 
+        retryInterval: 21, 
         maxInterval: 20
     }
 });
@@ -288,15 +330,47 @@ function testConfigureWorkerPoolWithListeners() returns error? {
     groups: ["listener", "retry"]
 }
 function testRetryConfigurationsWithListeners() returns error? {
-    check retryOneTimeListener.attach(periodicEventServiceWithErrors);
+    check retryOneTimeListener.attach(singleEventServiceWithErrors);
     check retryOneTimeListener.'start();
     runtime:registerListener(retryOneTimeListener);
     runtime:sleep(5);
     lock {
-        test:assertEquals(eventResults.length(), 1);
-        eventResults = [];
+        test:assertEquals(singleRetryResults.length(), 1);
+        singleRetryResults = [];
     }
     check retryOneTimeListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testRetryExponentialsWithListeners() returns error? {
+    check retryExponentialListener.attach(retryServiceWithErrors);
+    check retryExponentialListener.'start();
+    runtime:registerListener(retryExponentialListener);
+    runtime:sleep(35);
+    int expectedCount = 5; // 1 initial + 4 retries (2, 4, 8, 16 seconds)
+    lock {
+        test:assertEquals(retryResults.length(), expectedCount);
+        retryResults = [];
+    }
+    check retryExponentialListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testRetryExceedingIntervalWithListeners() returns error? {
+    check retryExceedingIntervalListener.attach(periodicEventServiceWithErrors);
+    check retryExceedingIntervalListener.'start();
+    runtime:registerListener(retryExceedingIntervalListener);
+    runtime:sleep(5);
+    int expectedCount = 1; 
+    lock {
+        test:assertEquals(eventResults.length(), expectedCount);
+        eventResults = [];
+    }
+    check retryExceedingIntervalListener.gracefulStop();
 }
 
 @test:Config {
