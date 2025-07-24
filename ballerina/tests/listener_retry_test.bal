@@ -74,6 +74,17 @@ listener Listener retryExceedingIntervalListener = new (trigger = {
     }
 });
 
+listener Listener retryExceedingRetryIntervalListener = new (trigger = {
+    interval: 20,
+    maxCount: 1,
+    retryConfig: {
+        maxAttempts: 5, 
+        backoffStrategy: EXPONENTIAL, 
+        retryInterval: 21, 
+        maxInterval: 20
+    }
+});
+
 listener Listener retryFixedListener = new (trigger = {
     interval: 6,
     maxCount: 2,
@@ -120,6 +131,27 @@ Service retryServiceWithErrors = service object {
     }
 };
 
+Service retryServiceWithIntermittentErrors = service object {
+    isolated function execute() returns error? {
+        lock {
+            if retryResults.length() == 0 {
+                retryResults.push(retryResults.length() + 1);
+                return error("STANDARD_ERROR");
+            }
+            retryResults.push(retryResults.length() + 1);
+        }
+    }
+};
+
+Service periodicEventServiceWithErrors = service object {
+    isolated function execute() returns error? {
+        lock {
+            eventResults.push(eventResults.length() + 1);
+            return error("STANDARD_ERROR");
+        }
+    }
+};
+
 @test:Config {
     groups: ["listener", "retry"]
 }
@@ -160,10 +192,27 @@ function testRetryWithExponentialInterval() returns error? {
 @test:Config {
     groups: ["listener", "retry"]
 }
-function testRetryWithExceedingRetryInterval() returns error? {
+function testRetryWithExceedingMaxInterval() returns error? {
     check retryExceedingIntervalListener.attach(periodicEventServiceWithErrors);
     check retryExceedingIntervalListener.'start();
     runtime:registerListener(retryExceedingIntervalListener);
+    runtime:sleep(5);
+    // No retries will occur because the retry interval is greater than the max interval.
+    int expectedCount = 1;
+    lock {
+        test:assertEquals(eventResults.length(), expectedCount);
+        eventResults = [];
+    }
+    check retryExceedingIntervalListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testRetryWithExceedingRetryInterval() returns error? {
+    check retryExceedingRetryIntervalListener.attach(periodicEventServiceWithErrors);
+    check retryExceedingRetryIntervalListener.'start();
+    runtime:registerListener(retryExceedingRetryIntervalListener);
     runtime:sleep(5);
     // No retries will occur because the retry interval is greater than the max interval.
     int expectedCount = 1;
@@ -223,4 +272,21 @@ function testRetryWithRecurringsAndExponentialIntervals() returns error? {
         eventResults = [];
     }
     check retryExponentialRecurringListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testRetryWithIntermittentErrors() returns error? {
+    check retryFixedListener.attach(retryServiceWithIntermittentErrors);
+    check retryFixedListener.'start();
+    runtime:registerListener(retryFixedListener);
+    runtime:sleep(10);
+    // 2 initial + 1 retry
+    int expectedCount = 3;
+    lock {
+        test:assertEquals(retryResults.length(), expectedCount);
+        retryResults = [];
+    }
+    check retryFixedListener.gracefulStop();
 }

@@ -90,15 +90,6 @@ Service periodicEventService = service object {
     }
 };
 
-Service periodicEventServiceWithErrors = service object {
-    isolated function execute() returns error? {
-        lock {
-            eventResults.push(eventResults.length() + 1);
-            return error("STANDARD_ERROR");
-        }
-    }
-};
-
 @test:Config {
     groups: ["listener"]
 }
