@@ -58,7 +58,7 @@ import static io.ballerina.stdlib.task.objects.TaskManager.TOKEN_HOLDER;
 public class TaskServerJob implements Job {
     public static final String GROUP_ID = "groupId";
     public static final String EXPONENTIAL_STRATEGY = "EXPONENTIAL";
-    public static final String LINEAR_STRATEGY = "LINEAR";
+    public static final String FIXED_STRATEGY = "FIXED";
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
@@ -158,18 +158,16 @@ public class TaskServerJob implements Job {
         Object result = null;
         long currentInterval = retryInterval;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
+            if (currentInterval > maxInterval || currentInterval >= taskInterval.intValue()) {
+                break;
+            }
+            setTimeout(currentInterval);
             result = runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
             if (!(result instanceof BError)) {
                 break;
             }
-            if (attempt < maxAttempts - 1) {
-                setTimeout(currentInterval);
-                currentInterval = calculateNextInterval(backoffStrategy, currentInterval, retryInterval, maxInterval);
-                BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
-                if (currentInterval > taskInterval.intValue()) {
-                    break;
-                }
-            }
+            currentInterval = calculateNextInterval(backoffStrategy, currentInterval, retryInterval, maxInterval);
         }
         return result;
     }
@@ -178,14 +176,14 @@ public class TaskServerJob implements Job {
                                        long currentInterval, long retryInterval, long maxInterval) {
         return switch (backoffStrategy) {
             case EXPONENTIAL_STRATEGY -> Math.min(currentInterval * 2, maxInterval);
-            case LINEAR_STRATEGY -> currentInterval + retryInterval;
+            case FIXED_STRATEGY -> retryInterval;
             default -> currentInterval;
         };
     }
 
     private boolean shouldRetry(Map<String, Object> jobDataMap) {
         Long maxCount = (Long) jobDataMap.get(MAX_COUNT);
-        if (maxCount == null || maxCount == 1) {
+        if (maxCount == null || maxCount == 0) {
             return false;
         }
         BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
@@ -202,7 +200,7 @@ public class TaskServerJob implements Job {
 
     public static void setTimeout(long retryInterval) {
         try {
-            Thread.sleep(retryInterval);
+            Thread.sleep(retryInterval * 1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
