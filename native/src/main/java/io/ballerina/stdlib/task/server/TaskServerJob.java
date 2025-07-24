@@ -162,7 +162,7 @@ public class TaskServerJob implements Job {
             if (!(result instanceof BError)) {
                 break;
             }
-            if (attempt < maxAttempts) {
+            if (attempt < maxAttempts - 1) {
                 setTimeout(currentInterval);
                 currentInterval = calculateNextInterval(backoffStrategy, currentInterval, retryInterval, maxInterval);
                 BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
