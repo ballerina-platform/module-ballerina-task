@@ -257,7 +257,7 @@ public enum RetryStrategy {
 };
 ```
 
-### 7.2. Listener APIs
+### 7.2. Functions
 
 The task listener provides the following APIs:
 
