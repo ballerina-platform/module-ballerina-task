@@ -232,7 +232,7 @@ The initial retry attempt occurs after the time period specified by retryInterva
 
 * **EXPONENTIAL**: The retry interval increases exponentially with each attempt. For instance, with an initial `retryInterval` of 2 seconds, subsequent retries might occur at 4, 8, 16, 32 seconds, and so on.
 
-If the calculated retry interval exceeds the trigger's execution interval, retries are automatically stopped. This prevents scenarios where retry attempts would occur after the next scheduled execution.
+If the time taken for retry attempts exceeds the trigger's execution interval, retries are automatically stopped. This prevents scenarios where retry attempts would occur after the next scheduled execution.
 
 The `maxInterval` parameter sets an upper bound on retry intervals, particularly useful with exponential backoff to prevent excessively long wait times between attempts.
 
