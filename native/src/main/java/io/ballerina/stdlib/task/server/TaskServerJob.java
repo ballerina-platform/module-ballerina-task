@@ -201,13 +201,11 @@ public class TaskServerJob implements Job {
     }
 
     public static void setTimeout(long retryInterval) {
-        Thread.startVirtualThread(() -> {
-            try {
-                Thread.sleep(retryInterval);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        });
+        try {
+            Thread.sleep(retryInterval);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public static void handleRollback(Connection connection) throws SQLException {
