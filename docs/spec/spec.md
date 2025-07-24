@@ -1,6 +1,6 @@
 # Specification: Ballerina Task Library
 
-_Owners_: @daneshk @kalaiyarasiganeshalingam                                      
+_Owners_: @daneshk @kalaiyarasiganeshalingam
 _Reviewers_: @daneshk  
 _Created_: 2021/12/12  
 _Updated_: 2025/07/24  
@@ -32,7 +32,7 @@ The conforming implementation of the specification is released and included in t
       * 7.1.1. [Trigger configuration](#711-trigger-configuration)
       * 7.1.2. [Warm backup configuration](#712-warm-backup-configuration)
       * 7.1.3. [Retry configuration](#713-retry-configuration)
-    * 7.2. [Listener APIs](#72-listener-apis)
+    * 7.2. [Functions](#72-functions)
     * 7.3. [Service implementation](#73-service-implementation)
     * 7.4. [Listener example](#74-listener-example)
 8. [Task coordination](#8-task-coordination)
@@ -290,7 +290,7 @@ The following example demonstrates using a task listener to execute a scheduled 
 import ballerina/io;
 import ballerina/task;
 
-listener task:Listener taskListener = new(schedule = {interval: 1});
+listener task:Listener taskListener = new(trigger = {interval: 1});
 
 service "job-1" on taskListener {
   private int i = 1;
@@ -319,27 +319,7 @@ The task coordination system follows a warm backup approach where:
 
 ## 8.1. Configurations
 
-The task coordination system can be configured using the `WarmBackupConfig` record under `ListenerConfiguration`. Coordination can only be done through a task listener. This handles how each node participates in coordination, how frequently it checks for liveness, updates its status, and connects to the coordination database.
-
-```ballerina
-# Represents the configuration required for task coordination.
-#
-# + databaseConfig - The database configuration for task coordination
-# + livenessCheckInterval - The interval (in seconds) to check the liveness of the job. Default is 30 seconds.
-# + taskId - Unique identifier for the current task
-# + groupId - The identifier for the group of tasks. This is used to identify the group of tasks that are
-#             coordinating the task. It is recommended to use a unique identifier for each group of tasks.
-# + heartbeatFrequency - The interval (in seconds) for the node to update its heartbeat. Default is one second.
-public type WarmBackupConfig record {
-  DatabaseConfig databaseConfig = <MysqlConfig>{};
-  int livenessCheckInterval = 30;
-  string taskId;
-  string groupId;
-  int heartbeatFrequency = 1;
-};
-
-public type DatabaseConfig MysqlConfig|PostgresqlConfig;
-```
+The task coordination system can be configured using the `WarmBackupConfig` record under `ListenerConfiguration`. Coordination can only be done through a task listener. This handles how each node participates in coordination, how frequently it checks for liveness, updates its status, and connects to the coordination database. The types for warm backup configurations are defined in the [7.1.2. Warm Backup Configuration](#712-warm-backup-configuration) section.
 
 ### 8.1.1. Configuration Parameters
 
@@ -427,7 +407,7 @@ service "job-1" on taskListener {
 }
 ```
 
-On a different node, deploy the same code but with a different value for `taskId`:
+On a different node, deploy the same code but with a different value for `taskId`. For example, if the `taskId` on one node is `node-1`, set it to `node-2` on the other node to ensure uniqueness.
 
 ### 8.3. Database Schema
 
