@@ -35,8 +35,15 @@ The conforming implementation of the specification is released and included in t
     * 7.2. [Listener APIs](#72-listener-apis)
     * 7.3. [Service implementation](#73-service-implementation)
     * 7.4. [Listener example](#74-listener-example)
+8. [Task coordination](#8-task-coordination)
+    * 8.1. [Configurations](#81-configurations)
+      * 8.1.1. [Configuration parameters](#811-configuration-parameters)
+      * 8.1.2. [Database configuration](#812-database-configuration)
+    * 8.2. [Task coordination example](#82-task-coordination-example)
+    * 8.3. [Database schema](#83-database-schema)
 
 ## 1. Overview
+
 This specification elaborates on the functionalities available in the Task library.
 
 This library provides APIs based on the following category:
@@ -184,6 +191,31 @@ public type TriggerConfiguration record {|
 |};
 ```
 
+#### 7.1.2. Warm Backup Configuration
+
+The warm backup configuration enables high availability for distributed task execution by coordinating multiple nodes through a database. It ensures that only one node executes the task while others remain on standby, automatically switching over if the active node fails. More details can be found in the [Task Coordination](#8-task-coordination) section.
+
+```ballerina
+# Represents the configuration required for task coordination.
+#
+# + databaseConfig - The database configuration for task coordination
+# + livenessCheckInterval - The interval (in seconds) to check the liveness of the job. Default is 30 seconds.
+# + taskId - Unique identifier for the current task
+# + groupId - The identifier for the group of tasks. This is used to identify the group of tasks that are
+#             coordinating the task. It is recommended to use a unique identifier for each group of tasks.
+# + heartbeatFrequency - The interval (in seconds) for the node to update its heartbeat. Default is one second.
+public type WarmBackupConfig record {
+  DatabaseConfig databaseConfig = <MysqlConfig>{};
+  int livenessCheckInterval = 30;
+  string taskId;
+  string groupId;
+  int heartbeatFrequency = 1;
+};
+
+# Represents the configuration required to connect to a database related to task coordination.
+public type DatabaseConfig MysqlConfig|PostgresqlConfig;
+```
+
 #### 7.1.3. Retry Configuration
 
 The retry configuration defines the behavior for retrying failed job executions. It allows you to specify the maximum number of attempts, retry intervals, and backoff strategies to handle transient failures gracefully.
@@ -272,3 +304,153 @@ service "job-1" on taskListener {
 }
 ```
 
+## 8. Task Coordination
+
+Task coordination support is designed for distributed systems where high availability is necessary. The coordination mechanism ensures that when tasks are running on multiple nodes, only one node is active while others remain on standby. If the active node fails, one of the standby nodes automatically takes over, maintaining system availability.
+
+Here, an RDBMS-based coordination system is used to handle system availability across multiple nodes, improving the reliability and uptime of distributed applications.
+
+The task coordination system follows a warm backup approach where:
+
+* Multiple nodes run the same program logic on separate tasks
+* One node is designated as the token bearer and executes the program logic
+* Other nodes act as watchdogs by monitoring the status of the token bearer node
+* If the active node fails, one of the candidate nodes takes over automatically
+
+## 8.1. Configurations
+
+The task coordination system can be configured using the `WarmBackupConfig` record under `ListenerConfiguration`. Coordination can only be done through a task listener. This handles how each node participates in coordination, how frequently it checks for liveness, updates its status, and connects to the coordination database.
+
+```ballerina
+# Represents the configuration required for task coordination.
+#
+# + databaseConfig - The database configuration for task coordination
+# + livenessCheckInterval - The interval (in seconds) to check the liveness of the job. Default is 30 seconds.
+# + taskId - Unique identifier for the current task
+# + groupId - The identifier for the group of tasks. This is used to identify the group of tasks that are
+#             coordinating the task. It is recommended to use a unique identifier for each group of tasks.
+# + heartbeatFrequency - The interval (in seconds) for the node to update its heartbeat. Default is one second.
+public type WarmBackupConfig record {
+  DatabaseConfig databaseConfig = <MysqlConfig>{};
+  int livenessCheckInterval = 30;
+  string taskId;
+  string groupId;
+  int heartbeatFrequency = 1;
+};
+
+public type DatabaseConfig MysqlConfig|PostgresqlConfig;
+```
+
+### 8.1.1. Configuration Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| **databaseConfig** | Database configuration for task coordination |
+| **livenessCheckInterval** | Interval (in seconds) to check the liveness of the active node |
+| **taskId** | Unique identifier for the current node |
+| **groupId** | Identifier for the group of nodes coordinating the task |
+| **heartbeatFrequency** | Interval (in seconds) for the node to update its heartbeat |
+
+### 8.1.2. Database Configuration
+
+The `databaseConfig` can be either MySQL or PostgreSQL. This is defined using a union type as `DatabaseConfig`. Users can choose either `task:MysqlConfig` or `task:PostgresqlConfig` based on their preferred database.
+
+**For PostgreSQL:**
+
+```ballerina
+# Represents the configuration required to connect to a database related to task coordination.
+#
+# + host - The hostname of the database server
+# + user - The username for the database connection
+# + password - The password for the database connection
+# + port - The port number of the database server
+# + database - The name of the database to connect to
+public type PostgresqlConfig record {
+  string host = "localhost";
+  string? user = ();
+  string? password = ();
+  int port = 5432;
+  string? database = ();
+};
+```
+
+**For MySQL:**
+
+```ballerina
+# Represents the configuration required to connect to a database related to task coordination.
+#
+# + host - The hostname of the database server
+# + user - The username for the database connection
+# + password - The password for the database connection
+# + port - The port number of the database server
+# + database - The name of the database to connect to
+public type MysqlConfig record {
+  string host = "localhost";
+  string? user = ();
+  string? password = ();
+  int port = 3306;
+  string? database = ();
+};
+```
+
+## 8.2. Task Coordination Example
+
+**Listener with coordination support:**
+
+```ballerina
+listener task:Listener taskListener = new (
+  trigger = {
+    interval,
+    maxCount
+  }, 
+  warmBackupConfig = {
+    databaseConfig,
+    livenessCheckInterval,
+    taskId, // must be unique for each node
+    groupId,
+    heartbeatFrequency
+  }
+);
+```
+
+**Service with coordination support:**
+
+Create a service with your business logic in the `execute` method.
+
+```ballerina
+service "job-1" on taskListener {
+  private int i = 1;
+
+  isolated function execute() {
+    // Add the business logic
+  }
+}
+```
+
+On a different node, deploy the same code but with a different value for `taskId`:
+
+### 8.3. Database Schema
+
+The task coordination system requires two essential tables that must be created before starting your application.
+
+**Token Holder Table:**
+
+The `token_holder` table maintains information about which node is currently the active token bearer.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| group_id | VARCHAR(255) | Primary key, identifies the coordination group |
+| task_id | VARCHAR(255) | The ID of the node |
+| term | INTEGER | Increments with each leadership change, prevents split-brain scenarios |
+
+> **Note:** A database lock needs to be added to prevent concurrent rewrites to the `token_holder` table.
+
+**Health Check Table:**
+
+The `health_check` table stores heartbeat information for each node.
+
+| Column | Type | Description |
+|--------|------|-------------|
+| task_id | VARCHAR(255) | Node identifier (part of compound primary key) |
+| group_id | VARCHAR(255) | Group identifier (part of compound primary key) |
+| last_heartbeat | TIMESTAMP | Last time the node sent a heartbeat |
