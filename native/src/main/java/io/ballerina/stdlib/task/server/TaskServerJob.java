@@ -185,10 +185,6 @@ public class TaskServerJob implements Job {
     }
 
     private boolean shouldRetry(Map<String, Object> jobDataMap) {
-        Long maxCount = (Long) jobDataMap.get(MAX_COUNT);
-        if (maxCount == null || maxCount == 0) {
-            return false;
-        }
         BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
         if (!jobDataMap.containsKey(RETRY_INTERVAL)) {
             return false;
