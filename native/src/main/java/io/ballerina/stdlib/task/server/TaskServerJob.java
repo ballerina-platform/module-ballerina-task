@@ -58,7 +58,6 @@ import static io.ballerina.stdlib.task.objects.TaskManager.TOKEN_HOLDER;
 public class TaskServerJob implements Job {
     public static final String GROUP_ID = "groupId";
     public static final String EXPONENTIAL_STRATEGY = "EXPONENTIAL";
-    public static final String FIXED_STRATEGY = "FIXED";
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
@@ -149,23 +148,22 @@ public class TaskServerJob implements Job {
         }
     }
 
-    private Object executeWithRetry(BObject job, Runtime runtime,
-                                    Map<String, Object> jobDataMap, StrandMetadata metadata) {
+    private Object executeWithRetry(BObject job, Runtime runtime, Map<String, Object> jobDataMap, StrandMetadata metadata) {
         Long maxAttempts = (Long) jobDataMap.get(MAX_ATTEMPTS);
         String backoffStrategy = jobDataMap.get(BACKOFF_STRATEGY).toString();
         Long retryInterval = (Long) jobDataMap.get(RETRY_INTERVAL);
         Long maxInterval = (Long) jobDataMap.get(MAX_INTERVAL);
+
         Object result = null;
-        long totalElapsedTime = 0;
+        long startTime = System.currentTimeMillis();
         long currentInterval = retryInterval;
+        BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
-            BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
             setTimeout(currentInterval);
-            totalElapsedTime += currentInterval;
             if (currentInterval > maxInterval || currentInterval >= taskInterval.intValue()) {
                 break;
             }
-            if (totalElapsedTime >= maxInterval) {
+            if (System.currentTimeMillis() - startTime >= taskInterval.floatValue() * 1000) {
                 break;
             }
             result = runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
