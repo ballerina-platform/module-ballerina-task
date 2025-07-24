@@ -115,7 +115,7 @@ public type TriggerConfiguration record {|
 public type RetryConfiguration record {|
   int maxAttempts;
   int retryInterval;
-  RetryStrategy backoffStrategy;
+  RetryStrategy backoffStrategy = FIXED;
   int maxInterval;
 |};
 
