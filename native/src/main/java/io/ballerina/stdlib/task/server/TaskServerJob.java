@@ -148,7 +148,8 @@ public class TaskServerJob implements Job {
         }
     }
 
-    private Object executeWithRetry(BObject job, Runtime runtime, Map<String, Object> jobDataMap, StrandMetadata metadata) {
+    private Object executeWithRetry(BObject job, Runtime runtime,
+                                    Map<String, Object> jobDataMap, StrandMetadata metadata) {
         Long maxAttempts = (Long) jobDataMap.get(MAX_ATTEMPTS);
         String backoffStrategy = jobDataMap.get(BACKOFF_STRATEGY).toString();
         Long retryInterval = (Long) jobDataMap.get(RETRY_INTERVAL);
