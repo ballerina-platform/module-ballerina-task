@@ -161,7 +161,7 @@ public class TaskServerJob implements Job {
         BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             setTimeout(currentInterval);
-            if (currentInterval > maxInterval || currentInterval >= taskInterval.intValue()) {
+            if (maxInterval != null && (currentInterval > maxInterval || currentInterval >= taskInterval.intValue())) {
                 break;
             }
             if (System.currentTimeMillis() - startTime >= taskInterval.floatValue() * 1000) {
@@ -177,9 +177,14 @@ public class TaskServerJob implements Job {
     }
 
     private long calculateNextInterval(String backoffStrategy,
-                                       long currentInterval, long retryInterval, long maxInterval) {
+                                       long currentInterval, long retryInterval, Object maxInterval) {
         return switch (backoffStrategy) {
-            case EXPONENTIAL_STRATEGY -> Math.min(currentInterval * 2, maxInterval);
+            case EXPONENTIAL_STRATEGY -> {
+                if (maxInterval != null) {
+                    yield Math.min(currentInterval * 2, (long) maxInterval);
+                }
+                yield currentInterval * 2;
+            }
             default -> retryInterval;
         };
     }

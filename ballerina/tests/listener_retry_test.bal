@@ -26,8 +26,7 @@ listener Listener retryOneTimeListener = new (trigger = {
     retryConfig: {
         maxAttempts: 5, 
         backoffStrategy: EXPONENTIAL, 
-        retryInterval: 1, 
-        maxInterval: 20
+        retryInterval: 1
     }
 });
 
@@ -37,17 +36,6 @@ listener Listener retryListener = new (trigger = {
     retryConfig: {
         maxAttempts: 5, 
         retryInterval: 1, 
-        maxInterval: 20
-    }
-});
-
-listener Listener retryListenerWithShortInterval = new (trigger = {
-    interval: 1,
-    maxCount: 2,
-    retryConfig: {
-        maxAttempts: 5, 
-        backoffStrategy: EXPONENTIAL, 
-        retryInterval: 2, 
         maxInterval: 20
     }
 });
