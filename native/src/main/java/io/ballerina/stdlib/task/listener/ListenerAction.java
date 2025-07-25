@@ -41,6 +41,11 @@ public class ListenerAction {
     private static final BString END_TIME = StringUtils.fromString("endTime");
     private static final BString TASK_POLICY = StringUtils.fromString("taskPolicy");
     public static final BString WARM_BACKUP_CONFIG = StringUtils.fromString("warmBackupConfig");
+    public static final BString RETRY_CONFIG = StringUtils.fromString("retryConfig");
+    public static final BString MAX_ATTEMPTS = StringUtils.fromString("maxAttempts");
+    public static final BString BACKOFF_STRATEGY = StringUtils.fromString("backoffStrategy");
+    public static final BString RETRY_INTERVAL = StringUtils.fromString("retryInterval");
+    public static final BString MAX_INTERVAL = StringUtils.fromString("maxInterval");
 
     private ListenerAction() { }
 
@@ -53,6 +58,8 @@ public class ListenerAction {
         if (warmBackupConfig != null) {
             taskListener.setConfig(WARM_BACKUP_CONFIG, warmBackupConfig);
         }
+        BMap<?, ?> retryConfig = configs.getMapValue(RETRY_CONFIG);
+        taskListener.setConfig(RETRY_CONFIG, retryConfig);
         listener.addNativeData(NATIVE_LISTENER_KEY, taskListener);
         return null;
     }
@@ -61,6 +68,7 @@ public class ListenerAction {
         TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
         try {
             if (listener != null) {
+                Object retryConfig = listener.getConfig().get(RETRY_CONFIG);
                 if (listener.getConfig().containsKey(WARM_BACKUP_CONFIG)) {
                     BMap warmBackupConfig = (BMap) listener.getConfig().get(WARM_BACKUP_CONFIG);
                     listener.start(environment, listenerObj,
@@ -68,14 +76,14 @@ public class ListenerAction {
                             (Long) listener.getConfig().get(MAX_COUNT),
                             listener.getConfig().get(START_TIME),
                             listener.getConfig().get(END_TIME),
-                            (BMap) listener.getConfig().get(TASK_POLICY), warmBackupConfig);
+                            (BMap) listener.getConfig().get(TASK_POLICY), warmBackupConfig, retryConfig);
                 } else {
                     listener.start(environment, listenerObj,
                             (BDecimal) listener.getConfig().get(INTERVAL),
                             (Long) listener.getConfig().get(MAX_COUNT),
                             listener.getConfig().get(START_TIME),
                             listener.getConfig().get(END_TIME),
-                            (BMap) listener.getConfig().get(TASK_POLICY));
+                            (BMap) listener.getConfig().get(TASK_POLICY), retryConfig);
                 }
             } else {
                 return Utils.createTaskError(LISTENER_NOT_INITIALIZED_ERROR);

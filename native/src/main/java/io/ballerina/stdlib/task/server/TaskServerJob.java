@@ -24,6 +24,7 @@ import io.ballerina.runtime.api.creators.ErrorCreator;
 import io.ballerina.runtime.api.types.ObjectType;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.utils.TypeUtils;
+import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BError;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
@@ -33,21 +34,30 @@ import io.ballerina.stdlib.task.objects.TaskManager;
 import io.ballerina.stdlib.task.utils.TaskConstants;
 import io.ballerina.stdlib.task.utils.Utils;
 import org.quartz.Job;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Map;
 
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.attemptTokenAcquisition;
 import static io.ballerina.stdlib.task.coordination.TokenAcquisition.hasActiveToken;
+import static io.ballerina.stdlib.task.objects.TaskManager.BACKOFF_STRATEGY;
 import static io.ballerina.stdlib.task.objects.TaskManager.DATABASE_CONFIG;
+import static io.ballerina.stdlib.task.objects.TaskManager.INTERVAL;
 import static io.ballerina.stdlib.task.objects.TaskManager.LIVENESS_CHECK_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.MAX_ATTEMPTS;
+import static io.ballerina.stdlib.task.objects.TaskManager.MAX_COUNT;
+import static io.ballerina.stdlib.task.objects.TaskManager.MAX_INTERVAL;
+import static io.ballerina.stdlib.task.objects.TaskManager.RETRY_INTERVAL;
 import static io.ballerina.stdlib.task.objects.TaskManager.TASK_ID;
 import static io.ballerina.stdlib.task.objects.TaskManager.TOKEN_HOLDER;
 
 public class TaskServerJob implements Job {
     public static final String GROUP_ID = "groupId";
+    public static final String EXPONENTIAL_STRATEGY = "EXPONENTIAL";
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) {
@@ -125,8 +135,73 @@ public class TaskServerJob implements Job {
         boolean isConcurrentSafe = type.isIsolated() && type.isIsolated(TaskConstants.EXECUTE);
         StrandMetadata metadata = new StrandMetadata(isConcurrentSafe, null);
         Object result = runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
-        if (result instanceof BError error) {
-            Utils.notifyFailure(jobExecutionContext, ErrorCreator.createError(error));
+        if (result instanceof BError) {
+            JobDataMap jobDataMap = jobExecutionContext.getMergedJobDataMap();
+            if (shouldRetry(jobDataMap)) {
+                Long maxCount = (Long) jobDataMap.get(MAX_COUNT);
+                jobExecutionContext.getMergedJobDataMap().put(MAX_COUNT, maxCount - 1);
+                result = executeWithRetry(job, runtime, jobDataMap, metadata);
+            }
+            if (result instanceof BError) {
+                Utils.notifyFailure(jobExecutionContext, (BError) result);
+            }
+        }
+    }
+
+    private Object executeWithRetry(BObject job, Runtime runtime,
+                                    Map<String, Object> jobDataMap, StrandMetadata metadata) {
+        Long maxAttempts = (Long) jobDataMap.get(MAX_ATTEMPTS);
+        String backoffStrategy = jobDataMap.get(BACKOFF_STRATEGY).toString();
+        Long retryInterval = (Long) jobDataMap.get(RETRY_INTERVAL);
+        Long maxInterval = (Long) jobDataMap.get(MAX_INTERVAL);
+
+        Object result = null;
+        long startTime = System.currentTimeMillis();
+        long currentInterval = retryInterval;
+        BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            setTimeout(currentInterval);
+            if (currentInterval > maxInterval || currentInterval >= taskInterval.intValue()) {
+                break;
+            }
+            if (System.currentTimeMillis() - startTime >= taskInterval.floatValue() * 1000) {
+                break;
+            }
+            result = runtime.callMethod(job, TaskConstants.EXECUTE, metadata);
+            currentInterval = calculateNextInterval(backoffStrategy, currentInterval, retryInterval, maxInterval);
+            if (!(result instanceof BError)) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private long calculateNextInterval(String backoffStrategy,
+                                       long currentInterval, long retryInterval, long maxInterval) {
+        return switch (backoffStrategy) {
+            case EXPONENTIAL_STRATEGY -> Math.min(currentInterval * 2, maxInterval);
+            default -> retryInterval;
+        };
+    }
+
+    private boolean shouldRetry(Map<String, Object> jobDataMap) {
+        BDecimal taskInterval = (BDecimal) jobDataMap.get(INTERVAL);
+        if (!jobDataMap.containsKey(RETRY_INTERVAL)) {
+            return false;
+        }
+        Long retryInterval = (Long) jobDataMap.get(RETRY_INTERVAL);
+        if (retryInterval > taskInterval.intValue()) {
+            return false;
+        }
+        Long maxAttempts = (Long) jobDataMap.get(MAX_ATTEMPTS);
+        return maxAttempts != null && maxAttempts > 0;
+    }
+
+    public static void setTimeout(long retryInterval) {
+        try {
+            Thread.sleep(retryInterval * 1000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

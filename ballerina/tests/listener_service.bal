@@ -23,6 +23,7 @@ isolated int[] recurringEventResults = [];
 isolated int[] multiServiceEventCounts = [];
 isolated int[] taskExecutionCounts = [];
 isolated int[] errorResult = [];
+isolated int[] eventResults = [];
 
 listener Listener singleListener = new (trigger = {
     interval: 1,
@@ -82,7 +83,7 @@ Service errorService = service object {
 };
 
 Service periodicEventService = service object {
-    isolated function execute() {
+    isolated function execute() returns error? {
         lock {
             recurringEventResults.push(recurringEventResults.length() + 1);
         }

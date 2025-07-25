@@ -93,6 +93,7 @@ public type ListenerConfiguration record {
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy - The policy, which is used to handle the error and will be waiting during the trigger time
+# + retryConfig - The retry configurations for job executions
 public type TriggerConfiguration record {|
     decimal interval;
     int maxCount = -1;
@@ -102,7 +103,27 @@ public type TriggerConfiguration record {|
         errorPolicy: LOG_AND_TERMINATE,
         waitingPolicy: WAIT
     };
+    RetryConfiguration? retryConfig = ();
 |};
+
+# Retry configuration for job execution.
+#
+# + maxAttempts - Maximum number of retry attempts
+# + retryInterval - Initial retry interval
+# + backoffStrategy - The strategy to use for retrying the job execution
+# + maxInterval - Maximum amount of time to wait between retries
+public type RetryConfiguration record {|
+  int maxAttempts;
+  int retryInterval;
+  RetryStrategy backoffStrategy = FIXED;
+  int maxInterval;
+|};
+
+# Supported retry strategies for job execution.
+public enum RetryStrategy {
+  FIXED,
+  EXPONENTIAL
+};
 
 # A read-only record consisting of a unique identifier for a created job.
 public type JobId readonly & record {|
