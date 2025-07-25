@@ -117,3 +117,58 @@ service "job-1" on taskListener {
     }
 }
 ```
+
+You can enhance job reliability by adding retry configurations for failing job executions in task listeners.
+
+```ballerina
+listener task:Listener taskListener = new (
+    trigger = {
+        interval: 20,
+        maxCount: 5
+    },
+    retryConfig: {
+        maxAttempts: 5,
+        retryInterval: 1,
+        maxInterval: 5
+    }
+);
+```
+
+### Task coordination
+
+Task coordination support is specifically designed for distributed systems where high availability and fault tolerance are essential requirements. The coordination mechanism ensures that when tasks are running across multiple nodes, only one node remains active while others stay on standby. If the active node fails or becomes unavailable, one of the standby nodes automatically takes over, maintaining continuous system availability and preventing service interruptions.
+
+The system utilizes an RDBMS-based coordination mechanism to handle availability across multiple nodes, significantly improving the reliability and uptime of distributed applications in production environments.
+The task coordination system follows a warm backup approach with the following characteristics:
+
+- Multiple nodes run identical program logic on separate task instances
+- One node is designated as the token bearer and actively executes the program logic
+- Other nodes act as watchdogs by continuously monitoring the status of the token bearer node
+- If the active node fails or becomes unresponsive, one of the candidate nodes automatically takes over without manual intervention
+
+The following code snippet demonstrates how to implement task coordination across multiple nodes.
+
+```ballerina
+listener task:Listener taskListener = new (
+  trigger = {
+    interval,
+    maxCount
+  }, 
+  warmBackupConfig = {
+    databaseConfig,
+    livenessCheckInterval,
+    taskId, // must be unique for each node
+    groupId,
+    heartbeatFrequency
+  }
+);
+
+service "job-1" on taskListener {
+  private int i = 1;
+
+  isolated function execute() {
+    // Add your business logic here
+    // This will only execute on the active node
+  }
+}
+```
