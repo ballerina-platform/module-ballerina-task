@@ -181,13 +181,14 @@ The trigger configuration defines how and when a task should be executed. It spe
 #               start immediately
 # + endTime - The trigger end time in Ballerina `time:Civil`
 # + taskPolicy - The policy used to handle errors and waiting during the trigger time
+# + retryConfig - The retry configurations for job executions
 public type TriggerConfiguration record {|
   decimal interval;
   int maxCount = -1;
   time:Civil startTime?;
   time:Civil endTime?;
   task:TaskPolicy taskPolicy = {};
-  task:RetryConfig retryConfig = ();
+  task:RetryConfiguration? retryConfig = ();
 |};
 ```
 
@@ -230,7 +231,7 @@ The initial retry attempt occurs after the time period specified by retryInterva
 
 * **FIXED**: The retry interval remains constant for all retry attempts. For example, if `retryInterval` is set to 5 seconds, each retry will occur exactly 5 seconds after the previous failure.
 
-* **EXPONENTIAL**: The retry interval increases exponentially with each attempt. For instance, with an initial `retryInterval` of 2 seconds, subsequent retries might occur at 4, 8, 16, 32 seconds, and so on.
+* **EXPONENTIAL**: The retry interval increases exponentially(doubled) with each attempt. For instance, with an initial `retryInterval` of 2 seconds, subsequent retries might occur at 4, 8, 16, 32 seconds, and so on.
 
 If the time taken for retry attempts exceeds the trigger's execution interval, retries are automatically stopped. This prevents scenarios where retry attempts would occur after the next scheduled execution.
 
@@ -247,7 +248,7 @@ public type RetryConfiguration record {|
   int maxAttempts;
   int retryInterval;
   RetryStrategy backoffStrategy;
-  int maxInterval;
+  int maxInterval?;
 |};
 
 # Supported retry strategies for job execution.

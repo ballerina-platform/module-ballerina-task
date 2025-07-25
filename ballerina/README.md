@@ -128,8 +128,7 @@ listener task:Listener taskListener = new (
     },
     retryConfig: {
         maxAttempts: 5,
-        retryInterval: 1,
-        maxInterval: 5
+        retryInterval: 1
     }
 );
 ```
