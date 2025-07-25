@@ -116,7 +116,7 @@ public type RetryConfiguration record {|
   int maxAttempts;
   int retryInterval;
   RetryStrategy backoffStrategy = FIXED;
-  int maxInterval;
+  int maxInterval?;
 |};
 
 # Supported retry strategies for job execution.
