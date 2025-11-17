@@ -94,6 +94,20 @@ public class ListenerAction {
         return null;
     }
 
+    private static Object civilToMillisIfNeeded(Environment env, Object value) {
+        if (value == null) {
+            return null;
+        }
+        return env.yieldAndRun(() -> {
+            Object[] arguments = new Object[]{value};
+            StrandMetadata strandMetadata = new StrandMetadata(true,
+                    ModuleUtils.getProperties(GET_TIME_IN_MILLISECONDS));
+            return env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLISECONDS,
+                    strandMetadata, arguments);
+        });
+        
+    }
+
     public static Object attachService(BObject listenerObj, BObject service, BString serviceName) {
         TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
         service.addNativeData(JOB_ID, serviceName);
