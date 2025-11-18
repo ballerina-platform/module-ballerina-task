@@ -95,18 +95,19 @@ public class ListenerAction {
         return null;
     }
 
-    private static Object civilToMillisIfNeeded(Environment env, Object value) {
+    private static Object civilToMillisIfNeeded(Environment env, Object value) throws Exception {
         if (value == null) {
             return null;
         }
-        return env.yieldAndRun(() -> {
-            Object[] arguments = new Object[]{value};
-            StrandMetadata strandMetadata = new StrandMetadata(true,
-                    ModuleUtils.getProperties(GET_TIME_IN_MILLISECONDS));
-            return env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLISECONDS,
-                    strandMetadata, arguments);
-        });
-        
+        Object[] arguments = new Object[]{value};
+        StrandMetadata strandMetadata = new StrandMetadata(true,
+                ModuleUtils.getProperties(GET_TIME_IN_MILLISECONDS));
+        Object result = env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLISECONDS,
+                strandMetadata, arguments);
+        if (result instanceof Throwable errorResult) {
+            throw new Exception("Error converting civil to milliseconds: " + errorResult.getMessage());
+        }
+        return result;
     }
 
     public static Object attachService(BObject listenerObj, BObject service, BString serviceName) {
