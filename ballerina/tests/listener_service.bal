@@ -16,7 +16,6 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
-import ballerina/time;
 
 isolated int[] oneTimeEventResults = [];
 isolated int[] recurringEventResults = [];
@@ -37,7 +36,6 @@ listener Listener singleEventListener = new (trigger = {
 
 listener Listener periodicEventListener = new (trigger = {
     interval: 2,
-    startTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3)),
     maxCount: 4
 });
 
