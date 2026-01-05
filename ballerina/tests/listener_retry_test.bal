@@ -16,16 +16,18 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
+import ballerina/time;
 
 isolated int[] retryResults = [];
 isolated int[] singleRetryResults = [];
+isolated int[] configCoverageResults = [];
 
 listener Listener retryOneTimeListener = new (trigger = {
     interval: 1,
     maxCount: 1,
     retryConfig: {
-        maxAttempts: 5, 
-        backoffStrategy: EXPONENTIAL, 
+        maxAttempts: 5,
+        backoffStrategy: EXPONENTIAL,
         retryInterval: 1
     }
 });
@@ -34,8 +36,8 @@ listener Listener retryListener = new (trigger = {
     interval: 25,
     maxCount: 2,
     retryConfig: {
-        maxAttempts: 5, 
-        retryInterval: 1, 
+        maxAttempts: 5,
+        retryInterval: 1,
         maxInterval: 20
     }
 });
@@ -44,9 +46,9 @@ listener Listener retryExponentialListener = new (trigger = {
     interval: 20,
     maxCount: 1,
     retryConfig: {
-        maxAttempts: 5, 
-        backoffStrategy: EXPONENTIAL, 
-        retryInterval: 2, 
+        maxAttempts: 5,
+        backoffStrategy: EXPONENTIAL,
+        retryInterval: 2,
         maxInterval: 50
     }
 });
@@ -55,9 +57,9 @@ listener Listener retryExceedingIntervalListener = new (trigger = {
     interval: 300,
     maxCount: 1,
     retryConfig: {
-        maxAttempts: 5, 
-        backoffStrategy: EXPONENTIAL, 
-        retryInterval: 21, 
+        maxAttempts: 5,
+        backoffStrategy: EXPONENTIAL,
+        retryInterval: 21,
         maxInterval: 20
     }
 });
@@ -66,9 +68,9 @@ listener Listener retryExceedingRetryIntervalListener = new (trigger = {
     interval: 20,
     maxCount: 1,
     retryConfig: {
-        maxAttempts: 5, 
-        backoffStrategy: EXPONENTIAL, 
-        retryInterval: 21, 
+        maxAttempts: 5,
+        backoffStrategy: EXPONENTIAL,
+        retryInterval: 21,
         maxInterval: 20
     }
 });
@@ -80,9 +82,9 @@ listener Listener retryFixedListener = new (trigger = {
         errorPolicy: CONTINUE
     },
     retryConfig: {
-        maxAttempts: 5, 
-        backoffStrategy: FIXED, 
-        retryInterval: 1, 
+        maxAttempts: 5,
+        backoffStrategy: FIXED,
+        retryInterval: 1,
         maxInterval: 6
     }
 });
@@ -94,12 +96,51 @@ listener Listener retryExponentialRecurringListener = new (trigger = {
         errorPolicy: CONTINUE
     },
     retryConfig: {
-        maxAttempts: 5, 
-        backoffStrategy: EXPONENTIAL, 
-        retryInterval: 1, 
+        maxAttempts: 5,
+        backoffStrategy: EXPONENTIAL,
+        retryInterval: 1,
         maxInterval: 6
     }
 });
+
+
+time:Civil startTime = time:utcToCivil(time:utcAddSeconds(time:utcNow(), 120));
+time:Civil endTime = time:utcToCivil(time:utcAddSeconds(time:utcNow(), 125));
+
+listener Listener timeWindowListener = new (trigger = {
+    interval: 1,
+    maxCount: 1,
+    startTime,
+    endTime,
+    retryConfig: {
+        maxAttempts: 2,
+        retryInterval: 1,
+        backoffStrategy: FIXED,
+        maxInterval: 2
+    }
+});
+
+time:Civil invalidEndTime = time:utcToCivil(time:utcAddSeconds(time:utcNow(), 0));
+
+listener Listener invalidConfigListener = new (
+    trigger = {
+        interval: 1,
+        maxCount: 1
+    },
+    warmBackupConfig = {
+        databaseConfig: <MysqlConfig>{
+            host: "localhost",
+            port: 1,
+            user: "test-user",
+            password: "test-password",
+            database: "testdb"
+        },
+        taskId: "test-task-id",
+        groupId: "test-group-id",
+        livenessCheckInterval: 1,
+        heartbeatFrequency: 1
+    }
+);
 
 Service singleEventServiceWithErrors = service object {
     isolated function execute() returns error? {
@@ -136,6 +177,14 @@ Service periodicEventServiceWithErrors = service object {
         lock {
             eventResults.push(eventResults.length() + 1);
             return error("STANDARD_ERROR");
+        }
+    }
+};
+
+Service configCoverageService = service object {
+    isolated function execute() returns error? {
+        lock {
+            configCoverageResults.push(1);
         }
     }
 };
@@ -277,4 +326,51 @@ function testRetryWithIntermittentErrors() returns error? {
         retryResults = [];
     }
     check retryFixedListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testListenerStartWithStartAndEndTimeConfigs() returns error? {
+    lock {
+        configCoverageResults = [];
+    }
+    check timeWindowListener.attach(configCoverageService);
+    check timeWindowListener.'start();
+    runtime:registerListener(timeWindowListener);
+    check timeWindowListener.gracefulStop();
+}
+
+@test:Config {
+    groups: ["listener"]
+}
+function testListenerStartWithInvalidEndTime() returns error? {
+    Listener invalidEndTimeListener = check new (trigger = {
+        interval: 1,
+        maxCount: 1,
+        startTime,
+        endTime: invalidEndTime
+    });
+    lock {
+        configCoverageResults = [];
+    }
+    Error? result = invalidEndTimeListener.attach(configCoverageService);
+    result = invalidEndTimeListener.'start();
+    test:assertTrue(result is Error);
+    runtime:registerListener(invalidEndTimeListener);
+    if result is Error {
+        test:assertTrue(result.message().includes("Error converting civil to milliseconds"));
+    }
+}
+
+@test:Config {
+    groups: ["listener", "retry"]
+}
+function testListenerStartWithWarmBackupConfig() returns error? {
+    lock {
+        configCoverageResults = [];
+    }
+    check invalidConfigListener.attach(configCoverageService);
+    Error? result = invalidConfigListener.'start();
+    test:assertTrue(result is Error);
 }

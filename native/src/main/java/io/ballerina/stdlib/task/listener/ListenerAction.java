@@ -19,12 +19,14 @@
 package io.ballerina.stdlib.task.listener;
 
 import io.ballerina.runtime.api.Environment;
+import io.ballerina.runtime.api.concurrent.StrandMetadata;
 import io.ballerina.runtime.api.utils.StringUtils;
 import io.ballerina.runtime.api.values.BDecimal;
 import io.ballerina.runtime.api.values.BMap;
 import io.ballerina.runtime.api.values.BObject;
 import io.ballerina.runtime.api.values.BString;
 import io.ballerina.stdlib.task.objects.TaskManager;
+import io.ballerina.stdlib.task.utils.ModuleUtils;
 import io.ballerina.stdlib.task.utils.Utils;
 
 import java.util.Map;
@@ -46,6 +48,7 @@ public class ListenerAction {
     public static final BString BACKOFF_STRATEGY = StringUtils.fromString("backoffStrategy");
     public static final BString RETRY_INTERVAL = StringUtils.fromString("retryInterval");
     public static final BString MAX_INTERVAL = StringUtils.fromString("maxInterval");
+    public static final String GET_TIME_IN_MILLISECONDS = "getTimeInMillies";
 
     private ListenerAction() { }
 
@@ -68,22 +71,20 @@ public class ListenerAction {
         TaskListener listener = (TaskListener) listenerObj.getNativeData(NATIVE_LISTENER_KEY);
         try {
             if (listener != null) {
+                Object startTime = civilToMillisIfNeeded(environment, listener.getConfig().get(START_TIME));
+                Object endTime = civilToMillisIfNeeded(environment, listener.getConfig().get(END_TIME));
                 Object retryConfig = listener.getConfig().get(RETRY_CONFIG);
                 if (listener.getConfig().containsKey(WARM_BACKUP_CONFIG)) {
-                    BMap warmBackupConfig = (BMap) listener.getConfig().get(WARM_BACKUP_CONFIG);
-                    listener.start(environment, listenerObj,
-                            (BDecimal) listener.getConfig().get(INTERVAL),
-                            (Long) listener.getConfig().get(MAX_COUNT),
-                            listener.getConfig().get(START_TIME),
-                            listener.getConfig().get(END_TIME),
-                            (BMap) listener.getConfig().get(TASK_POLICY), warmBackupConfig, retryConfig);
+                    BMap<BString, Object> warmBackupConfig =
+                            (BMap<BString, Object>) listener.getConfig().get(WARM_BACKUP_CONFIG);
+                    listener.start(environment, listenerObj, (BDecimal) listener.getConfig().get(INTERVAL),
+                            (Long) listener.getConfig().get(MAX_COUNT), startTime, endTime,
+                            (BMap<BString, Object>) listener.getConfig().get(TASK_POLICY),
+                            warmBackupConfig, retryConfig);
                 } else {
-                    listener.start(environment, listenerObj,
-                            (BDecimal) listener.getConfig().get(INTERVAL),
-                            (Long) listener.getConfig().get(MAX_COUNT),
-                            listener.getConfig().get(START_TIME),
-                            listener.getConfig().get(END_TIME),
-                            (BMap) listener.getConfig().get(TASK_POLICY), retryConfig);
+                    listener.start(environment, listenerObj, (BDecimal) listener.getConfig().get(INTERVAL),
+                            (Long) listener.getConfig().get(MAX_COUNT), startTime, endTime,
+                            (BMap<BString, Object>) listener.getConfig().get(TASK_POLICY), retryConfig);
                 }
             } else {
                 return Utils.createTaskError(LISTENER_NOT_INITIALIZED_ERROR);
@@ -92,6 +93,20 @@ public class ListenerAction {
             return Utils.createTaskError(e.getMessage());
         }
         return null;
+    }
+
+    private static Object civilToMillisIfNeeded(Environment env, Object value) throws Exception {
+        if (value == null) {
+            return null;
+        }
+        Object[] arguments = new Object[]{value};
+        StrandMetadata strandMetadata = new StrandMetadata(true, null);
+        Object result = env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLISECONDS,
+                strandMetadata, arguments);
+        if (result instanceof Throwable errorResult) {
+            throw new Exception("Error converting civil to milliseconds: " + errorResult.getMessage());
+        }
+        return result;
     }
 
     public static Object attachService(BObject listenerObj, BObject service, BString serviceName) {
