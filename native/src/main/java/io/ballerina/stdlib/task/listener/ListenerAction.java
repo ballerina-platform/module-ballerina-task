@@ -100,8 +100,7 @@ public class ListenerAction {
             return null;
         }
         Object[] arguments = new Object[]{value};
-        StrandMetadata strandMetadata = new StrandMetadata(true,
-                ModuleUtils.getProperties(GET_TIME_IN_MILLISECONDS));
+        StrandMetadata strandMetadata = new StrandMetadata(true, null);
         Object result = env.getRuntime().callFunction(ModuleUtils.getModule(), GET_TIME_IN_MILLISECONDS,
                 strandMetadata, arguments);
         if (result instanceof Throwable errorResult) {
