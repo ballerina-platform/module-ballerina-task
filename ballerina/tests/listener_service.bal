@@ -16,13 +16,13 @@
 
 import ballerina/lang.runtime;
 import ballerina/test;
-import ballerina/time;
 
 isolated int[] oneTimeEventResults = [];
 isolated int[] recurringEventResults = [];
 isolated int[] multiServiceEventCounts = [];
 isolated int[] taskExecutionCounts = [];
 isolated int[] errorResult = [];
+isolated int[] eventResults = [];
 
 listener Listener singleListener = new (trigger = {
     interval: 1,
@@ -36,7 +36,6 @@ listener Listener singleEventListener = new (trigger = {
 
 listener Listener periodicEventListener = new (trigger = {
     interval: 2,
-    startTime: time:utcToCivil(time:utcAddSeconds(time:utcNow(), 3)),
     maxCount: 4
 });
 
@@ -82,7 +81,7 @@ Service errorService = service object {
 };
 
 Service periodicEventService = service object {
-    isolated function execute() {
+    isolated function execute() returns error? {
         lock {
             recurringEventResults.push(recurringEventResults.length() + 1);
         }

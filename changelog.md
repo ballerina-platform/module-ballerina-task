@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- [Add retry support for listeners](https://github.com/wso2-enterprise/internal-support-ballerina/issues/1043)
+
 ## [2.10.0]
 
 ### Added

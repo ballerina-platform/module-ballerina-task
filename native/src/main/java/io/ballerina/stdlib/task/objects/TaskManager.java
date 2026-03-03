@@ -49,6 +49,13 @@ public class TaskManager {
     public static final String GROUP_ID = "groupId";
     public static final String DATABASE_CONFIG = "databaseConfig";
     public static final String LIVENESS_CHECK_INTERVAL = "livenessCheckInterval";
+    public static final String INTERVAL = "interval";
+    public static final String MAX_COUNT = "maxCount";
+    public static final String MAX_ATTEMPTS = "maxAttempts";
+    public static final String BACKOFF_STRATEGY = "backoffStrategy";
+    public static final String RETRY_INTERVAL = "retryInterval";
+    public static final String MAX_INTERVAL = "maxInterval";
+
     private Scheduler scheduler;
     private Runtime runtime = null;
     Map<Integer, JobDetail> jobInfoMap = new HashMap<>();
