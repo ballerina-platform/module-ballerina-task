@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- [Introduce `Mysql` and `Postgresql` singleton type aliases and a `dbType` discriminator field in `MysqlConfig` and `PostgresqlConfig` to resolve ambiguous type issues in the `DatabaseConfig` union type](https://github.com/ballerina-platform/ballerina-library/issues/8694)
+
 - [Add retry support for listeners](https://github.com/wso2-enterprise/internal-support-ballerina/issues/1043)
 
 ## [2.10.0]
