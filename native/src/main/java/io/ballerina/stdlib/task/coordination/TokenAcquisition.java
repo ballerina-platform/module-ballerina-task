@@ -40,6 +40,9 @@ import static io.ballerina.stdlib.task.server.TaskServerJob.handleRollback;
  */
 public final class TokenAcquisition {
     public static final BString DB_HOST = StringUtils.fromString("host");
+    public static final BString DB_MYSQL_HOST = StringUtils.fromString("mysqlHost");
+    public static final BString DB_POSTGRESQL_HOST = StringUtils.fromString("postgresqlHost");
+    public static final String DEFAULT_HOST = "localhost";
     public static final BString DB_USER = StringUtils.fromString("user");
     public static final BString DB_PASSWORD = StringUtils.fromString("password");
     public static final BString DB_PORT = StringUtils.fromString("port");
@@ -80,6 +83,26 @@ public final class TokenAcquisition {
     private TokenAcquisition() { }
 
     /**
+     * Resolves the host from the database config record.
+     * Checks the type-specific host field (mysqlHost/postgresqlHost) first.
+     * If it is set to a non-default value, that is used. Otherwise falls back to the deprecated
+     * {@code host} field if present, and finally defaults to "localhost".
+     */
+    private static String resolveHost(BMap<Object, Object> databaseConfig, String dbType) {
+        BString specificHostKey = DB_TYPE_MYSQL.equals(dbType) ? DB_MYSQL_HOST : DB_POSTGRESQL_HOST;
+        if (databaseConfig.containsKey(specificHostKey)) {
+            String specificHost = databaseConfig.getStringValue(specificHostKey).getValue();
+            if (!DEFAULT_HOST.equals(specificHost)) {
+                return specificHost;
+            }
+        }
+        if (databaseConfig.containsKey(DB_HOST)) {
+            return databaseConfig.getStringValue(DB_HOST).getValue();
+        }
+        return DEFAULT_HOST;
+    }
+
+    /**
      * Acquires token with proper transaction handling.
      */
     public static Object acquireToken(BMap<Object, Object> databaseConfig,
@@ -91,7 +114,7 @@ public final class TokenAcquisition {
             dbType = databaseConfig.getStringValue(DB_TYPE).getValue().toLowerCase();
         }
         DatabaseConfig dbConfig = new DatabaseConfig(
-                databaseConfig.getStringValue(DB_HOST).getValue(), databaseConfig.getStringValue(DB_USER).getValue(),
+                resolveHost(databaseConfig, dbType), databaseConfig.getStringValue(DB_USER).getValue(),
                 databaseConfig.getStringValue(DB_PASSWORD).getValue(), databaseConfig.getIntValue(DB_PORT).intValue(),
                 databaseConfig.getStringValue(DATABASE).getValue(), dbType
         );

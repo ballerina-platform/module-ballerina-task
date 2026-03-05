@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- [Introduce type-specific host fields (`mysqlHost`, `postgresqlHost`) for `MysqlConfig` and `PostgresqlConfig`, deprecating the generic `host` field to resolve ambiguous type issues](https://github.com/ballerina-platform/ballerina-library/issues/8694)
+
 - [Add retry support for listeners](https://github.com/wso2-enterprise/internal-support-ballerina/issues/1043)
 
 ## [2.10.0]

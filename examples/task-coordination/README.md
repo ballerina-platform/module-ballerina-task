@@ -48,25 +48,25 @@ The `databaseConfig` can be either MySQL or PostgreSQL. This is defined using a 
 **For PostgreSQL:**
 
 ```ballerina
-type PostgresqlConfig record {
-   string host;
+type PostgresqlConfig record {|
+   string postgresqlHost;
    int port;
    string user;
    string password;
    string database;
-};
+|};
 ```
 
 **For MySQL:**
 
 ```ballerina
-type MysqlConfig record {
-   string host;
+type MysqlConfig record {|
+   string mysqlHost;
    int port;
    string user;
    string password;
    string database;
-};
+|};
 ```
 
 ### Setting Up task coordination
