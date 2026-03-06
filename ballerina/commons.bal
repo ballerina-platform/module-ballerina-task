@@ -24,35 +24,45 @@ public type Service distinct service object {
 # Represents the configuration required to connect to a database related to task coordination.
 public type DatabaseConfig MysqlConfig|PostgresqlConfig;
 
-# Represents the configuration required to connect to a database related to task coordination.
+# Identifies a MySQL database type.
+public type Mysql "mysql";
+
+# Identifies a PostgreSQL database type.
+public type Postgresql "postgresql";
+
+# Represents the configuration required to connect to a MySQL database related to task coordination.
 #
+# + dbType - The database type identifier, always `"mysql"`
 # + host - The hostname of the database server
 # + user - The username for the database connection
 # + password - The password for the database connection
 # + port - The port number of the database server
 # + database - The name of the database to connect to
-public type MysqlConfig record {
+public type MysqlConfig record {|
+  Mysql dbType = "mysql";
   string host = "localhost";
   string? user = ();
   string? password = ();
   int port = 3306;
   string? database = ();
-};
+|};
 
-# Represents the configuration required to connect to a database related to task coordination.
+# Represents the configuration required to connect to a PostgreSQL database related to task coordination.
 #
+# + dbType - The database type identifier, always `"postgresql"`
 # + host - The hostname of the database server
 # + user - The username for the database connection
 # + password - The password for the database connection
 # + port - The port number of the database server
 # + database - The name of the database to connect to
-public type PostgresqlConfig record {
+public type PostgresqlConfig record {|
+  Postgresql dbType = "postgresql";
   string host = "localhost";
   string? user = ();
   string? password = ();
   int port = 5432;
   string? database = ();
-};
+|};
 
 # Represents the configuration required for task coordination.
 #
@@ -63,7 +73,9 @@ public type PostgresqlConfig record {
 #             coordinating the task. It is recommended to use a unique identifier for each group of tasks.
 # + heartbeatFrequency - The interval (in seconds) for the node to update its heartbeat. Default is one second.
 public type WarmBackupConfig record {
-    DatabaseConfig databaseConfig = <MysqlConfig>{};
+    DatabaseConfig databaseConfig = {
+        dbType: "mysql"
+    };
     int livenessCheckInterval = 30;
     string taskId;
     string groupId;
