@@ -103,6 +103,7 @@ listener Listener retryExponentialRecurringListener = new (trigger = {
     }
 });
 
+
 time:Civil startTime = time:utcToCivil(time:utcAddSeconds(time:utcNow(), 120));
 time:Civil endTime = time:utcToCivil(time:utcAddSeconds(time:utcNow(), 125));
 
@@ -127,8 +128,7 @@ listener Listener invalidConfigListener = new (
         maxCount: 1
     },
     warmBackupConfig = {
-        databaseConfig: {
-            dbType: "mysql",
+        databaseConfig: <MysqlConfig>{
             host: "localhost",
             port: 1,
             user: "test-user",
