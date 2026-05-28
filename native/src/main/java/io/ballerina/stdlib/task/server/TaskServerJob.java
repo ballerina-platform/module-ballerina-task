@@ -78,33 +78,34 @@ public class TaskServerJob implements Job {
         });
     }
 
-    private void  processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
+    private void processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
                                              boolean isTokenHolder, String taskId, String groupId,
                                              String jdbcUrl, DatabaseConfig dbConfig) {
-        Connection connection = null;
-        boolean deadStatus = false;
+        Connection connection;
         try {
             connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
         } catch (Exception e) {
-            deadStatus = true;
+            return;
         }
-        try {
-            if (!deadStatus) {
-                connection.setAutoCommit(false);
+        try (connection) {
+            connection.setAutoCommit(false);
+            try {
                 boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext, taskId,
                         groupId, isTokenHolder, dbConfig);
                 connection.commit();
                 if (shouldExecuteJob) {
                     executeJob(job, runtime, jobExecutionContext);
                 }
+            } catch (SQLException e) {
+                handleExecutionException(connection, jobExecutionContext,
+                        ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
+            } catch (BError error) {
+                handleExecutionException(connection, jobExecutionContext, error);
+            } catch (Throwable t) {
+                handleExecutionException(connection, jobExecutionContext, ErrorCreator.createError(t));
             }
         } catch (SQLException e) {
-            handleExecutionException(connection, jobExecutionContext,
-                    ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
-        } catch (BError error) {
-            handleExecutionException(connection, jobExecutionContext, error);
-        } catch (Throwable t) {
-            handleExecutionException(connection, jobExecutionContext, ErrorCreator.createError(t));
+            // connection.close() failed during cleanup; nothing further to do
         }
     }
 
