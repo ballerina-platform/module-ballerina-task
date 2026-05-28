@@ -33,7 +33,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-import static io.ballerina.stdlib.task.server.TaskServerJob.handleRollback;
 
 /**
  * Handles token acquisition with proper transaction management.
@@ -95,20 +94,20 @@ public final class TokenAcquisition {
                 databaseConfig.getStringValue(DB_PASSWORD).getValue(), databaseConfig.getIntValue(DB_PORT).intValue(),
                 databaseConfig.getStringValue(DATABASE).getValue(), dbType
         );
-        Connection connection = null;
-        try {
-            String instanceId = id.getValue();
-            String jdbcUrl = getJdbcUrl(dbConfig);
-            connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
+        String instanceId = id.getValue();
+        String jdbcUrl = getJdbcUrl(dbConfig);
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password())) {
             connection.setAutoCommit(false);
-            tokenAcquired = attemptTokenAcquisition(connection, instanceId, groupId.getValue(),
-                    tokenAcquired, livenessInterval, dbType);
-            connection.commit();
+            try {
+                tokenAcquired = attemptTokenAcquisition(connection, instanceId, groupId.getValue(),
+                        tokenAcquired, livenessInterval, dbType);
+                connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                throw Utils.createTaskError(e.getMessage());
+            }
             HealthCheckScheduler.startHealthCheckUpdater(dbConfig, instanceId, groupId.getValue(), heartbeatFrequency);
             return generateResponse(tokenAcquired, livenessInterval, instanceId, groupId.getValue(), dbConfig);
-        } catch (Exception e) {
-            handleRollback(connection);
-            throw Utils.createTaskError(e.getMessage());
         }
     }
 

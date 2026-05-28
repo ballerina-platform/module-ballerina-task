@@ -78,25 +78,33 @@ public class TaskServerJob implements Job {
         });
     }
 
-    private void  processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
+    private void processJobWithCoordination(BObject job, Runtime runtime, JobExecutionContext jobExecutionContext,
                                              boolean isTokenHolder, String taskId, String groupId,
                                              String jdbcUrl, DatabaseConfig dbConfig) {
-        Connection connection = null;
-        boolean deadStatus = false;
+        Connection connection;
         try {
             connection = DriverManager.getConnection(jdbcUrl, dbConfig.user(), dbConfig.password());
         } catch (Exception e) {
-            deadStatus = true;
+            return;
         }
+        try (connection) {
+            executeWithConnection(connection, job, runtime, jobExecutionContext, taskId, groupId,
+                    isTokenHolder, dbConfig);
+        } catch (SQLException e) {
+            // connection.close() failed during cleanup; nothing further to do
+        }
+    }
+
+    private void executeWithConnection(Connection connection, BObject job, Runtime runtime,
+                                       JobExecutionContext jobExecutionContext, String taskId, String groupId,
+                                       boolean isTokenHolder, DatabaseConfig dbConfig) {
         try {
-            if (!deadStatus) {
-                connection.setAutoCommit(false);
-                boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext, taskId,
-                        groupId, isTokenHolder, dbConfig);
-                connection.commit();
-                if (shouldExecuteJob) {
-                    executeJob(job, runtime, jobExecutionContext);
-                }
+            connection.setAutoCommit(false);
+            boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext, taskId,
+                    groupId, isTokenHolder, dbConfig);
+            connection.commit();
+            if (shouldExecuteJob) {
+                executeJob(job, runtime, jobExecutionContext);
             }
         } catch (SQLException e) {
             handleExecutionException(connection, jobExecutionContext,
