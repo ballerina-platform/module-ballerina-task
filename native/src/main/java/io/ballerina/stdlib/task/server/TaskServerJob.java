@@ -88,24 +88,31 @@ public class TaskServerJob implements Job {
             return;
         }
         try (connection) {
-            connection.setAutoCommit(false);
-            try {
-                boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext, taskId,
-                        groupId, isTokenHolder, dbConfig);
-                connection.commit();
-                if (shouldExecuteJob) {
-                    executeJob(job, runtime, jobExecutionContext);
-                }
-            } catch (SQLException e) {
-                handleExecutionException(connection, jobExecutionContext,
-                        ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
-            } catch (BError error) {
-                handleExecutionException(connection, jobExecutionContext, error);
-            } catch (Throwable t) {
-                handleExecutionException(connection, jobExecutionContext, ErrorCreator.createError(t));
-            }
+            executeWithConnection(connection, job, runtime, jobExecutionContext, taskId, groupId,
+                    isTokenHolder, dbConfig);
         } catch (SQLException e) {
             // connection.close() failed during cleanup; nothing further to do
+        }
+    }
+
+    private void executeWithConnection(Connection connection, BObject job, Runtime runtime,
+                                       JobExecutionContext jobExecutionContext, String taskId, String groupId,
+                                       boolean isTokenHolder, DatabaseConfig dbConfig) {
+        try {
+            connection.setAutoCommit(false);
+            boolean shouldExecuteJob = checkAndUpdateTokenStatus(connection, jobExecutionContext, taskId,
+                    groupId, isTokenHolder, dbConfig);
+            connection.commit();
+            if (shouldExecuteJob) {
+                executeJob(job, runtime, jobExecutionContext);
+            }
+        } catch (SQLException e) {
+            handleExecutionException(connection, jobExecutionContext,
+                    ErrorCreator.createError(StringUtils.fromString("Database error: " + e.getMessage())));
+        } catch (BError error) {
+            handleExecutionException(connection, jobExecutionContext, error);
+        } catch (Throwable t) {
+            handleExecutionException(connection, jobExecutionContext, ErrorCreator.createError(t));
         }
     }
 
