@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.11.2] - 2026-05-29
+
 ### Fixed
 - [Fix JDBC connection leak in the warm-backup coordination layer](https://github.com/ballerina-platform/ballerina-library/issues/8806)
 
