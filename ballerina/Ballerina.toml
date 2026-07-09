@@ -16,7 +16,7 @@ graalvmCompatible = true
 groupId = "io.ballerina.stdlib"
 artifactId = "task-native"
 version = "2.11.2"
-path = "../native/build/libs/task-native-2.11.2-SNAPSHOT.jar"
+path = "../native/build/libs/task-native-2.11.2.jar"
 
 [[platform.java25.dependency]]
 groupId = "org.quartz-scheduler"
