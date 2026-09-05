@@ -2,6 +2,12 @@
 
 This module provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
+## Key Features
+
+- One-time and frequency-based job scheduling
+- Listener-based job execution with retry configuration
+- Task coordination for high-availability, multi-node deployments
+
 ### Jobs and scheduling
 
 Every scheduling job in Ballerina needs to be represented by a `Job` object. Therefore, a `job` class with your custom logic needs to be created to execute it when the task is triggered.

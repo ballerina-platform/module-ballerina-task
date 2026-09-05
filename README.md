@@ -1,5 +1,4 @@
-Ballerina Task Library
-===================
+# Ballerina Task Library
 
   [![Build](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml/badge.svg)](https://github.com/ballerina-platform/module-ballerina-task/actions/workflows/build-timestamped-master.yml)
   [![codecov](https://codecov.io/gh/ballerina-platform/module-ballerina-task/branch/master/graph/badge.svg)](https://codecov.io/gh/ballerina-platform/module-ballerina-task)
@@ -8,7 +7,9 @@ Ballerina Task Library
   [![GitHub Last Commit](https://img.shields.io/github/last-commit/ballerina-platform/module-ballerina-task.svg)](https://github.com/ballerina-platform/module-ballerina-task/commits/master)
   [![Github issues](https://img.shields.io/github/issues/ballerina-platform/ballerina-standard-library/module/task.svg?label=Open%20Issues)](https://github.com/ballerina-platform/ballerina-standard-library/labels/module%2Ftask)
 
-This library provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
+## Overview
+
+This module provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
 ### Jobs and scheduling
 
@@ -126,6 +127,45 @@ service "job-1" on taskListener {
 
 For a quick sample on demonstrating the usage, see [Ballerina By Example](https://ballerina.io/learn/by-example/).
 
+### Task coordination
+
+Task coordination support is specifically designed for distributed systems where high availability and fault tolerance are essential requirements. The coordination mechanism ensures that when tasks are running across multiple nodes, only one node remains active while others stay on standby. If the active node fails or becomes unavailable, one of the standby nodes automatically takes over, maintaining continuous system availability and preventing service interruptions.
+
+The system utilizes an RDBMS-based coordination mechanism to handle availability across multiple nodes, significantly improving the reliability and uptime of distributed applications in production environments.
+The task coordination system follows a warm backup approach with the following characteristics:
+
+- Multiple nodes run identical program logic on separate task instances
+- One node is designated as the token bearer and actively executes the program logic
+- Other nodes act as watchdogs by continuously monitoring the status of the token bearer node
+- If the active node fails or becomes unresponsive, one of the candidate nodes automatically takes over without manual intervention
+
+The following code snippet demonstrates how to implement task coordination across multiple nodes.
+
+```ballerina
+listener task:Listener taskListener = new (
+  trigger = {
+    interval,
+    maxCount
+  }, 
+  warmBackupConfig = {
+    databaseConfig,
+    livenessCheckInterval,
+    taskId, // must be unique for each node
+    groupId,
+    heartbeatFrequency
+  }
+);
+
+service "job-1" on taskListener {
+  private int i = 1;
+
+  isolated function execute() {
+    // Add your business logic here
+    // This will only execute on the active node
+  }
+}
+```
+
 ## Issues and projects 
 
 Issues and Project are disabled for this repository as this is part of the Ballerina Standard Library. To report bugs, request new features, start new discussions, view project boards, etc. please visit Ballerina Standard Library [parent repository](https://github.com/ballerina-platform/ballerina-standard-library). 
@@ -185,7 +225,7 @@ Execute the commands below to build from the source.
 
 ## Contribute to Ballerina
 
-As an open source project, Ballerina welcomes contributions from the community. To start contributing, read these [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md) for information on how you should go about contributing to our project.
+As an open-source project, Ballerina welcomes contributions from the community. To start contributing, read these [contribution guidelines](https://github.com/ballerina-platform/ballerina-lang/blob/master/CONTRIBUTING.md) for information on how you should go about contributing to our project.
 
 ## Code of conduct
 
