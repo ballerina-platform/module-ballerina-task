@@ -2,7 +2,7 @@
 
 This module provides APIs to schedule a Ballerina job either once or periodically and to manage the execution of those jobs.
 
-## Key Features
+### Key Features
 
 - One-time and frequency-based job scheduling
 - Listener-based job execution with retry configuration
