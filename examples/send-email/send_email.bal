@@ -49,7 +49,7 @@ class Job {
         if sendMessage is email:Error {
             log:printError("Failed to send the email", 'error = sendMessage);
         } else {
-            log:printInfo("The email has been sent", recipient = toAddress, subject = subject);
+            log:printInfo("The email has been sent");
         }
     }
 }
