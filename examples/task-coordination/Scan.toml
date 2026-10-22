@@ -1,0 +1,4 @@
+# ballerina:14 flags `password = databaseConfig.password`. The value comes from a `configurable` (databaseConfig = ?)
+# that the user provides in Config.toml, so no secret is hard coded.
+[rule]
+exclude = ["ballerina:14"]
