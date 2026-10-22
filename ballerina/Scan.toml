@@ -1,0 +1,4 @@
+# ballerina:14 flags the public `password` field of MysqlConfig/PostgresqlConfig, whose default is `()` (no value).
+# No credential is hard coded; the password is supplied by the user at runtime.
+[rule]
+exclude = ["ballerina:14"]
