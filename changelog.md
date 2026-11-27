@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.11.5] - 2026-11-27
+
 ### Changed
 - [Update the `crypto` and `uuid` dependencies to 2.9.4 and 1.10.3 to pick up the Bouncy Castle 1.85 fixes](https://github.com/ballerina-platform/ballerina-library/issues/9645)
 
